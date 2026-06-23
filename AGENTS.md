@@ -80,6 +80,75 @@ this roster — `mealwala`→`healthwala`, `spendwala`→`moneywala`, and `folkw
 If a future export ever regresses to the old names, **do not downgrade** — keep this
 roster and flag the drift in the sync-back summary.
 
+## Screen layout recipe (for app repos)
+
+This repo is the **layout source of truth** for every walaware app. An app repo
+should depend on `@walaware/design`, import `theme.css`, and build screens from this
+recipe + the component kit — it should **not** copy markup from Claude Design's
+`templates/` or `ui_kits/` (those are visual reference only, not shipped code).
+Typical flow: Claude Design generates a mock → map the mock onto the mode + scaffold
+below using the kit's components and the semantic tokens in `theme.css`.
+
+**Always:** set `data-app="<name>"` on the screen root so the accent + wordmark
+resolve (coral `--color-wala` stays constant). Read semantic tokens, never hues.
+
+### Pick a layout mode
+
+- **`AppShell`** — multi-destination apps (nav, several screens, account/settings).
+  Import it from `@walaware/design`; supply `app`, `nav`, `account`, `onSettings`;
+  the shell owns brand lockup + nav + drawer. Content column caps at `maxWidth`
+  (default **920px**). Desktop = left sidebar; below `breakpoint` (920px) = top bar +
+  drawer. See `src/routes/shell/+page.svelte` for a worked screen.
+- **Single mobile column** — one focused surface (no nav). A centered column capped at
+  `--screen-max` (**430px**), `min-height: 100vh`, flex column, with its own header
+  (`AppIcon` + `Wordmark` + a trailing `IconButton`). Mirrors `templates/app-starter`.
+
+```svelte
+<!-- single-column scaffold -->
+<div data-app="shopwala" class="screen">
+  <header class="screen-head">
+    <AppIcon app="shopwala" size={44} />
+    <Wordmark root="shop" size={30} />
+    <IconButton tone="soft" aria-label="More" class="ml-auto">⋯</IconButton>
+  </header>
+  <div class="intro">
+    <h1>What are you selling?</h1>          <!-- sentence-case question, Fredoka display -->
+    <p>One friendly line of context.</p>     <!-- 15px body, text-wrap: pretty -->
+  </div>
+  <section class="sections">                 <!-- gap: var(--stack-gap); padding: 0 gutter -->
+    <Card><CardHeader icon="🏷️" title="Your listings" /> … </Card>
+    <Card> … </Card>
+  </section>
+</div>
+```
+
+### Page rhythm (both modes)
+
+- **Sections are `Card`s led by `CardHeader`** — an emoji tile + a sentence-case
+  *question* title ("What to bring", not "Items"). One leading emoji per section.
+- **Stack gap** between cards: `--stack-gap` (14px). Card padding: `--card-pad` (18px).
+  `Card` has no margin of its own — the **parent** supplies spacing via a flex column
+  with `gap` (don't rely on card margins).
+- **Gutter** (screen side padding): `--gutter` (16px; templates go up to 20px). Min tap
+  target `--tap-min` (44px).
+- **Type:** page title = `--text-display` (Fredoka, ~28px); section titles via
+  `CardHeader`; body = `--text-body` (Nunito 15px), line-height ~1.5, `text-wrap: pretty`.
+  Never below `--text-tiny` (11.5px) — tiny meta labels only.
+- **Surfaces:** white cards, `--radius-lg` (24px), `--shadow-card` (accent-tinted) — **no
+  border**. Hero/sheet = `--radius-xl` (28px). Tiles/inputs = `--radius-md` (16px).
+  Everything tappable (buttons, chips, avatars, segmented control) is a **pill**.
+  Hairlines on rows/inputs use `--color-sand-300`.
+- **Motion:** `--ease-spring` for pops/toggles, `--ease-out` otherwise; durations
+  `--dur-fast` 120ms (press) / `--dur-base` 200ms / `--dur-pop` 320ms. No ambient motion.
+- **Iconography:** **emoji** for in-content signifiers (one per section), **Lucide** line
+  glyphs for chrome/controls (the sanctioned set — `AppShell` does this for settings/menu;
+  app glyphs live in `WALA_GLYPHS`). Never hand-draw decorative SVG.
+- **Voice/empties:** speak to *you* about *we/us*; titles are questions; empty states
+  invite (`EmptyState` — "It's quiet in here…"), completion celebrates.
+
+All values above are tokens in `src/lib/theme.css` — that file is the source; this is the
+map. When in doubt, open `src/routes/+page.svelte` (gallery) or `/shell` for live patterns.
+
 ## Scope: what belongs in the shared kit
 
 Generic primitives and patterns only (brand, core, people, forms, feedback).
