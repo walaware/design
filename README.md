@@ -181,8 +181,9 @@ drawer mechanics, and accent wiring (`data-app`). No bottom tab bar.
 
 `Button` `variant`: `primary` (follows the app accent) · `secondary` (amber) · `accent` (berry) ·
 `soft` · `ghost`. Sizes: `sm` · `md` · `lg`. Pass **`href`** (with optional `target`/`rel`) to
-render a real `<a>` styled as a button — so nav-as-button stays a true link. `AppShell` nav
-items take the same `href` to render each row as a real link.
+render a real `<a>` styled as a button — so nav-as-button stays a true link (`target="_blank"`
+auto-adds `rel="noopener noreferrer"`). `AppShell` nav items take the same `href` to render each
+row as a real link.
 
 ### Exported types: `Status` & `Lean`
 

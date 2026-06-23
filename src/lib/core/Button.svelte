@@ -12,9 +12,9 @@
 		full?: boolean;
 		/** Render as a real link (`<a href>`) styled as a button — for nav. */
 		href?: string;
-		/** Link target (only with `href`). */
+		/** Link target (only with `href`). `_blank` auto-adds a safe `rel`. */
 		target?: string;
-		/** Link rel (only with `href`). */
+		/** Link rel (only with `href`). Defaults to `noopener noreferrer` for `target="_blank"`. */
 		rel?: string;
 		iconLeft?: Snippet;
 		iconRight?: Snippet;
@@ -38,6 +38,8 @@
 
 	// A disabled link isn't a real thing — fall back to a real <button disabled>.
 	const asLink = $derived(!!href && !disabled);
+	// Safe default: target="_blank" without a rel is a reverse-tabnabbing risk.
+	const safeRel = $derived(rel ?? (target === '_blank' ? 'noopener noreferrer' : undefined));
 </script>
 
 <!--
@@ -50,7 +52,7 @@
 	class="wala-btn v-{variant} s-{size} {full ? 'full' : ''} {klass}"
 	href={asLink ? href : undefined}
 	target={asLink ? target : undefined}
-	rel={asLink ? rel : undefined}
+	rel={asLink ? safeRel : undefined}
 	disabled={asLink ? undefined : disabled}
 	{...rest}
 >
