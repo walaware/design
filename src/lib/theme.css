@@ -12,6 +12,14 @@
    font-display, ease-spring) AND emits them as :root CSS variables so
    the shipped components resolve at runtime.
 
+   IMPORTANT — `@theme static`: by default Tailwind v4 only emits the theme
+   variables it sees *used* in scanned source. Consumer apps import these
+   components from node_modules, which Tailwind does NOT scan, so the
+   components' `var(--radius-lg)` / `var(--shadow-card)` usage goes undetected
+   and those tokens get tree-shaken out of :root — leaving cards square and
+   shadows gone. `static` forces every token to emit unconditionally, which is
+   exactly what a shipped design system needs. Do NOT drop `static`.
+
    The per-app ACCENT is a runtime contract: a screen declares its app
    with data-app="<name>" and --color-primary* remaps to that accent.
    The coral "wala" thread (--color-wala) is the one constant and is
@@ -23,7 +31,7 @@
    font <link> to your app shell (app.html) — see the README — or self-host
    with @font-face. The family names below match what those fonts register. */
 
-@theme {
+@theme static {
 	/* ---------- Palette ramps ---------- */
 	/* Sand — warm neutrals / backgrounds */
 	--color-sand-50: #fff9f3;
