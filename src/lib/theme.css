@@ -1,0 +1,340 @@
+/* ============================================================
+   @walaware/design · theme.css
+   --------------------------------------------------------------
+   The walaware house style — the warm "Campfire" direction.
+   Tailwind v4 CSS-first tokens. Apps import this AFTER tailwindcss:
+
+       @import "tailwindcss";
+       @import "@walaware/design/theme.css";
+
+   The @theme block contributes design tokens to Tailwind (so you get
+   utilities like bg-coral-500, text-cocoa-900, rounded-lg, shadow-card,
+   font-display, ease-spring) AND emits them as :root CSS variables so
+   the shipped components resolve at runtime.
+
+   The per-app ACCENT is a runtime contract: a screen declares its app
+   with data-app="<name>" and --color-primary* remaps to that accent.
+   The coral "wala" thread (--color-wala) is the one constant and is
+   never remapped.
+   ============================================================ */
+
+/* FONTS — Fredoka (display) + Nunito (body), both OFL. This file does NOT
+   load them (a CSS @import can't sit after Tailwind's output). Add the
+   font <link> to your app shell (app.html) — see the README — or self-host
+   with @font-face. The family names below match what those fonts register. */
+
+@theme {
+	/* ---------- Palette ramps ---------- */
+	/* Sand — warm neutrals / backgrounds */
+	--color-sand-50: #fff9f3;
+	--color-sand-100: #fff4ea;
+	--color-sand-200: #ffead9;
+	--color-sand-300: #ffe0c2;
+	--color-sand-400: #f2d2b6;
+
+	/* Coral — the house lead + the constant wala thread */
+	--color-coral-200: #ffd4c6;
+	--color-coral-300: #ffa98f;
+	--color-coral-400: #ff8e6d;
+	--color-coral-500: #ff7a59;
+	--color-coral-600: #e15b38;
+	--color-coral-700: #c24a2c;
+
+	/* Sunshine */
+	--color-sun-200: #ffe9c2;
+	--color-sun-300: #ffd37a;
+	--color-sun-400: #ffb23e;
+	--color-sun-500: #f59e14;
+	--color-sun-600: #e89a2a;
+
+	/* Berry */
+	--color-berry-200: #ffd9e4;
+	--color-berry-300: #fba8c2;
+	--color-berry-500: #e84f7c;
+	--color-berry-600: #d13a68;
+
+	/* Leaf — going / success */
+	--color-leaf-200: #d6efd8;
+	--color-leaf-400: #6fb07a;
+	--color-leaf-500: #3fa66a;
+	--color-leaf-600: #2f8a55;
+
+	/* Sky — info, occasional */
+	--color-sky-200: #cfe6f2;
+	--color-sky-500: #4f9ed1;
+
+	/* Teal — stuffwala accent */
+	--color-teal-500: #2fb6a3;
+	--color-teal-600: #259384;
+
+	/* Cocoa — ink */
+	--color-cocoa-900: #3a2d28;
+	--color-cocoa-700: #6b5247;
+	--color-cocoa-500: #9a8a80;
+	--color-cocoa-300: #c9b8ae;
+	--color-white: #ffffff;
+
+	/* Avatar accent ramp (round-robin per person) */
+	--color-av-1: #ff7a59;
+	--color-av-2: #ffb23e;
+	--color-av-3: #e84f7c;
+	--color-av-4: #6fb07a;
+	--color-av-5: #6ba8d8;
+	--color-av-6: #b57edc;
+	--color-av-7: #f2935c;
+	--color-av-8: #4fb6a8;
+
+	/* ---------- Semantic colors ----------
+	   These reference the ramps. --color-primary* are remapped at
+	   runtime per app via [data-app] (see contract below). */
+	--color-bg-app: var(--color-sand-100);
+	--color-bg-app-alt: var(--color-sand-50);
+	--color-surface-card: var(--color-white);
+	--color-surface-sunk: var(--color-sand-200);
+	--color-surface-chip: var(--color-white);
+
+	--color-text-strong: var(--color-cocoa-900);
+	--color-text-body: var(--color-cocoa-700);
+	--color-text-muted: var(--color-cocoa-500);
+	--color-text-on-color: var(--color-white);
+
+	--color-border-soft: var(--color-sand-300);
+	--color-border-chip: var(--color-sand-300);
+
+	--color-primary: var(--color-coral-500);
+	--color-primary-press: var(--color-coral-600);
+	--color-primary-soft: var(--color-coral-200);
+	--color-secondary: var(--color-sun-400);
+	--color-secondary-press: var(--color-sun-600);
+	--color-accent: var(--color-berry-500);
+	--color-accent-soft: var(--color-berry-200);
+
+	--color-status-going: var(--color-leaf-500);
+	--color-status-going-soft: var(--color-leaf-200);
+	--color-status-maybe: var(--color-sun-500);
+	--color-status-maybe-soft: var(--color-sun-200);
+	--color-status-out: var(--color-cocoa-500);
+
+	--color-focus-ring: var(--color-coral-400);
+
+	/* The constant family thread — never remapped per app. */
+	--color-wala: var(--color-coral-500);
+	--color-wala-soft: var(--color-coral-200);
+	--color-brand-ink: var(--color-cocoa-900);
+
+	/* ---------- Type ---------- */
+	--font-display: 'Fredoka', system-ui, sans-serif;
+	--font-body: 'Nunito', system-ui, sans-serif;
+
+	--text-display: 28px;
+	--text-title: 22px;
+	--text-heading: 17px;
+	--text-lead: 16px;
+	--text-body: 15px;
+	--text-small: 13px;
+	--text-tiny: 11.5px;
+
+	/* ---------- Radius ---------- */
+	--radius-sm: 11px;
+	--radius-md: 16px;
+	--radius-lg: 24px;
+	--radius-xl: 28px;
+	--radius-pill: 999px;
+
+	/* ---------- Elevation ---------- */
+	--shadow-card: 0 8px 22px -10px rgba(255, 122, 89, 0.32);
+	--shadow-soft: 0 4px 14px -6px rgba(58, 45, 40, 0.18);
+	--shadow-pop: 0 14px 30px -12px rgba(255, 122, 89, 0.42);
+	--shadow-chip: 0 1px 0 rgba(58, 45, 40, 0.04);
+
+	/* ---------- Motion ---------- */
+	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+	--ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+	/* 4px base grid → p-1 = 4px, gap-4 = 16px, etc. */
+	--spacing: 4px;
+}
+
+/* ============================================================
+   Runtime layer (plain CSS, unlayered so it wins over @theme).
+   Tokens here are either non-Tailwind-namespace design values or
+   values that must stay overridable at runtime.
+   ============================================================ */
+:root {
+	/* Layout */
+	--gutter: 16px; /* screen side padding */
+	--card-pad: 18px;
+	--stack-gap: 14px; /* between cards */
+	--tap-min: 44px; /* min hit target */
+	--screen-max: 430px; /* mobile-first content cap */
+
+	/* Named steps (mirror the 4px grid for var()-based layouts) */
+	--space-1: 4px;
+	--space-2: 8px;
+	--space-3: 12px;
+	--space-4: 16px;
+	--space-5: 20px;
+	--space-6: 24px;
+	--space-7: 28px;
+	--space-8: 32px;
+	--space-10: 40px;
+	--space-12: 48px;
+
+	/* Weights */
+	--fw-body: 600;
+	--fw-bold: 700;
+	--fw-black: 800;
+	--fw-display: 600;
+	--fw-display-b: 700;
+
+	/* Line-height + tracking */
+	--lh-tight: 1.05;
+	--lh-snug: 1.25;
+	--lh-normal: 1.45;
+	--ls-tight: -0.01em;
+	--ls-normal: 0;
+	--ls-wide: 0.04em;
+
+	/* Durations */
+	--dur-fast: 120ms;
+	--dur-base: 200ms;
+	--dur-pop: 320ms;
+
+	/* Button "lips" — the 3D press depth (a hard offset-y shadow in the
+	   button's own darker shade). Components compute their own, these are
+	   reference tokens. */
+	--lip-primary: 0 5px 0 var(--color-coral-600);
+	--lip-secondary: 0 5px 0 var(--color-sun-600);
+	--lip-accent: 0 5px 0 var(--color-berry-600);
+}
+
+/* ============================================================
+   Per-app ACCENT contract
+   --------------------------------------------------------------
+   A screen declares which app it is with data-app="<name>" on
+   <html> (or any wrapper). That remaps --color-primary* so every
+   primary action / active state picks up the app's accent. The
+   coral --color-wala thread is intentionally NOT remapped.
+   No data-app set → the neutral house coral default (above).
+   ============================================================ */
+:root {
+	--app-accent: var(--color-coral-500);
+	--app-accent-press: var(--color-coral-600);
+	--app-accent-soft: var(--color-coral-200);
+
+	/* The walaware app accents (reference values). Spread across the hue
+	   wheel for instant recognition; all drawn from the Campfire family. */
+	--acc-trip: #ff7a59;
+	--acc-trip-press: #e15b38;
+	--acc-trip-soft: #ffd4c6; /* coral · journeys */
+	--acc-health: #f59e14;
+	--acc-health-press: #d98908;
+	--acc-health-soft: #ffe9c2; /* amber · health & meals */
+	--acc-stuff: #2fb6a3;
+	--acc-stuff-press: #259384;
+	--acc-stuff-soft: #cdebe6; /* teal · inventory */
+	--acc-money: #3fa66a;
+	--acc-money-press: #2f8a55;
+	--acc-money-soft: #d6efd8; /* leaf · money */
+	--acc-shop: #e84f7c;
+	--acc-shop-press: #d13a68;
+	--acc-shop-soft: #ffd9e4; /* berry · buying/selling */
+	--acc-task: #4f9ed1;
+	--acc-task-press: #3e80ad;
+	--acc-task-soft: #cfe6f2; /* sky · plans/tasks */
+	--acc-folk: #b57edc;
+	--acc-folk-press: #9a5fc9;
+	--acc-folk-soft: #ede0f9; /* grape · people & relationships */
+}
+
+[data-app='tripwala'] {
+	--app-accent: var(--acc-trip);
+	--app-accent-press: var(--acc-trip-press);
+	--app-accent-soft: var(--acc-trip-soft);
+}
+[data-app='healthwala'] {
+	--app-accent: var(--acc-health);
+	--app-accent-press: var(--acc-health-press);
+	--app-accent-soft: var(--acc-health-soft);
+}
+[data-app='stuffwala'] {
+	--app-accent: var(--acc-stuff);
+	--app-accent-press: var(--acc-stuff-press);
+	--app-accent-soft: var(--acc-stuff-soft);
+}
+[data-app='moneywala'] {
+	--app-accent: var(--acc-money);
+	--app-accent-press: var(--acc-money-press);
+	--app-accent-soft: var(--acc-money-soft);
+}
+[data-app='shopwala'] {
+	--app-accent: var(--acc-shop);
+	--app-accent-press: var(--acc-shop-press);
+	--app-accent-soft: var(--acc-shop-soft);
+}
+[data-app='taskwala'] {
+	--app-accent: var(--acc-task);
+	--app-accent-press: var(--acc-task-press);
+	--app-accent-soft: var(--acc-task-soft);
+}
+[data-app='folkwala'] {
+	--app-accent: var(--acc-folk);
+	--app-accent-press: var(--acc-folk-press);
+	--app-accent-soft: var(--acc-folk-soft);
+}
+
+/* Bind the live accent to the primary semantic. Primary-action
+   components read --color-primary*, so they recolor with no extra work. */
+[data-app] {
+	--color-primary: var(--app-accent);
+	--color-primary-press: var(--app-accent-press);
+	--color-primary-soft: var(--app-accent-soft);
+	--color-focus-ring: var(--app-accent);
+}
+
+/* ============================================================
+   Base element defaults — light reset + brand body defaults.
+   ============================================================ */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: var(--font-body);
+	font-weight: var(--fw-body);
+	font-size: var(--text-body);
+	line-height: var(--lh-normal);
+	color: var(--color-text-strong);
+	background: var(--color-bg-app);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+	font-family: var(--font-display);
+	font-weight: var(--fw-display-b);
+	line-height: var(--lh-snug);
+	letter-spacing: var(--ls-tight);
+	color: var(--color-text-strong);
+	margin: 0;
+}
+
+button {
+	font-family: var(--font-display);
+	cursor: pointer;
+}
+input,
+textarea {
+	font-family: var(--font-body);
+}
+
+::selection {
+	background: var(--color-coral-200);
+	color: var(--color-cocoa-900);
+}

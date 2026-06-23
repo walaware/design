@@ -1,0 +1,4 @@
+/* Preview-app global styles. This is exactly how a consuming walaware app
+   wires it up: Tailwind first, then the design-system theme. */
+@import 'tailwindcss';
+@import './lib/theme.css';
