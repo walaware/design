@@ -1,6 +1,6 @@
 {
   "name": "@walaware/design",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Shared design system for the walaware family of life apps — tokens, the wala wordmark, and Svelte 5 components in the warm Campfire house style.",
   "type": "module",
   "license": "MIT",
@@ -10,9 +10,19 @@
     "type": "git",
     "url": "git+https://github.com/walaware/design.git"
   },
-  "keywords": ["walaware", "design-system", "svelte", "tailwind", "campfire"],
-  "files": ["dist"],
-  "sideEffects": ["**/*.css"],
+  "keywords": [
+    "walaware",
+    "design-system",
+    "svelte",
+    "tailwind",
+    "campfire"
+  ],
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
