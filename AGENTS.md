@@ -12,10 +12,12 @@ of life apps. It ships:
 - **Svelte 5 components**, organized by domain under `src/lib/`.
 - A **barrel export** at `src/lib/index.ts` and a live demo at `src/routes/+page.svelte`.
 
-The **React design system in Claude Design is the upstream source of truth for
-component design and behaviour**; this repo is the Svelte implementation. The two
-are kept in sync by hand via the workflow below. **Exception: app names / the app
-roster are owned HERE** (see "Canonical app roster").
+The **React design system in Claude Design is the source of truth for component
+design and behaviour**; this repo is the Svelte implementation. **This repo + agent is
+the sync hub**: app repos consume the shipped package and point only here, and this repo
+is kept in **two-way sync** with Claude Design via the live **DesignSync** MCP tool
+(see the design-sync workflow below). **Exception: app names / the app roster are owned
+HERE** (see "Canonical app roster").
 
 ## Repo conventions (match these exactly)
 
@@ -168,26 +170,32 @@ it's proven in ~3 apps (the "rule of three" — see README). When an upstream ex
 contains app-domain components (e.g. a `trip/` category), **do not port them**;
 list them as intentionally out-of-scope.
 
-## Design-sync workflow (Claude Design ⇄ Claude Code)
+## Design-sync workflow (two-way, via the DesignSync MCP)
 
-Recurring task: ingest a design export and reconcile it into this repo. A repo skill
-automates it — see `.claude/skills/design-sync/SKILL.md`. In short:
+Recurring task: keep this repo and the **walaware Design System** Claude Design project
+in sync — **both directions**. The `design-sync` skill drives it
+(`.claude/skills/design-sync/SKILL.md`); run `/design-login` once to authorize the live
+**DesignSync** MCP tool. In short:
 
-1. A zip is dropped at `incoming/<name>.zip` (the `/incoming` folder is gitignored).
-2. Unzip, inventory every component (`.d.ts` props) and token file.
-3. Diff vs this repo → **NEW / CHANGED / UNCHANGED**. Never touch UNCHANGED files.
-4. Sync tokens first (preserve `[data-app]` scopes + `--color-wala`; flag breaking
-   renames/removals; remember the namespace mapping and the canonical-roster rule).
-5. Port NEW + CHANGED components to Svelte per the conventions above; keep public
-   prop names + defaults identical to each `.d.ts`.
-6. Update `src/lib/index.ts`, the demo in `src/routes/+page.svelte`, and the README
-   component table.
-7. If the package carries app screens (`templates/<app>`, `ui_kits/*`), capture/update
-   `docs/apps/<app>.md` (layout, screens, context) and the README "App layouts" index.
-8. Run `pnpm run check` then `pnpm run package` — both must be clean.
-9. Emit two artifacts: the **NEW/CHANGED/UNCHANGED report** (+ non-1:1 ports) for the
-   human, and a **sync-back summary** to feed to Claude Design so upstream matches
-   this repo (renames, additions, divergences).
+- **Access:** live DesignSync MCP is the **primary** path — `list_files`/`get_file` to
+  diff, `finalize_plan`→`write_files` to push. A zip in `incoming/` is a **deprecated
+  fallback** for when the MCP isn't available (headless/cron); `/incoming` stays
+  gitignored.
+- **Pull (Claude Design → repo):** diff `.d.ts` props vs each component's `$props()` →
+  **NEW / CHANGED / UNCHANGED** (never touch UNCHANGED). Tokens first (preserve
+  `[data-app]` scopes, `--color-wala`, `@theme static`; namespace mapping;
+  canonical-roster rule). Port NEW+CHANGED to Svelte, prop names/defaults identical to
+  the `.d.ts`; register in `index.ts` + demo + README; capture `docs/apps/<app>.md` for
+  any `templates/<app>`/`ui_kits/*`.
+- **Push (repo → Claude Design):** after a repo-originated change ships, mirror its
+  contract + reference + prompt into the React source (`get_file` to match their style,
+  author to a staging dir, `finalize_plan`→`write_files`, read-back to verify).
+  Incrementally — changed components only. Svelte-only concerns (e.g. `@theme static`)
+  are **not** pushed.
+- **Verify:** `pnpm run check` + `pnpm run package` clean, dev-server smoke (routes 200),
+  then `pnpm version patch|minor` to release the Svelte side (apps bump `#v0.x.y`).
+- **Output:** a human NEW/CHANGED/UNCHANGED report noting what was written **on each
+  side** + the release tag. (A copy-paste sync-back block is only for the zip fallback.)
 
 ## Verify before done
 
