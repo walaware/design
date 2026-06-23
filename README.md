@@ -168,7 +168,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 | Group      | Components                                  |
 | ---------- | ------------------------------------------- |
 | `brand`    | `Wordmark`, `AppIcon` (+ `WALA_SUITE`, `WALA_GLYPHS`) |
-| `shell`    | `AppShell` (+ `NavItem`, `ShellAccount` types) |
+| `shell`    | `AppShell` (+ `NavItem`, `ShellAccount`, `ShellBack` types) |
 | `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip`, `Tooltip` |
 | `people`   | `Avatar`, `AvatarGroup`, `LeanMeter` (+ `colorFor`) |
 | `forms`    | `TextField`, `SegmentedControl`, `Composer` |
@@ -180,6 +180,22 @@ top bar + slide-in drawer below `breakpoint` (default 920px). The app supplies
 drawer mechanics, and accent wiring (`data-app`). No bottom tab bar.
 `ShellAccount` is `{ name, color?, avatar?, meta?, onSignOut? }` — pass `avatar` (a
 photo URL) and the footer/top-bar avatar shows the photo, falling back to the initial.
+
+**Contextual mode** turns the same sidebar into a section nav over **one scrollable
+page** (no sub-routes) — for opening a record (a trip, an order) without leaving the shell:
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `back` | `ShellBack \| null` | a "← …" row above the nav that exits the context (`{ label?, onClick }`) |
+| `scrollSpy` | `boolean` | treat `nav` as in-page anchors: smooth-scroll on click, highlight the active section on scroll. Items need `href="#id"` or `target` |
+| `scrollSpyOffset` | `number \| null` | fixed scroll offset; omit to auto-measure a `[data-appshell-sticky]` header inside the scroll area |
+| `title` | node | context label shown in the **mobile top bar** in place of the wordmark (e.g. the open record's name) |
+
+`NavItem` also gains `target?` (section id, alt to `href="#id"`) and `soon?` (a dimmed,
+non-interactive roadmap row with a "soon" tag). Consumer contract: render the modules as
+one long page of `<section id="…">`s and mark the sticky record header
+`data-appshell-sticky`. See the `/shell` demo ("Open a trip") and
+[docs/apps/tripwala.md](docs/apps/tripwala.md).
 
 ### Avatars
 

@@ -22,7 +22,7 @@ export { default as Tooltip } from './core/Tooltip.svelte';
 
 // Shell
 export { default as AppShell } from './shell/AppShell.svelte';
-export { type NavItem, type ShellAccount } from './shell/AppShell.svelte';
+export { type NavItem, type ShellAccount, type ShellBack } from './shell/AppShell.svelte';
 
 // People
 export { default as Avatar } from './people/Avatar.svelte';
