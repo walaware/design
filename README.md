@@ -191,6 +191,26 @@ proven in ~3 apps (the rule of three); promoting early couples the shared packag
 
 ---
 
+## App layouts
+
+This repo is the **layout source of truth** every app repo points to. Build screens from the
+**[screen layout recipe](AGENTS.md#screen-layout-recipe-for-app-repos)** (modes, scaffold, rhythm)
+using the kit + tokens. Each app's screens, layout, and context are captured in
+[`docs/apps/`](docs/apps/) ([template](docs/apps/TEMPLATE.md)) — capture every screen Claude Design
+mocks there, thoroughly.
+
+| App | Layout | Screens & context |
+| --- | ------ | ----------------- |
+| `tripwala` | single page | [docs/apps/tripwala.md](docs/apps/tripwala.md) |
+| `healthwala` | — | _not yet designed_ |
+| `stuffwala` | — | _not yet designed_ |
+| `moneywala` | — | _not yet designed_ |
+| `shopwala` | AppShell | [docs/apps/shopwala.md](docs/apps/shopwala.md) |
+| `taskwala` | — | _not yet designed_ |
+| `folkwala` | — | _not yet designed_ |
+
+---
+
 ## Token reference
 
 All tokens are CSS variables on `:root` and (for colours/type/radius/shadow/motion) Tailwind

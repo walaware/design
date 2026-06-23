@@ -50,6 +50,14 @@ token namespace mapping, and the scope rules this skill depends on.
    usage to the demo in `src/routes/+page.svelte`, and update the component table in
    `README.md`. Match how existing entries are registered.
 
+   **Capture app layouts.** If the package carries app screens — a `templates/<app>/`
+   or `ui_kits/*` folder — create or update `docs/apps/<app>.md` (from
+   `docs/apps/TEMPLATE.md`) and the README "App layouts" index. Claude Design usually
+   ships **several screens per app**; capture each thoroughly — layout mode, nav,
+   section-by-section breakdown, components used, states, and the non-obvious UX context
+   (the "why", e.g. an agent-escalation model). This is how the repo stays the layout
+   source of truth app repos point to.
+
 6. **Verify.** Run `pnpm run check` (0 errors/warnings) then `pnpm run package`
    (publint "All good!"). Then **smoke-test the dev server** — these two gates use the
    full TypeScript compiler and will pass on code that the dev server's faster

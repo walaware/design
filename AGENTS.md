@@ -149,6 +149,16 @@ resolve (coral `--color-wala` stays constant). Read semantic tokens, never hues.
 All values above are tokens in `src/lib/theme.css` — that file is the source; this is the
 map. When in doubt, open `src/routes/+page.svelte` (gallery) or `/shell` for live patterns.
 
+### Per-app layouts (`docs/apps/`)
+
+Each app's screens, navigation, and UX context are captured in `docs/apps/<app>.md`
+(start from `docs/apps/TEMPLATE.md`; index in the README → "App layouts"). Because
+Claude Design usually mocks **several screens per app**, capture them thoroughly there —
+layout mode, section-by-section breakdown, the components each uses, states, and the
+non-obvious context (e.g. shopwala's agent-escalation model). When a design sync brings
+new/changed mocks for an app (a `templates/<app>` or `ui_kits/*` folder in the package),
+create or update that app's file as part of the sync.
+
 ## Scope: what belongs in the shared kit
 
 Generic primitives and patterns only (brand, core, people, forms, feedback).
@@ -172,8 +182,10 @@ automates it — see `.claude/skills/design-sync/SKILL.md`. In short:
    prop names + defaults identical to each `.d.ts`.
 6. Update `src/lib/index.ts`, the demo in `src/routes/+page.svelte`, and the README
    component table.
-7. Run `pnpm run check` then `pnpm run package` — both must be clean.
-8. Emit two artifacts: the **NEW/CHANGED/UNCHANGED report** (+ non-1:1 ports) for the
+7. If the package carries app screens (`templates/<app>`, `ui_kits/*`), capture/update
+   `docs/apps/<app>.md` (layout, screens, context) and the README "App layouts" index.
+8. Run `pnpm run check` then `pnpm run package` — both must be clean.
+9. Emit two artifacts: the **NEW/CHANGED/UNCHANGED report** (+ non-1:1 ports) for the
    human, and a **sync-back summary** to feed to Claude Design so upstream matches
    this repo (renames, additions, divergences).
 
