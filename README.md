@@ -180,7 +180,32 @@ top bar + slide-in drawer below `breakpoint` (default 920px). The app supplies
 drawer mechanics, and accent wiring (`data-app`). No bottom tab bar.
 
 `Button` `variant`: `primary` (follows the app accent) · `secondary` (amber) · `accent` (berry) ·
-`soft` · `ghost`. Sizes: `sm` · `md` · `lg`.
+`soft` · `ghost`. Sizes: `sm` · `md` · `lg`. Pass **`href`** (with optional `target`/`rel`) to
+render a real `<a>` styled as a button — so nav-as-button stays a true link. `AppShell` nav
+items take the same `href` to render each row as a real link.
+
+### Exported types: `Status` & `Lean`
+
+Shared enums (string-literal unions) that drive `StatusBadge` and `LeanMeter`:
+
+| Type | Values | Meaning |
+| ---- | ------ | ------- |
+| `Status` | `going` · `maybe` · `out` · `set` · `open` | RSVP / claim state (`going` 🔥, `maybe` 🤔, `set` ✓, `open`) |
+| `Lean` | `1` · `2` · `3` | how confident a "Maybe" really is — `1` long shot, `2` 50/50, `3` leaning yes |
+
+```svelte
+<script>
+  import { StatusBadge, LeanMeter, type Status, type Lean } from '@walaware/design';
+  let rsvp: Status = 'maybe';
+  let lean: Lean = 2;
+</script>
+<StatusBadge status={rsvp}>Maybe</StatusBadge>
+<LeanMeter {lean} />
+```
+
+> Component **props are the typed `.d.ts` contract** — your editor autocompletes them from the
+> package. Nullable-friendly where it helps: `Avatar.color` and `SegmentedControl.value` accept
+> `null` (= derive / nothing selected).
 
 ### App-specific & "derived" components
 

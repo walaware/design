@@ -4,8 +4,8 @@
 
 	interface Props extends HTMLAttributes<HTMLSpanElement> {
 		name?: string;
-		/** Explicit colour; otherwise derived from the name. */
-		color?: string;
+		/** Explicit colour; `null`/omitted derives a stable colour from the name. */
+		color?: string | null;
 		/** Diameter in px. */
 		size?: number;
 		/** White ring (for overlapping clusters). */

@@ -15,6 +15,8 @@
 		badge?: NodeLike | false;
 		/** Highlight as the current destination. */
 		active?: boolean;
+		/** Destination URL — renders the row as a real `<a>` (keeps nav a true link). */
+		href?: string;
 		/** Navigate handler (also closes the mobile drawer). */
 		onClick?: () => void;
 	}
@@ -126,13 +128,20 @@
 {#snippet navList()}
 	<nav class="nav">
 		{#each nav as item, i (item.key ?? i)}
-			<button class="nav-btn" class:active={item.active} onclick={go(item.onClick)}>
+			<!-- svelte-ignore a11y_no_static_element_interactions -- both branches (a[href] / button) are interactive -->
+			<svelte:element
+				this={item.href ? 'a' : 'button'}
+				href={item.href}
+				class="nav-btn"
+				class:active={item.active}
+				onclick={go(item.onClick)}
+			>
 				<span class="nav-icon">{@render node(item.icon)}</span>
 				<span class="nav-label">{@render node(item.label)}</span>
 				{#if item.badge != null && item.badge !== false}
 					<span class="badge">{@render node(item.badge)}</span>
 				{/if}
-			</button>
+			</svelte:element>
 		{/each}
 	</nav>
 {/snippet}
@@ -187,7 +196,7 @@
 
 	<div class="main">
 		{#if !desktop}
-			<header class="topbar">
+			<header class="topbar" class:drawer-open={drawer} inert={drawer}>
 				<IconButton tone="soft" size={32} onclick={() => (drawer = true)} aria-label="menu">
 					{@render shellIcon('menu', 18)}
 				</IconButton>
@@ -286,6 +295,7 @@
 		font-weight: 800;
 		font-size: 14.5px;
 		text-align: left;
+		text-decoration: none;
 		color: var(--color-text-strong);
 		transition: background var(--dur-fast) var(--ease-out);
 	}
@@ -381,6 +391,13 @@
 		padding: 12px 16px;
 		background: var(--color-bg-app);
 		border-bottom: 1px solid var(--color-sand-300);
+		transition: opacity var(--dur-base) var(--ease-out);
+	}
+	/* While the drawer is open it owns the brand + nav; the sticky top bar
+	   would otherwise show through (it out-paints the scrim), so fade it out. */
+	.topbar.drawer-open {
+		opacity: 0;
+		pointer-events: none;
 	}
 	.topbar-end {
 		margin-left: auto;

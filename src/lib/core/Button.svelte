@@ -10,6 +10,12 @@
 		size?: Size;
 		/** Stretch to fill the container width. */
 		full?: boolean;
+		/** Render as a real link (`<a href>`) styled as a button — for nav. */
+		href?: string;
+		/** Link target (only with `href`). */
+		target?: string;
+		/** Link rel (only with `href`). */
+		rel?: string;
 		iconLeft?: Snippet;
 		iconRight?: Snippet;
 		children?: Snippet;
@@ -20,27 +26,38 @@
 		size = 'md',
 		full = false,
 		disabled = false,
+		href,
+		target,
+		rel,
 		iconLeft,
 		iconRight,
 		children,
 		class: klass = '',
 		...rest
 	}: Props = $props();
+
+	// A disabled link isn't a real thing — fall back to a real <button disabled>.
+	const asLink = $derived(!!href && !disabled);
 </script>
 
 <!--
 	Chunky, pill-shaped action with a 3D "lip" that compresses on press —
 	the signature Campfire button. `primary` follows the per-app accent.
+	Pass `href` to render a real <a> (keeps a nav-styled-as-button a true link).
 -->
-<button
+<svelte:element
+	this={asLink ? 'a' : 'button'}
 	class="wala-btn v-{variant} s-{size} {full ? 'full' : ''} {klass}"
-	{disabled}
+	href={asLink ? href : undefined}
+	target={asLink ? target : undefined}
+	rel={asLink ? rel : undefined}
+	disabled={asLink ? undefined : disabled}
 	{...rest}
 >
 	{#if iconLeft}{@render iconLeft()}{/if}
 	{#if children}{@render children()}{/if}
 	{#if iconRight}{@render iconRight()}{/if}
-</button>
+</svelte:element>
 
 <style>
 	.wala-btn {
@@ -55,6 +72,7 @@
 		line-height: 1.1;
 		border: none;
 		border-radius: var(--radius-pill);
+		text-decoration: none;
 		color: var(--btn-fg);
 		background: var(--btn-bg);
 		box-shadow: 0 var(--lip-h) 0 var(--btn-lip);

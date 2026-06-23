@@ -3,8 +3,8 @@
 
 	interface Props {
 		options?: Option[];
-		/** Two-way bound selected value. */
-		value?: string;
+		/** Two-way bound selected value; `null`/omitted = nothing selected yet. */
+		value?: string | null;
 		/** Called with the new value on change. */
 		onChange?: (value: string) => void;
 	}
