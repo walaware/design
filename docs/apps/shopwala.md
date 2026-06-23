@@ -1,8 +1,13 @@
 # shopwala — marketplace selling agent
 
 **Accent:** Berry `#E84F7C` · **Glyph:** `shopping-bag` · **Root:** `shop` · **`data-app`:** `shopwala`
-**Layout mode:** AppShell (4 nav destinations + settings)
+**Layout mode:** AppShell — desktop sidebar ⇄ mobile top bar + slide-in drawer, **no bottom tab bar** (4 nav destinations + settings)
 **Status:** designing · **Last mock sync:** 2026-06-23 (`templates/shopwala` in the Claude Design package)
+
+> **Layout decision (2026-06-23):** shopwala uses the standard `AppShell` responsive
+> model verbatim — desktop sidebar, mobile top bar + drawer, **no bottom tab bar**. The
+> upstream `templates/shopwala` description ("mobile top bar + tabs") is **deprecated**;
+> AppShell is the source of truth for chrome. Flagged for Claude Design in the sync-back.
 
 ## Context
 
@@ -83,6 +88,9 @@ now) and *trust/control* (clearly show what the agent is and isn't allowed to do
 ## Open questions / TODO
 
 - Flesh out Home + Deals section breakdowns at the next mock sync.
-- Confirm whether mobile uses the standard AppShell drawer (template description mentions
-  "mobile top bar + tabs" — verify it's not introducing a bottom tab bar, which the shell
-  deliberately omits).
+
+## Resolved
+
+- **2026-06-23 — mobile chrome:** follow `AppShell` (top bar + drawer), **no bottom tab
+  bar**. Upstream's "mobile top bar + tabs" template wording is deprecated; see the
+  layout-decision note at the top and the sync-back to Claude Design.
