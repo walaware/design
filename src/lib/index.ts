@@ -18,6 +18,7 @@ export { default as IconButton } from './core/IconButton.svelte';
 export { default as Card } from './core/Card.svelte';
 export { default as CardHeader } from './core/CardHeader.svelte';
 export { default as Chip } from './core/Chip.svelte';
+export { default as Tooltip } from './core/Tooltip.svelte';
 
 // People
 export { default as Avatar } from './people/Avatar.svelte';

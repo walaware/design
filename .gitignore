@@ -8,3 +8,7 @@ node_modules
 !.env.example
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Design exports dropped in for ingestion (Claude Design → Claude Code sync).
+# Zips and their unpacked contents are working artifacts, never committed.
+/incoming

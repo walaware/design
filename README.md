@@ -148,7 +148,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 ```svelte
 <script>
 	import {
-		Button, IconButton, Card, CardHeader, Chip,
+		Button, IconButton, Card, CardHeader, Chip, Tooltip,
 		Avatar, AvatarGroup, LeanMeter,
 		TextField, SegmentedControl, Composer,
 		StatusBadge, EmptyState, ChatMessage
@@ -167,7 +167,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 | Group      | Components                                  |
 | ---------- | ------------------------------------------- |
 | `brand`    | `Wordmark`, `AppIcon` (+ `WALA_SUITE`, `WALA_GLYPHS`) |
-| `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip` |
+| `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip`, `Tooltip` |
 | `people`   | `Avatar`, `AvatarGroup`, `LeanMeter` (+ `colorFor`) |
 | `forms`    | `TextField`, `SegmentedControl`, `Composer` |
 | `feedback` | `StatusBadge`, `EmptyState`, `ChatMessage`  |
