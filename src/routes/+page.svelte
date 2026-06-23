@@ -209,10 +209,10 @@
 			{/each}
 		</div>
 
-		<p class="shell-link">
-			See the full app chrome — sidebar ⇄ mobile drawer — in the
-			<a href="/shell">AppShell demo →</a>
-		</p>
+		<p class="shell-link">See the full app chrome — sidebar ⇄ mobile drawer:</p>
+		<div class="shell-cta">
+			<Button href="/shell" variant="soft" size="sm">Open the AppShell demo →</Button>
+		</div>
 	</section>
 
 	<section class="frames">
@@ -255,11 +255,8 @@
 		font-size: 15px;
 		color: var(--color-text-body);
 	}
-	.shell-link a {
-		color: var(--color-wala);
-		font-weight: 700;
-		text-decoration: none;
-		white-space: nowrap;
+	.shell-cta {
+		margin: 10px 0 0;
 	}
 	.frames {
 		display: grid;

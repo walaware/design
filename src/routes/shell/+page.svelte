@@ -15,10 +15,12 @@
 	let app = $state<WalaApp>('tripwala');
 	let screen = $state('home');
 
+	// `href` renders each row as a real <a> (cmd/middle-click works); `onClick`
+	// still drives the in-page screen state and closes the mobile drawer.
 	const nav = $derived<NavItem[]>([
-		{ key: 'home', label: 'Home', icon: '🧭', active: screen === 'home', onClick: () => (screen = 'home') },
-		{ key: 'today', label: 'Today', icon: '📍', badge: 2, active: screen === 'today', onClick: () => (screen = 'today') },
-		{ key: 'crew', label: 'Crew', icon: '👥', active: screen === 'crew', onClick: () => (screen = 'crew') }
+		{ key: 'home', label: 'Home', icon: '🧭', href: '#home', active: screen === 'home', onClick: () => (screen = 'home') },
+		{ key: 'today', label: 'Today', icon: '📍', badge: 2, href: '#today', active: screen === 'today', onClick: () => (screen = 'today') },
+		{ key: 'crew', label: 'Crew', icon: '👥', href: '#crew', active: screen === 'crew', onClick: () => (screen = 'crew') }
 	]);
 </script>
 
@@ -30,7 +32,9 @@
 	settingsActive={screen === 'settings'}
 >
 	<div class="stack">
-		<a class="back" href="/">← Components</a>
+		<div class="backrow">
+			<Button href="/" variant="ghost" size="sm">← Components</Button>
+		</div>
 		<h1>{screen === 'settings' ? 'Settings' : WALA_SUITE[app].label}</h1>
 		<p class="lead">
 			Resize below 920px to collapse the sidebar into the top-bar + drawer. Switch app to watch the
@@ -72,12 +76,8 @@
 		flex-direction: column;
 		gap: var(--stack-gap);
 	}
-	.back {
-		align-self: start;
-		font-size: 14px;
-		font-weight: 700;
-		color: var(--color-wala);
-		text-decoration: none;
+	.backrow {
+		margin-bottom: 2px;
 	}
 	.stack h1 {
 		margin: 4px 0 0;
