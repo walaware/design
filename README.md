@@ -233,3 +233,27 @@ pnpm run package    # build dist/ + publint
 
 The preview route (`src/routes/+page.svelte`) renders the wordmark, the full app-icon suite, and the
 core components under both the tripwala and shopwala accents — the quickest way to eyeball changes.
+
+## Release
+
+Releasing is one command. Apps install via `github:walaware/design#<tag>`, so a release is just a
+correct tag on a green commit — there's no npm publish step.
+
+```bash
+pnpm version patch   # or: minor | major
+```
+
+That single command, via lifecycle hooks:
+
+1. **`preversion`** runs `pnpm check && pnpm package` — a failing build/types aborts the release, so
+   you can never tag a broken commit.
+2. bumps `package.json`, commits, and creates the matching **`vX.Y.Z`** tag (version and tag can't
+   drift — npm/pnpm `version` does both atomically; it also refuses to run with a dirty tree).
+3. **`postversion`** runs `git push --follow-tags` — pushes the commit and its tag together.
+
+Pushing the tag triggers the **Release** workflow (`.github/workflows/release.yml`): it re-validates
+the tagged commit on CI and creates a GitHub Release with auto-generated notes. Every push/PR is also
+checked by the **CI** workflow (`.github/workflows/ci.yml`), so `main` stays releasable.
+
+Consuming apps move to a new version by bumping the `#vX.Y.Z` ref in their `package.json` (or
+`pnpm update @walaware/design`).

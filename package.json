@@ -4,6 +4,7 @@
   "description": "Shared design system for the walaware family of life apps — tokens, the wala wordmark, and Svelte 5 components in the warm Campfire house style.",
   "type": "module",
   "license": "MIT",
+  "packageManager": "pnpm@9.12.3",
   "author": "walaware",
   "repository": {
     "type": "git",
@@ -29,7 +30,9 @@
     "preview": "vite preview",
     "package": "svelte-kit sync && svelte-package && publint",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "prepare": "svelte-kit sync && svelte-package"
+    "prepare": "svelte-kit sync && svelte-package",
+    "preversion": "pnpm run check && pnpm run package",
+    "postversion": "git push --follow-tags"
   },
   "peerDependencies": {
     "svelte": "^5.0.0",

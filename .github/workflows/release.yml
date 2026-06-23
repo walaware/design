@@ -1,0 +1,30 @@
+name: Release
+
+# When a vX.Y.Z tag is pushed (e.g. by `pnpm version minor`), re-validate the
+# tagged commit and publish a GitHub Release with auto-generated notes. Apps
+# install via `github:walaware/design#<tag>`, so the tag *is* the release —
+# there is no npm publish step.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Verify the tagged commit builds
+        run: pnpm run check && pnpm run package
+      - name: Create GitHub Release
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes --verify-tag --title "$GITHUB_REF_NAME"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
