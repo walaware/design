@@ -91,10 +91,36 @@
 		fn?.();
 		drawer = false;
 	};
+
+	/* Shell-owned chrome glyphs (Lucide, 24×24, 2px rounded stroke) — inner SVG
+	   markup only. Kept crisp line icons instead of emoji so the chrome reads as
+	   UI, not content. These are chrome-specific (not app-suite WALA_GLYPHS). */
+	const SHELL_ICONS: Record<string, string> = {
+		settings:
+			'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+		menu: '<line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/>'
+	};
 </script>
 
 {#snippet node(value: NodeLike | undefined | null)}
 	{#if typeof value === 'function'}{@render value()}{:else if value != null}{value}{/if}
+{/snippet}
+
+{#snippet shellIcon(name: 'settings' | 'menu', size: number)}
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		aria-hidden="true"
+	>
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- shell glyphs are a static, internal allow-list -->
+		{@html SHELL_ICONS[name]}
+	</svg>
 {/snippet}
 
 {#snippet navList()}
@@ -115,7 +141,7 @@
 	<div class="foot">
 		{#if onSettings}
 			<button class="nav-btn" class:active={settingsActive} onclick={go(onSettings)}>
-				<span class="nav-icon">⚙️</span>
+				<span class="nav-icon glyph">{@render shellIcon('settings', 19)}</span>
 				<span class="nav-label">Settings</span>
 			</button>
 		{/if}
@@ -162,12 +188,16 @@
 	<div class="main">
 		{#if !desktop}
 			<header class="topbar">
-				<IconButton tone="soft" onclick={() => (drawer = true)} aria-label="menu">☰</IconButton>
+				<IconButton tone="soft" size={32} onclick={() => (drawer = true)} aria-label="menu">
+					{@render shellIcon('menu', 18)}
+				</IconButton>
 				<AppIcon {app} size={30} />
 				<Wordmark {root} size={21} />
 				<span class="topbar-end">
 					{#if onSettings}
-						<IconButton tone="soft" onclick={go(onSettings)} aria-label="settings">⚙️</IconButton>
+						<IconButton tone="soft" size={32} onclick={go(onSettings)} aria-label="settings">
+							{@render shellIcon('settings', 18)}
+						</IconButton>
 					{/if}
 					{#if account}
 						<Avatar name={account.name} color={account.color} size={32} />
@@ -272,6 +302,10 @@
 		font-size: 18px;
 		width: 22px;
 		text-align: center;
+	}
+	.nav-icon.glyph {
+		display: grid;
+		place-items: center;
 	}
 	.nav-label {
 		flex: 1;
