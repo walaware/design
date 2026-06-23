@@ -178,6 +178,24 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 top bar + slide-in drawer below `breakpoint` (default 920px). The app supplies
 `nav` + `account` + content; the shell owns the brand lockup, active states,
 drawer mechanics, and accent wiring (`data-app`). No bottom tab bar.
+`ShellAccount` is `{ name, color?, avatar?, meta?, onSignOut? }` — pass `avatar` (a
+photo URL) and the footer/top-bar avatar shows the photo, falling back to the initial.
+
+### Avatars
+
+`Avatar` renders, in precedence order: `emoji` → `src` (photo) → colour-derived initial.
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `name` | `string` | seeds the initial + a stable colour |
+| `src` | `string \| null` | photo URL; **falls back to the initial** on missing/empty/load-error (never a broken-image icon) |
+| `color` | `string \| null` | override; `null` ⇒ derive from `name` |
+| `emoji` | `string \| null` | overrides both photo and initial |
+| `size` | `number` | diameter px (default 36) |
+| `ring` | `boolean` | white ring for overlapping clusters |
+
+`AvatarGroup` takes `people: (string \| { name, color?, src? })[]` — each person's `src`
+flows down to its `Avatar`, with the same fallback.
 
 `Button` `variant`: `primary` (follows the app accent) · `secondary` (amber) · `accent` (berry) ·
 `soft` · `ghost`. Sizes: `sm` · `md` · `lg`. Pass **`href`** (with optional `target`/`rel`) to

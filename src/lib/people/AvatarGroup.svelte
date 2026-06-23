@@ -2,7 +2,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import Avatar from './Avatar.svelte';
 
-	type Person = string | { name: string; color?: string };
+	type Person = string | { name: string; color?: string; src?: string };
 
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		people?: Person[];
@@ -19,6 +19,7 @@
 	const extra = $derived(people.length - shown.length);
 	const nameOf = (p: Person) => (typeof p === 'string' ? p : p.name);
 	const colorOf = (p: Person) => (typeof p === 'string' ? undefined : p.color);
+	const srcOf = (p: Person) => (typeof p === 'string' ? undefined : p.src);
 </script>
 
 <!-- Overlapping cluster of avatars with an optional "+N" overflow. -->
@@ -28,6 +29,7 @@
 			<Avatar
 				name={nameOf(p)}
 				color={colorOf(p)}
+				src={srcOf(p)}
 				{size}
 				ring
 				style={i === 0 ? '' : `margin-left:${-size * 0.28}px`}

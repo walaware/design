@@ -25,6 +25,8 @@
 		name: string;
 		/** Avatar colour (any CSS colour or --color-av-* token). */
 		color?: string;
+		/** Profile photo URL; falls back to the coloured initial. */
+		avatar?: string;
 		/** Subtitle line under the name; defaults to "Sign out" when onSignOut is set. */
 		meta?: NodeLike;
 		onSignOut?: () => void;
@@ -156,7 +158,7 @@
 		{/if}
 		{#if account}
 			<div class="account">
-				<Avatar name={account.name} color={account.color} size={32} />
+				<Avatar name={account.name} color={account.color} src={account.avatar} size={32} />
 				<div class="account-text">
 					<div class="account-name">{account.name}</div>
 					{#if account.onSignOut}
@@ -209,7 +211,7 @@
 						</IconButton>
 					{/if}
 					{#if account}
-						<Avatar name={account.name} color={account.color} size={32} />
+						<Avatar name={account.name} color={account.color} src={account.avatar} size={32} />
 					{/if}
 				</span>
 			</header>

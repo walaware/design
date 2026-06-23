@@ -15,6 +15,11 @@
 	let app = $state<WalaApp>('tripwala');
 	let screen = $state('home');
 
+	// Self-contained avatar photo (data URI) for the signed-in account.
+	const photo = `data:image/svg+xml,${encodeURIComponent(
+		"<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFB23E'/><stop offset='1' stop-color='#E84F7C'/></linearGradient></defs><rect width='96' height='96' fill='url(#g)'/><circle cx='48' cy='40' r='15' fill='#fff' opacity='.92'/><path d='M22 84a26 22 0 0 1 52 0z' fill='#fff' opacity='.92'/></svg>"
+	)}`;
+
 	// `href` renders each row as a real <a> (cmd/middle-click works); `onClick`
 	// still drives the in-page screen state and closes the mobile drawer.
 	const nav = $derived<NavItem[]>([
@@ -27,7 +32,7 @@
 <AppShell
 	{app}
 	{nav}
-	account={{ name: 'Maya', color: 'var(--color-av-1)', onSignOut: () => alert('Signed out') }}
+	account={{ name: 'Maya', avatar: photo, onSignOut: () => alert('Signed out') }}
 	onSettings={() => (screen = 'settings')}
 	settingsActive={screen === 'settings'}
 >

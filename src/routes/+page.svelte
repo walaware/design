@@ -26,10 +26,18 @@
 
 	let rsvp = $state('Going');
 	let cond = $state('Used');
+
+	// A self-contained avatar photo (data URI — always loads, no network), so the
+	// demo shows a real photo; the "broken" demo uses a URL that 404s → initial.
+	const photo = `data:image/svg+xml,${encodeURIComponent(
+		"<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFB23E'/><stop offset='1' stop-color='#E84F7C'/></linearGradient></defs><rect width='96' height='96' fill='url(#g)'/><circle cx='48' cy='40' r='15' fill='#fff' opacity='.92'/><path d='M22 84a26 22 0 0 1 52 0z' fill='#fff' opacity='.92'/></svg>"
+	)}`;
+	const brokenPhoto = 'https://invalid.invalid/avatar.jpg';
+
 	const crew = [
-		{ name: 'Maya' },
+		{ name: 'Maya', src: photo },
 		{ name: 'Arjun' },
-		{ name: 'Sam' },
+		{ name: 'Sam', src: photo },
 		{ name: 'Priya' },
 		{ name: 'Leo' },
 		{ name: 'Nina' },
@@ -209,6 +217,15 @@
 			{/each}
 		</div>
 
+		<div class="avatars">
+			<span class="avatars-label">Avatars — photo, graceful fallback:</span>
+			<Avatar name="Maya" src={photo} size={48} />
+			<Avatar name="Arjun" src={brokenPhoto} size={48} />
+			<Avatar name="Sam" size={48} />
+			<Avatar name="Leo" emoji="🦊" size={48} />
+			<AvatarGroup people={crew} max={5} size={40} />
+		</div>
+
 		<p class="shell-link">See the full app chrome — sidebar ⇄ mobile drawer:</p>
 		<div class="shell-cta">
 			<Button href="/shell" variant="soft" size="sm">Open the AppShell demo →</Button>
@@ -249,6 +266,18 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 8px;
+	}
+	.avatars {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px;
+		margin: 18px 0 0;
+	}
+	.avatars-label {
+		font-size: 15px;
+		color: var(--color-text-body);
+		margin-right: 4px;
 	}
 	.shell-link {
 		margin: 18px 0 0;
