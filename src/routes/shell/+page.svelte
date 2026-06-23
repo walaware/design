@@ -29,38 +29,81 @@
 	onSettings={() => (screen = 'settings')}
 	settingsActive={screen === 'settings'}
 >
-	<h1 style="margin-bottom:6px">{screen === 'settings' ? 'Settings' : WALA_SUITE[app].label}</h1>
-	<p style="color:var(--color-text-body);margin:0 0 18px">
-		Resize below 920px to collapse the sidebar into the top-bar + drawer. Switch app to watch the
-		accent (and the active nav row) recolor — while the coral <code>·wala</code> in the wordmark stays put.
-	</p>
+	<div class="stack">
+		<a class="back" href="/">← Components</a>
+		<h1>{screen === 'settings' ? 'Settings' : WALA_SUITE[app].label}</h1>
+		<p class="lead">
+			Resize below 920px to collapse the sidebar into the top-bar + drawer. Switch app to watch the
+			accent (and the active nav row) recolor — while the coral <code>·wala</code> in the wordmark stays put.
+		</p>
 
-	<Card>
-		<CardHeader icon="🎨" title="Switch app accent" />
-		<div style="display:flex;flex-wrap:wrap;gap:8px">
-			{#each appNames as a (a)}
-				<button
-					onclick={() => (app = a)}
-					style="border:none;background:none;cursor:pointer;padding:0"
-				>
-					<Chip tone={a === app ? 'coral' : 'neutral'} outline={a !== app}>{a}</Chip>
-				</button>
-			{/each}
-		</div>
-	</Card>
+		<Card>
+			<CardHeader icon="🎨" title="Switch app accent" />
+			<div class="chips">
+				{#each appNames as a (a)}
+					<button class="chip-btn" onclick={() => (app = a)}>
+						<Chip tone={a === app ? 'coral' : 'neutral'} outline={a !== app}>{a}</Chip>
+					</button>
+				{/each}
+			</div>
+		</Card>
 
-	{#if screen === 'crew'}
-		<Card>
-			<EmptyState emoji="👋" title="No crew yet" body="Invite people to see them here." action="Invite ✨" />
-		</Card>
-	{:else}
-		<Card>
-			<CardHeader icon="✅" title="It works" />
-			<p style="margin:0 0 12px;color:var(--color-text-body)">
-				Nav clicks set the active row and close the mobile drawer. Settings + account live in the
-				sidebar footer and the mobile top bar.
-			</p>
-			<Button>Primary action</Button>
-		</Card>
-	{/if}
+		{#if screen === 'crew'}
+			<Card>
+				<EmptyState emoji="👋" title="No crew yet" body="Invite people to see them here." action="Invite ✨" />
+			</Card>
+		{:else}
+			<Card>
+				<CardHeader icon="✅" title="It works" />
+				<p class="card-text">
+					Nav clicks set the active row and close the mobile drawer. Settings + account live in the
+					sidebar footer and the mobile top bar.
+				</p>
+				<Button>Primary action</Button>
+			</Card>
+		{/if}
+	</div>
+
 </AppShell>
+
+<style>
+	.stack {
+		display: flex;
+		flex-direction: column;
+		gap: var(--stack-gap);
+	}
+	.back {
+		align-self: start;
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--color-wala);
+		text-decoration: none;
+	}
+	.stack h1 {
+		margin: 4px 0 0;
+	}
+	.lead {
+		margin: 0;
+		color: var(--color-text-body);
+	}
+	.card-text {
+		margin: 2px 0 14px;
+		color: var(--color-text-body);
+	}
+	.chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+	.chip-btn {
+		border: none;
+		background: none;
+		cursor: pointer;
+		padding: 0;
+	}
+	.stack code {
+		font-family: var(--font-display);
+		color: var(--color-wala);
+		font-weight: 600;
+	}
+</style>
