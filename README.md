@@ -1,5 +1,10 @@
 # @walaware/design
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+[![Svelte](https://img.shields.io/badge/Svelte-5-ff3e00.svg)](https://svelte.dev)
+[![Tailwind](https://img.shields.io/badge/Tailwind-4-38bdf8.svg)](https://tailwindcss.com)
+[![AI-developed](https://img.shields.io/badge/built_with-AI_%2B_human_review-7c3aed.svg)](https://github.com/walaware/.github/blob/main/AI_POLICY.md)
+
 The shared design system for **walaware** — a family of small, personally-built life apps
 (`tripwala`, `healthwala`, `stuffwala`, `moneywala`, `shopwala`, `taskwala`, `folkwala`). One warm, playful
 **Campfire** house style so the whole suite feels like one world, with a **per-app accent** so each
@@ -257,3 +262,23 @@ checked by the **CI** workflow (`.github/workflows/ci.yml`), so `main` stays rel
 
 Consuming apps move to a new version by bumping the `#vX.Y.Z` ref in their `package.json` (or
 `pnpm update @walaware/design`).
+
+---
+
+## Contributing
+
+PRs welcome — see the suite-wide [Contributing guide](https://github.com/walaware/.github/blob/main/CONTRIBUTING.md)
+and [Code of Conduct](https://github.com/walaware/.github/blob/main/CODE_OF_CONDUCT.md). Keep the kit
+**generic**: promote a component into `@walaware/design` only once it's proven in ~3 apps (the rule of
+three). Docs follow the [documentation standard](https://github.com/walaware/.github/blob/main/DOCUMENTATION.md);
+broader conventions live in [walaware/.github/docs](https://github.com/walaware/.github/tree/main/docs).
+
+## Built with AI
+
+`@walaware/design` is part of a [heavily AI-developed](https://github.com/walaware/.github/blob/main/AI_POLICY.md)
+suite — built by LLM agents under human direction and review.
+
+## License
+
+[MIT](./LICENSE) — shared libraries are permissive so every walaware app can consume them freely.
+(The apps themselves are AGPL-3.0.)
