@@ -148,6 +148,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 ```svelte
 <script>
 	import {
+		AppShell,
 		Button, IconButton, Card, CardHeader, Chip, Tooltip,
 		Avatar, AvatarGroup, LeanMeter,
 		TextField, SegmentedControl, Composer,
@@ -167,10 +168,16 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 | Group      | Components                                  |
 | ---------- | ------------------------------------------- |
 | `brand`    | `Wordmark`, `AppIcon` (+ `WALA_SUITE`, `WALA_GLYPHS`) |
+| `shell`    | `AppShell` (+ `NavItem`, `ShellAccount` types) |
 | `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip`, `Tooltip` |
 | `people`   | `Avatar`, `AvatarGroup`, `LeanMeter` (+ `colorFor`) |
 | `forms`    | `TextField`, `SegmentedControl`, `Composer` |
 | `feedback` | `StatusBadge`, `EmptyState`, `ChatMessage`  |
+
+`AppShell` is the standard app chrome: a desktop left sidebar that collapses to a
+top bar + slide-in drawer below `breakpoint` (default 920px). The app supplies
+`nav` + `account` + content; the shell owns the brand lockup, active states,
+drawer mechanics, and accent wiring (`data-app`). No bottom tab bar.
 
 `Button` `variant`: `primary` (follows the app accent) · `secondary` (amber) · `accent` (berry) ·
 `soft` · `ghost`. Sizes: `sm` · `md` · `lg`.

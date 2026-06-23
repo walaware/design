@@ -145,6 +145,11 @@
 				</div>
 			{/each}
 		</div>
+
+		<p class="shell-link">
+			See the full app chrome — sidebar ⇄ mobile drawer — in the
+			<a href="/shell">AppShell demo →</a>
+		</p>
 	</section>
 
 	<section class="frames">
@@ -182,6 +187,16 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 8px;
+	}
+	.shell-link {
+		margin: 18px 0 0;
+		font-size: 15px;
+		color: var(--color-text-body);
+	}
+	.shell-link a {
+		color: var(--color-wala);
+		font-weight: 700;
+		text-decoration: none;
 	}
 	.frames {
 		display: grid;

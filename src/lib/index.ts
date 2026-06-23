@@ -20,6 +20,10 @@ export { default as CardHeader } from './core/CardHeader.svelte';
 export { default as Chip } from './core/Chip.svelte';
 export { default as Tooltip } from './core/Tooltip.svelte';
 
+// Shell
+export { default as AppShell } from './shell/AppShell.svelte';
+export { type NavItem, type ShellAccount } from './shell/AppShell.svelte';
+
 // People
 export { default as Avatar } from './people/Avatar.svelte';
 export { default as AvatarGroup } from './people/AvatarGroup.svelte';

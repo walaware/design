@@ -66,18 +66,19 @@ recolor automatically. Preserve this `[data-app]` scope structure on every token
 
 ```
 tripwala   coral   #FF7A59  Journeys & trips
-healthwala amber   #F59E14  Health & meals      (grew from upstream "mealwala")
+healthwala amber   #F59E14  Health & meals      (was "mealwala" upstream)
 stuffwala  teal    #2FB6A3  Personal inventory
-moneywala  leaf    #3FA66A  Money & expenses    (renamed from upstream "spendwala")
+moneywala  leaf    #3FA66A  Money & expenses    (was "spendwala" upstream)
 shopwala   berry   #E84F7C  Buying & selling
 taskwala   sky     #4F9ED1  Plans & tasks
-folkwala   grape   #B57EDC  People & relationships  (added here; not yet upstream)
+folkwala   grape   #B57EDC  People & relationships
 ```
 
 Defined in `theme.css` (`[data-app]` scopes + `--acc-*` tokens) and `brand/suite.ts`
-(`WALA_SUITE`). If an upstream export still uses `mealwala`/`spendwala` or omits
-`folkwala`, **do not downgrade** — keep this roster and flag the drift in the
-sync-back summary so upstream is corrected.
+(`WALA_SUITE`). As of the AppShell sync, upstream (Claude Design) has converged on
+this roster — `mealwala`→`healthwala`, `spendwala`→`moneywala`, and `folkwala` added.
+If a future export ever regresses to the old names, **do not downgrade** — keep this
+roster and flag the drift in the sync-back summary.
 
 ## Scope: what belongs in the shared kit
 
@@ -111,4 +112,9 @@ automates it — see `.claude/skills/design-sync/SKILL.md`. In short:
 
 - `pnpm run check` → 0 errors/warnings.
 - `pnpm run package` → publint "All good!".
+- **Smoke-test the dev server**: `pnpm dev`, then `curl` every route — each must
+  return `200`, not `500`. `check`/`package` use the full TS compiler and pass on code
+  the dev server's lighter TS-stripper rejects. Known trap: an optional function param
+  `(fn?: () => void)` strips to invalid `(fn?)` and 500s dev SSR — write
+  `(fn: (() => void) | undefined)` instead.
 - New/changed component exported from `src/lib/index.ts` and shown in the demo.

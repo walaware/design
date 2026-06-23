@@ -51,7 +51,20 @@ token namespace mapping, and the scope rules this skill depends on.
    `README.md`. Match how existing entries are registered.
 
 6. **Verify.** Run `pnpm run check` (0 errors/warnings) then `pnpm run package`
-   (publint "All good!"). Fix anything that fails.
+   (publint "All good!"). Then **smoke-test the dev server** — these two gates use the
+   full TypeScript compiler and will pass on code that the dev server's faster
+   TS-stripper chokes on (it strips `: type` annotations but not the surrounding
+   syntax). Known footgun: **optional function params** like `(fn?: () => void)` strip
+   to invalid `(fn?)` and 500 the dev SSR — write `(fn: (() => void) | undefined)`
+   instead. To catch this class of bug, start the server and curl every route:
+   ```bash
+   pnpm dev &                                  # background
+   sleep 4
+   curl -s -o /dev/null -w "/ %{http_code}\n"      http://localhost:5173/
+   curl -s -o /dev/null -w "/shell %{http_code}\n" http://localhost:5173/shell
+   ```
+   Every route must return `200` (not `500`). If a route 500s, read the dev output —
+   the error names the post-strip line/column — fix, and re-curl. Fix anything that fails.
 
 7. **Stop and ask** for anything that can't map 1:1 to Svelte (React-specific
    composition, ambiguous scope) rather than guessing. List these explicitly.
