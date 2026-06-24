@@ -137,6 +137,15 @@ shared primitives. Built in shopwala's repo:
 
 - Flesh out Home + Deals section breakdowns at the next mock sync.
 - Build out the workspace `soon` modules (Insights · Promote · Similar sold) when designed.
+- **Capability toggle row — promote to the shared kit? (decision pending).** shopwala uses
+  it in two places already (app Settings + the per-listing "Let the agent reply here"
+  toggle), but that's two usages in *one* app — below the rule-of-three bar. Trigger: a
+  **second agent-style app** (healthwala/taskwala/folkwala) needs the same governable
+  on/off-with-locked-state row → then promote a `ToggleRow`/`CapabilityRow` primitive into
+  `@walaware/design` and refactor shopwala onto it. Until then it stays app-domain; don't
+  pre-emptively generalize. (Same watch applies to the **Escalation card** and **Listing
+  card** — promote only on cross-app reuse.) Mirror of tripwala's lean-vs-richer call, run
+  in the app→kit direction.
 
 ## Resolved
 
