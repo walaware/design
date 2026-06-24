@@ -214,3 +214,10 @@ the balance algorithm are in the Claude Design `ui_kits/rally/tripData.jsx` refe
 - ~~Decide if/when tripwala moves from single-page to AppShell (multi-trip).~~ **Resolved
   2026-06-23:** adopted `AppShell` two-level (global destinations → contextual section nav).
 - Build out the "soon" modules (Itinerary · Map · Photos) when designed upstream.
+- **Gear/Food rows — lean inline vs richer `ClaimRow` (decision pending).** The current
+  template inlines simplified Gear/Food rows (emoji + name + claimed avatar-pill | "Claim"
+  soft button). Upgrade to the richer `ClaimRow` (the "up for grabs!" note + grab flow + the
+  claimed-tile coral swap — see App-domain components) **only when** Gear/Food needs that
+  fidelity. Trigger: claiming becomes a primary interaction (e.g. unclaimed-item nudges,
+  per-person claim counts) rather than a static "who's bringing what" display. Until then,
+  keep the lean rows — don't pull `ClaimRow` in prematurely.
