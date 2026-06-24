@@ -57,15 +57,82 @@ trip"). Two levels:
 - **States:** empty sections invite ("It's quiet in here… be the first!"); completion
   celebrates.
 
-## App-specific patterns
+## App-domain components (tripwala builds these in its own repo)
 
-These are tripwala-domain and live in **tripwala's own repo**, not the shared kit
-(rule of three — they're upstream's `trip/` category, intentionally not ported here):
+These are tripwala-domain and live in **tripwala's own repo**, not the shared `@walaware/design`
+package (rule of three — they're upstream's `trip/` category, intentionally not exported). The
+shared package **does not** ship them; there is no `@walaware/design/trip` import.
 
-- `ClaimRow` — claimable line item with an up-for-grabs state.
-- `ExpenseRow` — a split-cost line.
-- `BalanceSummary` — settle-up / who-owes-whom.
-- GPX route map panel — the sanctioned drawn UI.
+**But the design is specified** — the contracts + usage below are mirrored from the Claude
+Design source (`components/trip/*` + the `ui_kits/rally` worked example) so the tripwala agent
+has the full spec in one place. tripwala writes the **Svelte** implementation once, composing the
+shared primitives it already imports (`Avatar`, `Button`, `Card`, `CardHeader`, `Chip`,
+`SegmentedControl`, `LeanMeter`, `ChatMessage`, `Composer`, `EmptyState`, `IconButton`).
+
+### `ClaimRow` — claimable gear/task row (Rally's signature component)
+Emoji tile + item; shows a "Grab it" button when unclaimed, swaps to the claimer's `Avatar`
+once taken. Composes `Avatar` + `Button`.
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `emoji` | node | leading tile glyph (default `🎒`) |
+| `emojiBg` | string | tile background (default `--color-sand-200`; takes coral once claimed) |
+| `name` | node | item name (e.g. "Camp stove") |
+| `note` | node | sub-text when unclaimed (e.g. "up for grabs!") |
+| `claimedBy` | `string \| null` | claimer's name; `null` = unclaimed |
+| `claimColor` | string | override claimer avatar colour |
+| `onClaim` | `() => void` | grab action |
+| `claimLabel` | string | grab button label (default "Grab it"; rally uses "I'll do it" once you've joined) |
+| `divider` | boolean | top divider (default true; pass `false` on the first row) |
+
+### `ExpenseRow` — one shared cost line
+What it was, who paid, how it splits, total + per-person. Stack inside a `Card`.
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `emoji` | node | tile glyph (default `💸`) |
+| `title` | node | what the expense was for |
+| `amount` | number | total |
+| `paidBy` | string | who fronted it |
+| `paidColor` | string | payer avatar colour |
+| `splitCount` | number | people it splits across (drives the per-person figure) |
+| `splitLabel` | string | override split text (e.g. "just Maya & Theo", else "everyone") |
+| `divider` | boolean | top divider (default true) |
+
+### `BalanceSummary` — net position + settle-up
+The payoff of expense tracking: the current user's net (`+` owed to you / `−` you owe) and the
+minimal who-pays-whom lines. A fully-settled trip shows a 🎉. Composes `Avatar`.
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `youNet` | number | current user's net (default 0) |
+| `settlements` | `Settlement[]` | `{ from, fromColor?, to, toColor?, amount }[]` |
+
+### Route map panel (`route` section)
+A GPX map panel — **the one sanctioned hand-drawn graphic** (functional product UI); everything
+else stays Lucide/emoji. Data shape: `{ file, track: [[x,y]…], distance, gain, days, road?, stops? }`.
+
+### Section model + trip types (the page's data shape)
+A trip is `{ type, title, where, dates, sections[] }`. Each **section is a modular block** keyed by
+`kind` — nothing is hard-required, every section is relabelable and its items editable, and the
+page has an "Add a section" affordance. Kinds and what renders them:
+
+| `kind` | Renders | Shared parts used |
+| ------ | ------- | ----------------- |
+| `people` | RSVP list + your answer; `Maybe` opens the **flaky-maybe** confidence picker | `Avatar`, `SegmentedControl`, `LeanMeter`, status emoji 🔥🤔💤 |
+| `claim` | list of `ClaimRow`s; empty → `EmptyState`; footer "N still open" / "🎉 All covered!" | `ClaimRow`, `EmptyState`, `IconButton` (＋ add) |
+| `route` | the GPX map panel | (app-domain drawn UI) |
+| `chat` | scrollable `ChatMessage` log + `Composer` | `ChatMessage`, `Composer` |
+| `expenses` | `BalanceSummary` headline + `ExpenseRow` list | `BalanceSummary`, `ExpenseRow`, `IconButton` |
+
+A **trip type** just seeds a starting set of sections — Rally ships `camping`, `backpacking`,
+`roadtrip`, `overlanding`, `cabin` (a type picker swaps the set). Expense **splitting** is computed
+(`split: "everyone"` or a named subset → greedy min-cash-flow settlements). Full seed data +
+the balance algorithm are in the Claude Design `ui_kits/rally/tripData.jsx` reference.
+
+> These map onto the contextual-mode `<section id>` modules (see Navigation): `people`→`#crew`,
+> `claim`→`#gear`/`#packing`/`#food`, `route`→`#map` (a "soon" module today), `expenses`→`#expenses`,
+> `chat`→a chat module. Build the Svelte versions in tripwala's repo; this doc is the contract.
 
 ## Open questions / TODO
 
