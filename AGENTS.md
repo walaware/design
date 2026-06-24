@@ -19,6 +19,21 @@ is kept in **two-way sync** with Claude Design via the live **DesignSync** MCP t
 (see the design-sync workflow below). **Exception: app names / the app roster are owned
 HERE** (see "Canonical app roster").
 
+## Org conventions (walaware/.github)
+
+[`walaware/.github`](https://github.com/walaware/.github) is the org-wide source of truth
+for conventions + architecture (the suite names two sync sources: that repo for
+conventions, **this** repo for design). Adopt new conventions as they land so this repo
+doesn't drift. The ones that apply to this repo **as a shared library** (most are
+app-only — PocketBase, OAuth, Caddy, secrets):
+
+- **Library playground port `5901`** — shared libraries run their demo off the app dev
+  grid (apps take `5173 + n*100`); pinned in `vite.config.js`. (`5901` not `5900` — `5900`
+  is macOS Screen Sharing/VNC.)
+- **License `MIT`** — shared libraries are MIT (apps are AGPL-3.0). ✓ already.
+- **SvelteKit 5 web conventions** — runes, Prettier, `pnpm check` clean before a PR —
+  already mirrored under "Repo conventions" below.
+
 ## Repo conventions (match these exactly)
 
 Components are Svelte 5 with runes. Before writing one, read 2–3 neighbours
@@ -201,9 +216,10 @@ in sync — **both directions**. The `design-sync` skill drives it
 
 - `pnpm run check` → 0 errors/warnings.
 - `pnpm run package` → publint "All good!".
-- **Smoke-test the dev server**: `pnpm dev`, then `curl` every route — each must
-  return `200`, not `500`. `check`/`package` use the full TS compiler and pass on code
-  the dev server's lighter TS-stripper rejects. Known trap: an optional function param
-  `(fn?: () => void)` strips to invalid `(fn?)` and 500s dev SSR — write
+- **Smoke-test the dev server**: `pnpm dev` (pinned to **`5901`** in `vite.config.js` —
+  the registered library playground port, off the app dev grid), then `curl` every route
+  — each must return `200`, not `500`. `check`/`package` use the full TS compiler and pass
+  on code the dev server's lighter TS-stripper rejects. Known trap: an optional function
+  param `(fn?: () => void)` strips to invalid `(fn?)` and 500s dev SSR — write
   `(fn: (() => void) | undefined)` instead.
 - New/changed component exported from `src/lib/index.ts` and shown in the demo.

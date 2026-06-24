@@ -75,10 +75,10 @@ should become part of the shared contract). Mirror it into the React source.
   the dev TS-stripper rejects. Known footgun: an optional param `(fn?: () => void)`
   strips to invalid `(fn?)` and 500s dev SSR — write `(fn: (() => void) | undefined)`.
   ```bash
-  pnpm dev --port 5176 --strictPort &   # avoid app dev ports 5173/5174
-  sleep 4
-  curl -s -o /dev/null -w "/ %{http_code}\n"      http://localhost:5176/
-  curl -s -o /dev/null -w "/shell %{http_code}\n" http://localhost:5176/shell
+  pnpm dev &   # vite.config pins this to 5901 — the registered library playground
+  sleep 4      # port, off the app dev grid (walaware/.github docs/conventions.md)
+  curl -s -o /dev/null -w "/ %{http_code}\n"      http://localhost:5901/
+  curl -s -o /dev/null -w "/shell %{http_code}\n" http://localhost:5901/shell
   ```
   Every route must return `200`. Fix anything that 500s.
 - Release Svelte-side changes via `pnpm version patch|minor` (GitHub-tag release; apps
