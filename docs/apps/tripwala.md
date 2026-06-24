@@ -2,7 +2,7 @@
 
 **Accent:** Coral `#FF7A59` (the house default + the constant `--color-wala`) · **Glyph:** `compass` · **Root:** `trip` · **`data-app`:** `tripwala`
 **Layout mode:** `AppShell`, two-level — global destinations → **contextual section nav** (scrollSpy) over one scrollable trip page
-**Status:** designing · **Last mock sync:** 2026-06-23 (`ui_kits/rally` worked example + AppShell contextual mode in the Claude Design package)
+**Status:** designing · **Last mock sync:** 2026-06-23 (`templates/tripwala` multi-trip + AppShell contextual workspace; `ui_kits/rally` single-page worked example — both in the Claude Design package)
 
 ## Context
 
@@ -21,18 +21,38 @@ tripwala now uses **`AppShell` in both of its modes** (the contextual mode is a 
 shell capability — see the AppShell prop table in the README; demo at `/shell` → "Open a
 trip"). Two levels:
 
-- **App level** — global destinations: `Trips · Today`. Standard `nav[].active` + `onClick`.
-- **Contextual (a trip is open)** — the sidebar becomes a **section nav over ONE
-  scrollable page** (no sub-routes):
-  - `back={{ label: 'All trips', onClick }}` exits the trip (also closes the drawer).
-  - `scrollSpy` turns `nav` into in-page anchors — each item targets a `<section id>` via
-    `href="#id"`; the shell smooth-scrolls on click and highlights the active section on
-    scroll.
-  - `title={trip.name}` shows the trip name in the mobile top bar (in place of the wordmark).
-  - Module nav set: `Overview · Dates · Who's coming · Gear · Food · Packing · Expenses ·
-    Trip settings`, then a dimmed **`soon`** group (`Itinerary · Map · Photos`) for roadmap items.
-  - **Consumer contract:** render the modules as one long page of `<section id="…">`s, and
-    mark the sticky trip header `data-appshell-sticky` so scrollSpy offsets land right.
+**App level** — global destinations, coral accent, Settings via `onSettings`. Only **Trips**
+is live today; the rest are dimmed `soon` roadmap rows (matches the current upstream template):
+
+| key | label | icon | state |
+| --- | ----- | ---- | ----- |
+| `trips` | Trips | 🧭 | **active** (stays active while a trip is open) |
+| `calendar` | Calendar | 📅 | `soon` |
+| `planner` | Planner | 🗓️ | `soon` |
+| `map` | Map | 🗺️ | `soon` |
+
+> **Not "Today".** Earlier drafts of this doc said "Trips · Today" — that was wrong. The live
+> app-level nav is **Trips** + the three `soon` rows above.
+
+**Contextual (a trip is open)** — the sidebar becomes a **section nav over ONE scrollable
+page** (no sub-routes): `back={{ label: 'All trips', onClick }}` exits (also closes the
+drawer); `scrollSpy` turns `nav` into in-page anchors; `title={trip.name}` shows the trip
+name in the mobile top bar. Module nav (each row → a `<section id>`):
+
+| key | label | icon | `<section>` |
+| --- | ----- | ---- | ----------- |
+| `overview` | Overview | ✨ | `#overview` |
+| `dates` | Dates | 📅 | `#dates` |
+| `crew` | Who's coming | 🙌 | `#crew` |
+| `gear` | Gear | 🎒 | `#gear` |
+| `food` | Food | 🍳 | `#food` |
+| `packing` | Packing | 🧳 | `#packing` |
+| `expenses` | Expenses | 💸 | `#expenses` |
+| `tripsettings` | Trip settings | ⚙️ | `#tripsettings` |
+
+…then a dimmed **`soon`** group: `Itinerary 🗓️ · Map 🗺️ · Photos 📷`. **Consumer contract:**
+render the modules as one long page of `<section id="…">`s (the ids above), and mark the
+sticky trip header `data-appshell-sticky` so scrollSpy offsets land right.
 
 ## Screens
 
@@ -41,8 +61,8 @@ trip"). Two levels:
 - **Purpose:** everything about one trip on one page; module nav + scrollspy navigate it;
   the section set varies by trip type.
 - **Layout:** `AppShell` contextual mode; a sticky trip header (`data-appshell-sticky`:
-  AppIcon, trip title + dates + status chips), then a `--stack-gap` stack of `<section
-  id>` `Card` modules. The page is also customizable (an "Add a section" affordance).
+  emoji tile, trip title, `dates · where · N going`, and a "Message crew" `Button`), then
+  the `<section id>` modules. The page is also customizable (an "Add a section" affordance).
 - **Sections** (each a `Card` + `CardHeader` emoji/question title, wrapped in a `<section id>`):
   - `🙌 Who's coming?` (**people**) — RSVP `Going / Maybe / Out`; `Maybe` opens a
     **flaky-maybe** confidence picker (`LeanMeter`: long-shot → 50/50 → leaning-yes).
