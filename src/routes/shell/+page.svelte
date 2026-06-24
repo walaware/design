@@ -221,4 +221,9 @@
 	section {
 		scroll-margin-top: 96px;
 	}
+	/* Tall enough that the contextual page overflows the scrollport — so the
+	   scrollspy (smooth-scroll + active-on-scroll) is actually exercised. */
+	.stack section {
+		min-height: 58vh;
+	}
 </style>

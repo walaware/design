@@ -44,6 +44,7 @@
 </script>
 
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import AppIcon from '../brand/AppIcon.svelte';
 	import Wordmark from '../brand/Wordmark.svelte';
@@ -75,7 +76,8 @@
 		breakpoint?: number;
 		/** Max content-column width in px. */
 		maxWidth?: number;
-		/** Override the content padding. */
+		/** Override the content padding. Omit to use the mode-aware default (contextual
+		    mode zeroes the top so a `[data-appshell-sticky]` header pins flush). */
 		contentPadding?: string;
 		/** Screen content. */
 		children?: Snippet;
@@ -93,7 +95,7 @@
 		title = null,
 		breakpoint = 920,
 		maxWidth = 920,
-		contentPadding = 'clamp(18px,3.2vw,34px) clamp(16px,3.4vw,40px) 64px',
+		contentPadding = undefined,
 		children,
 		class: klass = '',
 		...rest
@@ -121,6 +123,19 @@
 		fn?.();
 		drawer = false;
 	};
+
+	/** Contextual mode = a record is open (section nav over one scrollable page). */
+	const contextual = $derived(scrollSpy || !!back);
+
+	/** Mode-aware content padding. Contextual pages carry a `data-appshell-sticky`
+	    header that must pin flush to the scrollport, so the contextual default zeroes
+	    the top padding (an explicit `contentPadding` always wins). */
+	const pad = $derived(
+		contentPadding ??
+			(contextual
+				? '0 clamp(16px,3.4vw,40px) 64px'
+				: 'clamp(18px,3.2vw,34px) clamp(16px,3.4vw,40px) 64px')
+	);
 
 	/* ---- Contextual sidebar: section nav + scrollspy ----
 	   When `scrollSpy` is on, `nav` items are in-page anchors over ONE scrollable
@@ -179,12 +194,23 @@
 		item.onClick?.();
 	};
 
+	/* Both scrollspy effects depend on `spyKey` (the section ids joined into a STRING)
+	   and read `spyIds` (the array) only via `untrack`. A consumer that re-publishes the
+	   `nav` prop each render (e.g. a polling `invalidateAll`) hands us a referentially-new
+	   array with the same sections; keying on the array ref would re-run these every tick
+	   and yank scroll to the top. Keying on the string means we only react to a real
+	   section-set change. (React keys its deps on the spyKey string already; this restores
+	   parity.) */
+
 	/** Reset to the top + first section when the spy nav set changes (e.g. a record opens). */
 	$effect(() => {
-		spyKey; // track
-		if (scrollSpy && mainEl) {
-			mainEl.scrollTop = 0;
-			spyActive = spyIds[0] ?? null;
+		spyKey; // track the section-set CONTENT (string), not the spyIds array ref
+		const el = mainEl;
+		if (scrollSpy && el) {
+			untrack(() => {
+				el.scrollTop = 0;
+				spyActive = spyIds[0] ?? null;
+			});
 		}
 	});
 
@@ -193,12 +219,14 @@
 		if (!scrollSpy) return;
 		const rootEl = mainEl;
 		if (!rootEl) return;
-		spyKey; // re-bind when the section set changes
+		spyKey; // re-bind only when the section-set content changes
+		scrollSpyOffset; // …or when the explicit offset changes
+		const ids = untrack(() => spyIds); // snapshot without depending on the array ref
 		const onScroll = () => {
 			const off = offsetFor(rootEl);
 			const rootTop = rootEl.getBoundingClientRect().top;
-			let current = spyIds[0] ?? null;
-			for (const id of spyIds) {
+			let current = ids[0] ?? null;
+			for (const id of ids) {
 				const el = sectionEl(rootEl, id);
 				if (!el) continue;
 				const top = el.getBoundingClientRect().top - rootTop;
@@ -362,7 +390,7 @@
 			</header>
 		{/if}
 
-		<main class="content" style:padding={contentPadding} bind:this={mainEl}>
+		<main class="content" style:padding={pad} bind:this={mainEl}>
 			<div class="content-inner" style:max-width="{maxWidth}px">
 				{@render children?.()}
 			</div>
@@ -386,7 +414,12 @@
 
 <style>
 	.wala-appshell {
-		min-height: 100vh;
+		/* Bound the shell to the viewport so `.content` is the real scroll root —
+		   scrollSpy drives `.content.scrollTo` and listens to its scroll, which only
+		   works if `.content` (not the window) is what actually scrolls. dvh handles
+		   mobile browser chrome; vh is the fallback. */
+		height: 100vh;
+		height: 100dvh;
 		display: flex;
 		background: var(--color-bg-app);
 		font-family: var(--font-body);
@@ -585,6 +618,7 @@
 	.main {
 		flex: 1;
 		min-width: 0;
+		min-height: 0; /* let .content shrink so it — not the window — scrolls */
 		display: flex;
 		flex-direction: column;
 	}
@@ -626,6 +660,7 @@
 	.content {
 		flex: 1;
 		min-width: 0;
+		min-height: 0; /* paired with .main min-height:0 → .content is the scroll root */
 		overflow-y: auto;
 	}
 	.content-inner {

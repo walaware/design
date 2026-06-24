@@ -49,7 +49,9 @@
 	}
 	.t-sun {
 		--chip-bg: var(--color-sun-200);
-		--chip-fg: var(--color-sun-600);
+		/* cocoa-700, not sun-600 — amber-on-amber (sun-600 on sun-200) fails contrast
+		   for labels like "In planning" / "N maybe". The only tone that needed it. */
+		--chip-fg: var(--color-cocoa-700);
 		--chip-bd: var(--color-sun-200);
 	}
 	.t-berry {
