@@ -1,7 +1,7 @@
 # shopwala — marketplace selling agent
 
 **Accent:** Berry `#E84F7C` · **Glyph:** `shopping-bag` · **Root:** `shop` · **`data-app`:** `shopwala`
-**Layout mode:** AppShell — desktop sidebar ⇄ mobile top bar + slide-in drawer, **no bottom tab bar** (4 nav destinations + settings)
+**Layout mode:** `AppShell`, two-level — global destinations → **contextual listing workspace** (scrollSpy) over one scrollable page (same shared shell mode tripwala uses). Desktop sidebar ⇄ mobile top bar + slide-in drawer, **no bottom tab bar**.
 **Status:** designing · **Last mock sync:** 2026-06-23 (`templates/shopwala` in the Claude Design package)
 
 > **Layout decision (2026-06-23):** shopwala uses the standard `AppShell` responsive
@@ -23,7 +23,11 @@ now) and *trust/control* (clearly show what the agent is and isn't allowed to do
 
 ## Navigation
 
-`AppShell` `nav`, Berry accent. Settings via `onSettings`.
+shopwala uses **`AppShell` in both of its modes** (the contextual mode is a shared shell
+capability — see the AppShell prop table in the README; demo at `/shell` → "Open a trip").
+Two levels:
+
+**App level** — global destinations, Berry accent, Settings via `onSettings`:
 
 | key | label | icon | badge? | purpose |
 | --- | ----- | ---- | ------ | ------- |
@@ -32,6 +36,22 @@ now) and *trust/control* (clearly show what the agent is and isn't allowed to do
 | `listings` | Listings | 🛍️ | — | all listings, filterable by status |
 | `deals` | Deals | 🤝 | — | in-progress deals / handshakes |
 | _settings_ | Settings | ⚙ (shell glyph) | — | agent capability toggles |
+
+**Contextual** — opening a listing (tap a card in Listings) swaps the sidebar to a
+**section nav over ONE scrollable page**, exactly like tripwala's trip workspace:
+`back={{ label: 'All listings', onClick }}` + `scrollSpy` + `title={listing.name}`. Module nav:
+
+| key | label | icon | targets `<section>` |
+| --- | ----- | ---- | ------------------- |
+| `overview` | Overview | ✨ | `#overview` |
+| `conversations` | Conversations | 💬 | `#conversations` |
+| `details` | Details | 📝 | `#details` |
+| `pricing` | Pricing | 🏷️ | `#pricing` |
+| `activity` | Activity | 📊 | `#activity` |
+| `settings` | Listing settings | ⚙ | `#settings` |
+
+…then a dimmed **`soon`** group: `Insights 📈 · Promote 🚀 · Similar sold 🔁`. The sticky
+listing header is marked `data-appshell-sticky`; mobile top-bar `title` = the listing name.
 
 ## Screens
 
@@ -54,7 +74,30 @@ now) and *trust/control* (clearly show what the agent is and isn't allowed to do
 - **Sections:** filters `All / Active / Pending / Sold`; each listing shows a
   `StatusBadge` — **Active** = leaf, **Pending** = sun, **Sold / Draft / Archived** =
   neutral.
-- **Context / UX notes:** status drives both the badge tone and the filter buckets.
+- **Context / UX notes:** status drives both the badge tone and the filter buckets. Each
+  card also carries a coral **🔔 N needs-you badge** (count of escalated chats on that
+  listing), so triage and listing management share one signal. **Tapping a card opens the
+  contextual listing workspace** (below).
+
+### Listing workspace (contextual mode) — one scroll of `<section>` modules
+
+- **Purpose:** everything about one listing on one page, without leaving the shell —
+  opened from a Listings card; `back` ("← All listings") exits.
+- **Layout:** `AppShell` contextual mode; a sticky listing header (`data-appshell-sticky`:
+  thumbnail, title, price, `StatusBadge`), then a `--stack-gap` stack of `<section id>`
+  `Card` modules navigated by the module nav + scrollspy.
+- **Modules** (each a `<section id>` matching the contextual nav):
+  - `#overview` — agent-activity summary for this listing.
+  - `#conversations` — buyer threads; a thread's **"Review"** action routes to the
+    **Needs you** inbox (the hero surface stays the single triage queue — the workspace
+    links into it, doesn't fork it).
+  - `#details` — `Condition · Category · Location · Listed (days ago)` field rows.
+  - `#pricing` — price + negotiation posture for this listing.
+  - `#activity` — views / saves / events timeline.
+  - `#settings` — per-listing **"Let the agent reply here"** toggle (local state, default
+    **on**) — a listing-scoped echo of the global capability contract in Settings.
+- **Context / UX notes:** the dimmed **Insights · Promote · Similar sold** nav rows are
+  roadmap (`soon`). No new shared primitives — composes the kit + app-domain cards.
 
 ### Deals (`deals`)
 
@@ -77,20 +120,29 @@ now) and *trust/control* (clearly show what the agent is and isn't allowed to do
 - **Context / UX notes:** this screen is the trust contract. Locked categories must read
   as deliberately non-negotiable, not "coming soon."
 
-## App-specific patterns
+## App-domain components (shopwala builds these in its own repo)
 
-- **Escalation card** (buyer/listing context + agent question + snooze) — shopwala-only
-  for now; lives in the app repo.
-- **Capability toggle row** (with locked state + risk note) — app repo.
-- Both are promotion candidates for the kit *only* if healthwala/taskwala-style agents
+App-domain — **not** shipped in `@walaware/design` (rule of three); they compose the
+shared primitives. Built in shopwala's repo:
+
+- **Escalation card** (buyer/listing context + agent question + snooze: `+1 hour / +3
+  hours / Tonight / Tomorrow`) — the Needs-you hero row.
+- **Capability toggle row** (with locked state + risk note) — Settings + the per-listing
+  "Let the agent reply here" toggle reuse this shape.
+- **Listing card** (thumbnail + `StatusBadge` + 🔔 needs-you badge) — opens the workspace.
+- All are promotion candidates for the kit *only* if healthwala/taskwala-style agents
   reuse them (rule of three).
 
 ## Open questions / TODO
 
 - Flesh out Home + Deals section breakdowns at the next mock sync.
+- Build out the workspace `soon` modules (Insights · Promote · Similar sold) when designed.
 
 ## Resolved
 
+- **2026-06-23 — contextual workspace:** Listings cards open into an `AppShell` contextual
+  section nav (scrollSpy over one scrollable page), mirroring tripwala's trip workspace.
+  No package change — app-domain layout on the already-synced shell mode (v0.3.0).
 - **2026-06-23 — mobile chrome:** follow `AppShell` (top bar + drawer), **no bottom tab
   bar**. Upstream's "mobile top bar + tabs" template wording is deprecated; see the
   layout-decision note at the top and the sync-back to Claude Design.
