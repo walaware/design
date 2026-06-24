@@ -54,28 +54,73 @@ name in the mobile top bar. Module nav (each row → a `<section id>`):
 render the modules as one long page of `<section id="…">`s (the ids above), and mark the
 sticky trip header `data-appshell-sticky` so scrollSpy offsets land right.
 
+## Layout conventions (the 2026-06-23 cleanup)
+
+The current `templates/tripwala` tightened the visual language. Apply these consistently —
+they're how the cleaned-up mocks read:
+
+- **Section header sits *above* the card, not inside it.** Each `<section id>` opens with a
+  header row — `emoji (17px) + <h2> (font-display 600, 18px)` and an optional muted
+  subtitle (e.g. "— who's bringing what") or right-aligned `Chip`s — then the `Card` below
+  holds the rows. (This differs from the rally model, which put the title in `CardHeader`
+  *inside* the card. Either is valid; the template uses header-above-card.)
+- **Horizontal dividers** between list rows: `border-top: 1px solid var(--color-sand-200)`,
+  and **the first row omits it** (same rule as `ClaimRow`/`ExpenseRow` `divider` default
+  `true` → pass `false` on row 0). Structural separators (sticky header, Trips-home section
+  headers) use the heavier `--color-sand-300`.
+- **Action / button alignment** is always right via `margin-left:auto` (or the action as the
+  last flex child). Button vocabulary: header CTA = `Button variant="primary"`; an inline
+  row action like claim = `Button variant="soft" size="sm"`; destructive/quiet = `Button
+  variant="ghost" size="sm"`. Header actions can also use `CardHeader action={…}` (already
+  right-aligns).
+- **Row rhythm:** list rows are `padding: 11px 0`, `gap: 11px`; a leading 20px emoji in a
+  26px-wide centered slot; the label `flex:1` (700, 14.5px); the trailing claim/avatar/amount.
+
 ## Screens
 
-### Trip page (contextual mode — one scroll of `<section>` modules under the section nav)
+### Trips home (`#trips` app level)
+- **Header:** `h1` "Your trips" + muted subtitle ("N trips coming up.") + a right-aligned
+  `Button variant="primary"` "＋ New trip". Divider under it (`--color-sand-300`).
+- **Upcoming / Past** uppercase labels, each over a responsive card grid
+  (`repeat(auto-fill, minmax(260px, 1fr))`). A **trip card** (tap → opens the trip): emoji
+  tile (gradient sand) + title + `dates · where`, a crew `Avatar` stack (`ring`, −8px
+  overlap), and right-aligned `Chip`s (`leaf` "N going", `sun` "N maybe"). Past cards are
+  dimmed (`opacity 0.82`), smaller, with "N went".
 
-- **Purpose:** everything about one trip on one page; module nav + scrollspy navigate it;
-  the section set varies by trip type.
-- **Layout:** `AppShell` contextual mode; a sticky trip header (`data-appshell-sticky`:
-  emoji tile, trip title, `dates · where · N going`, and a "Message crew" `Button`), then
-  the `<section id>` modules. The page is also customizable (an "Add a section" affordance).
-- **Sections** (each a `Card` + `CardHeader` emoji/question title, wrapped in a `<section id>`):
-  - `🙌 Who's coming?` (**people**) — RSVP `Going / Maybe / Out`; `Maybe` opens a
-    **flaky-maybe** confidence picker (`LeanMeter`: long-shot → 50/50 → leaning-yes).
-    Uses `Avatar`, `SegmentedControl`, `LeanMeter`, status emoji 🔥🤔💤.
-  - `🎒 What to bring` (**claim**) — claimable items; unclaimed read "up for grabs!".
-    Uses `ClaimRow`, `EmptyState`.
-  - `🗺️ Route` (**route**) — a GPX map panel. The **one sanctioned hand-drawn graphic**
-    (functional product UI), everything else is Lucide/emoji.
-  - `💬 Trip chat` (**chat**) — `ChatMessage` + `Composer`.
-  - `💰 Expenses` (**expenses**) — split costs (Groceries / Gas / Campsite…), settle-up.
-    Uses `ExpenseRow`, `BalanceSummary`.
-- **States:** empty sections invite ("It's quiet in here… be the first!"); completion
-  celebrates.
+### Trip page (contextual mode — one scroll of `<section id>` modules)
+- **Purpose:** everything about one trip on one page; module nav + scrollspy navigate it.
+- **Sticky header** (`data-appshell-sticky`): emoji tile + trip title + `dates · where · N
+  going` + a right-aligned `Button variant="primary"` "Message crew". `scroll-margin-top`
+  on each section keeps anchored scrolls clear of it.
+- **Modules** (in nav order):
+  - `#overview ✨` — three stat tiles (`surface-sunk`, `radius-md`): **Countdown** ("in 12
+    days") · **Crew** ("6 going") · **Claimed** ("3/8"); then a "Gear & food claimed" label
+    with a right-aligned count and a **progress bar** (8px, `radius-pill`, sand-300 track,
+    `--color-primary` fill).
+  - `#dates 📅` — big date (`display`, 20px) + muted nights label; then a **day plan** list:
+    rows `day (104px, primary-press 800) + label`, divider-separated.
+  - `#crew 🙌 Who's coming?` — crew as **avatar pills** (`Avatar 28` + name on `sand-100`
+    `radius-pill`); header carries right-aligned going/maybe `Chip`s.
+  - `#gear 🎒` ("— who's bringing what") — rows: emoji + name + **either** a claimed
+    avatar-pill (`Avatar 22` + claimer) **or** a `Button variant="soft" size="sm"` "Claim".
+  - `#food 🍳` ("— who's cooking") — identical row pattern to Gear.
+  - `#packing 🧳` ("— your personal list") — a **personal checklist**: a check circle
+    (filled `--color-primary` + ✓ when done, else a 2px sand-300 ring) + item.
+  - `#expenses 💸` — rows: `Avatar` + who / what + right-aligned amount (`display`, 16px);
+    then a **balance box** (`--color-primary-soft`, `radius-md`): "You're owed $X" / "You owe
+    $X" (primary-press) + right-aligned "$Y each".
+  - `#tripsettings ⚙️ Trip settings` — toggle rows: **Trip notifications** (pill switch,
+    `--color-primary` on / sand-300 off, 22px knob) and **Leave this trip** (`Button
+    variant="ghost" size="sm"` "Leave").
+- **`soon` modules:** Itinerary · Map · Photos (dimmed nav rows, no section yet).
+
+### App settings (`#settings` app level)
+- Toggle rows (Trip notifications) + an **account row**: `Avatar 36` + "Maya" + "No account
+  — just a claimed name" + a right-aligned `Button variant="ghost" size="sm"` "Sign out".
+  The no-account line is the identity model stated plainly.
+
+### Global: toast
+- Actions confirm with a fixed bottom-center pill toast ("You've got it 🙌", "Signed out 👋").
 
 ## App-domain components (tripwala builds these in its own repo)
 
@@ -88,6 +133,15 @@ Design source (`components/trip/*` + the `ui_kits/rally` worked example) so the 
 has the full spec in one place. tripwala writes the **Svelte** implementation once, composing the
 shared primitives it already imports (`Avatar`, `Button`, `Card`, `CardHeader`, `Chip`,
 `SegmentedControl`, `LeanMeter`, `ChatMessage`, `Composer`, `EmptyState`, `IconButton`).
+
+> **Two reference fidelities — don't conflate them.** The current `templates/tripwala`
+> (the cleanup you build now) **inlines simplified rows** for Gear/Food/Expenses (see
+> Screens above) — it does *not* yet use the richer components below. `ClaimRow`,
+> `ExpenseRow`, `BalanceSummary`, and the `route`/`chat`/flaky-maybe model come from the
+> original `ui_kits/rally` worked example and are the **canonical richer building blocks** to
+> reach for when a module gets fleshed out (e.g. Who's coming → full RSVP + flaky-maybe;
+> Gear → grab flow; Expenses → computed settle-up). Build the lean template now; keep these
+> as the upgrade path. The contracts are below so either fidelity is one source.
 
 ### `ClaimRow` — claimable gear/task row (Rally's signature component)
 Emoji tile + item; shows a "Grab it" button when unclaimed, swaps to the claimer's `Avatar`
@@ -132,10 +186,11 @@ minimal who-pays-whom lines. A fully-settled trip shows a 🎉. Composes `Avatar
 A GPX map panel — **the one sanctioned hand-drawn graphic** (functional product UI); everything
 else stays Lucide/emoji. Data shape: `{ file, track: [[x,y]…], distance, gain, days, road?, stops? }`.
 
-### Section model + trip types (the page's data shape)
-A trip is `{ type, title, where, dates, sections[] }`. Each **section is a modular block** keyed by
-`kind` — nothing is hard-required, every section is relabelable and its items editable, and the
-page has an "Add a section" affordance. Kinds and what renders them:
+### Section model + trip types (the rally worked-example data shape)
+> This is the **richer rally model** (the upgrade path above), not the lean template's flat
+> modules. A trip is `{ type, title, where, dates, sections[] }`. Each **section is a modular
+> block** keyed by `kind` — nothing is hard-required, every section is relabelable and its
+> items editable, and the page has an "Add a section" affordance. Kinds and what renders them:
 
 | `kind` | Renders | Shared parts used |
 | ------ | ------- | ----------------- |
