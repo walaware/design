@@ -104,7 +104,6 @@
 	let desktop = $state(true);
 	let drawer = $state(false);
 	let spyActive = $state<string | null>(null);
-	let navIn = $state(true);
 	let mainEl = $state<HTMLElement>();
 
 	$effect(() => {
@@ -150,16 +149,12 @@
 	);
 	const spyKey = $derived(spyIds.join('|'));
 
-	/** Slide the nav column in whenever the context changes (app level ↔ a record,
-	    and between records). Transform-only; opacity stays 1 so the nav can't hide.
-	    The CSS transition is gated behind prefers-reduced-motion. */
+	/** Identity of the current context (app level ↔ a record, and between records).
+	    The nav column is `{#key navKey}`'d on this, so it remounts when the context
+	    changes — which (re)runs the `.navwrap` slide-in keyframe. Remounting is the
+	    reliable way to retrigger the animation: a state-toggled transition gets
+	    coalesced into a single DOM update and never plays. */
 	const navKey = $derived(scrollSpy || back ? 'ctx:' + (typeof title === 'string' ? title : '') : 'app');
-	$effect(() => {
-		navKey; // track
-		navIn = false;
-		const r = requestAnimationFrame(() => requestAnimationFrame(() => (navIn = true)));
-		return () => cancelAnimationFrame(r);
-	});
 
 	/** Section anchor — by id, escaping for the CSS selector when supported. */
 	const sectionEl = (rootEl: HTMLElement, id: string) =>
@@ -277,44 +272,46 @@
 {/snippet}
 
 {#snippet navColumn()}
-	<!-- Slides in (transform-only) when the context changes; opacity stays 1. -->
-	<div class="navwrap" style:transform={navIn ? 'translateX(0)' : 'translateX(-14px)'}>
-		{#if back}
-			<button class="back-row" onclick={go(back.onClick)}>
-				<span class="back-icon">{@render shellIcon('back', 16)}</span>
-				<span class="nav-label">{#if back.label != null}{@render node(back.label)}{:else}Back{/if}</span>
-			</button>
-			<div class="nav-divider"></div>
-		{/if}
-		<nav class="nav">
-			{#each nav as item, i (item.key ?? i)}
-				{@const tid = spyTarget(item)}
-				{@const isSpy = scrollSpy && !!tid}
-				{#if item.soon}
-					<div class="nav-btn soon">
-						<span class="nav-icon">{@render node(item.icon)}</span>
-						<span class="nav-label">{@render node(item.label)}</span>
-						<span class="soon-tag">soon</span>
-					</div>
-				{:else}
-					<!-- svelte-ignore a11y_no_static_element_interactions -- both branches (a[href] / button) are interactive -->
-					<svelte:element
-						this={item.href ? 'a' : 'button'}
-						href={item.href}
-						class="nav-btn"
-						class:active={isSpy ? spyActive === tid : item.active}
-						onclick={isSpy ? spyClick(tid as string, item) : go(item.onClick)}
-					>
-						<span class="nav-icon">{@render node(item.icon)}</span>
-						<span class="nav-label">{@render node(item.label)}</span>
-						{#if item.badge != null && item.badge !== false}
-							<span class="badge">{@render node(item.badge)}</span>
-						{/if}
-					</svelte:element>
-				{/if}
-			{/each}
-		</nav>
-	</div>
+	<!-- Remounted on context change ({#key navKey}) so the slide-in keyframe replays. -->
+	{#key navKey}
+		<div class="navwrap">
+			{#if back}
+				<button class="back-row" onclick={go(back.onClick)}>
+					<span class="back-icon">{@render shellIcon('back', 16)}</span>
+					<span class="nav-label">{#if back.label != null}{@render node(back.label)}{:else}Back{/if}</span>
+				</button>
+				<div class="nav-divider"></div>
+			{/if}
+			<nav class="nav">
+				{#each nav as item, i (item.key ?? i)}
+					{@const tid = spyTarget(item)}
+					{@const isSpy = scrollSpy && !!tid}
+					{#if item.soon}
+						<div class="nav-btn soon">
+							<span class="nav-icon">{@render node(item.icon)}</span>
+							<span class="nav-label">{@render node(item.label)}</span>
+							<span class="soon-tag">soon</span>
+						</div>
+					{:else}
+						<!-- svelte-ignore a11y_no_static_element_interactions -- both branches (a[href] / button) are interactive -->
+						<svelte:element
+							this={item.href ? 'a' : 'button'}
+							href={item.href}
+							class="nav-btn"
+							class:active={isSpy ? spyActive === tid : item.active}
+							onclick={isSpy ? spyClick(tid as string, item) : go(item.onClick)}
+						>
+							<span class="nav-icon">{@render node(item.icon)}</span>
+							<span class="nav-label">{@render node(item.label)}</span>
+							{#if item.badge != null && item.badge !== false}
+								<span class="badge">{@render node(item.badge)}</span>
+							{/if}
+						</svelte:element>
+					{/if}
+				{/each}
+			</nav>
+		</div>
+	{/key}
 {/snippet}
 
 {#snippet footer()}
@@ -447,13 +444,27 @@
 		padding: 6px 8px 22px;
 	}
 
-	/* Nav column slides in (transform-only) when the context changes. */
+	/* Nav column slides + fades in when the context changes (app level ↔ a record,
+	   and between records). Driven by a keyframe that runs on remount ({#key navKey})
+	   — the visible cue that the sidebar reloaded for a new context. The resting
+	   state is the element's natural transform:none / opacity:1, so it can never
+	   get stuck mid-animation. */
 	.navwrap {
-		transition: transform var(--dur-base) var(--ease-out);
+		animation: navwrap-in var(--dur-base) var(--ease-out) both;
+	}
+	@keyframes navwrap-in {
+		from {
+			transform: translateX(-26px);
+			opacity: 0;
+		}
+		to {
+			transform: none;
+			opacity: 1;
+		}
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.navwrap {
-			transition: none;
+			animation: none;
 		}
 	}
 
