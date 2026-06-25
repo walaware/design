@@ -42,8 +42,14 @@ is live today; the rest are dimmed `soon` roadmap rows (matches the current upst
 
 **Contextual (a trip is open)** — the sidebar becomes a **section nav over ONE scrollable
 page** (no sub-routes): `back={{ label: 'All trips', onClick }}` exits (also closes the
-drawer); `scrollSpy` turns `nav` into in-page anchors; `title={trip.name}` shows the trip
-name in the mobile top bar. Module nav (each row → a `<section id>`):
+drawer); `scrollSpy` turns `nav` into in-page anchors. On **mobile**, the shell now
+**collapses the sticky trip header into the top bar** (added in **v0.4.0**): pass
+`title={trip.name}`, `subtitle="{dates} · {where}"`, and `icon={trip.emoji}` — the top bar
+shows the brand while the trip header is in view, then crossfades to the trip's icon + name +
+subtitle as the header scrolls under it (so the name shows once, not twice). This replaces the
+app-side `collapseHeader` prototype, which reached into kit DOM (hiding the top-bar icon via
+`html[data-trip] .wala-appshell .topbar > [role="img"]`) and managed the header's sticky/offset
+coupling itself — all now owned by the kit. Module nav (each row → a `<section id>`):
 
 | key | label | icon | `<section>` |
 | --- | ----- | ---- | ----------- |
@@ -97,7 +103,9 @@ they're how the cleaned-up mocks read:
 - **Purpose:** everything about one trip on one page; module nav + scrollspy navigate it.
 - **Sticky header** (`data-appshell-sticky`): emoji tile + trip title + `dates · where · N
   going` + a right-aligned `Button variant="primary"` "Message crew". `scroll-margin-top`
-  on each section keeps anchored scrolls clear of it.
+  on each section keeps anchored scrolls clear of it. On mobile this header **scrolls away**
+  and its identity (emoji + title + `dates · where`) crossfades into the top bar — wire the
+  shell's `title`/`subtitle`/`icon` to match it (the kit owns the collapse; no app CSS).
 - **Modules** (in nav order):
   - `#overview ✨` — three stat tiles (`surface-sunk`, `radius-md`): **Countdown** ("in 12
     days") · **Crew** ("6 going") · **Claimed** ("3/8"); then a "Gear & food claimed" label
@@ -240,6 +248,10 @@ the balance algorithm are in the Claude Design `ui_kits/rally/tripData.jsx` refe
 
 - ~~Decide if/when tripwala moves from single-page to AppShell (multi-trip).~~ **Resolved
   2026-06-23:** adopted `AppShell` two-level (global destinations → contextual section nav).
+- ~~Mobile shows two stacked sticky headers (top bar + trip header) with the name twice.~~
+  **Resolved 2026-06-25 (v0.4.0):** the kit collapses the trip header into the top bar
+  (`title`/`subtitle`/`icon` crossfade); drop the app-side `collapseHeader` action + the kit
+  DOM overrides.
 - Build out the "soon" modules (Itinerary · Map · Photos) when designed upstream.
 - **Gear/Food rows — lean inline vs richer `ClaimRow` (decision pending).** The current
   template inlines simplified Gear/Food rows (emoji + name + claimed avatar-pill | "Claim"

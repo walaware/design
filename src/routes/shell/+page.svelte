@@ -57,6 +57,8 @@
 	nav={record ? recordNav : appNav}
 	scrollSpy={!!record}
 	title={record}
+	subtitle={record ? 'Aug 8–10 · Point Reyes' : null}
+	icon={record ? '🏔️' : null}
 	back={record ? { label: 'All trips', onClick: close } : null}
 	account={{
 		name: 'Maya',
@@ -80,7 +82,7 @@
 			<section id="overview">
 				<Card>
 					<CardHeader icon="📋" title="Overview" />
-					<p class="card-text">A scrollspy section nav over one long page — no sub-routes. Click a row to smooth-scroll; the active row tracks your scroll position.</p>
+					<p class="card-text">A scrollspy section nav over one long page — no sub-routes. Click a row to smooth-scroll; the active row tracks your scroll position. Resize below 920px and scroll: the record header below scrolls away and the top bar crossfades the brand → this trip's icon + name + dates.</p>
 					<div class="chips">
 						<Chip tone="coral">🎉 4 going</Chip>
 						<Chip tone="sun">🤔 2 maybe</Chip>

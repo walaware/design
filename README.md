@@ -189,7 +189,19 @@ page** (no sub-routes) — for opening a record (a trip, an order) without leavi
 | `back` | `ShellBack \| null` | a "← …" row above the nav that exits the context (`{ label?, onClick }`) |
 | `scrollSpy` | `boolean` | treat `nav` as in-page anchors: smooth-scroll on click, highlight the active section on scroll. Items need `href="#id"` or `target` |
 | `scrollSpyOffset` | `number \| null` | fixed scroll offset; omit to auto-measure a `[data-appshell-sticky]` header inside the scroll area |
-| `title` | node | context label shown in the **mobile top bar** in place of the wordmark (e.g. the open record's name) |
+| `title` | node | the open record's name — the **collapsed** mobile top-bar title (see below); with collapse off it replaces the wordmark in the bar, as before |
+| `subtitle` | node | second line under the collapsed `title` (e.g. `dates · where`). Collapse mode only |
+| `icon` | node | record icon shown in place of the app icon when the top bar is collapsed (e.g. an emoji tile). Omit → keep the app icon. Collapse mode only |
+| `collapseHeader` | `boolean` | collapse the record header into the mobile top bar (default `true`); `false` keeps today's always-pinned header |
+
+**Collapsing record header (mobile).** On mobile the sticky top bar and the consumer's
+`[data-appshell-sticky]` record header would stack into two sticky rows showing the record
+name twice. With `collapseHeader` on (the default, in contextual mode), the kit lets the
+record header **scroll away** — the top bar is the only sticky chrome — and crossfades the
+bar's content by opacity as the header passes under it: brand (app icon + wordmark) when the
+header is in view → record `icon` + `title` + `subtitle` once it scrolls under. Reverts on
+scroll-up. The scroll-spy offset tracks the top bar, so anchored sections still land right.
+Desktop has no top bar, so this is a no-op there (the header stays as the consumer styles it).
 
 `NavItem` also gains `target?` (section id, alt to `href="#id"`) and `soon?` (a dimmed,
 non-interactive roadmap row with a "soon" tag). Consumer contract: render the modules as

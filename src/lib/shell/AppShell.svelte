@@ -72,8 +72,20 @@
 		scrollSpy?: boolean;
 		/** Fixed scroll offset (px) for scrollSpy. Omit to auto-measure a `[data-appshell-sticky]` header inside main. */
 		scrollSpyOffset?: number | null;
-		/** Context label shown in the mobile top bar in place of the wordmark (e.g. the open record's name). */
+		/** Context label shown in the mobile top bar (e.g. the open record's name). When the
+		    record header collapses under the top bar, this is the collapsed title; otherwise
+		    (collapse off) it replaces the wordmark, as before. */
 		title?: NodeLike | null;
+		/** Second line under the collapsed `title` in the mobile top bar. Collapse mode only. */
+		subtitle?: NodeLike | null;
+		/** Record icon shown in place of the app icon when the top bar is collapsed (e.g. an
+		    emoji tile). Omit to keep showing the app icon. Collapse mode only. */
+		icon?: NodeLike | null;
+		/** Collapse the consumer's `[data-appshell-sticky]` header into the mobile top bar:
+		    let it scroll away and crossfade the top bar brand → record icon + title + subtitle
+		    as it passes under. Mobile + contextual only (no top bar elsewhere → no-op). Default
+		    ON; pass `false` to keep today's always-pinned header. */
+		collapseHeader?: boolean;
 		/** Viewport width (px) at/above which the sidebar shows; below it, the drawer. */
 		breakpoint?: number;
 		/** Max content-column width in px. */
@@ -95,6 +107,9 @@
 		scrollSpy = false,
 		scrollSpyOffset = null,
 		title = null,
+		subtitle = null,
+		icon = null,
+		collapseHeader = true,
 		breakpoint = 920,
 		maxWidth = 920,
 		contentPadding = undefined,
@@ -107,6 +122,12 @@
 	let drawer = $state(false);
 	let spyActive = $state<string | null>(null);
 	let mainEl = $state<HTMLElement>();
+	let topbarEl = $state<HTMLElement>();
+	/** Record header has scrolled up under the top bar (mobile collapse). */
+	let collapsed = $state(false);
+	/** Whether the open context renders a `[data-appshell-sticky]` header (the thing we
+	    collapse). Detected from the slotted content, re-checked when the context changes. */
+	let hasStickyHeader = $state(false);
 
 	$effect(() => {
 		const mq = window.matchMedia(`(min-width: ${breakpoint}px)`);
@@ -127,6 +148,13 @@
 
 	/** Contextual mode = a record is open (section nav over one scrollable page). */
 	const contextual = $derived(scrollSpy || !!back);
+
+	/** Collapse engaged: only where the top bar exists (mobile), a record is open, the
+	    consumer renders a `[data-appshell-sticky]` header to collapse, and it's not opted
+	    out. Desktop has no top bar → always a no-op. When on, that header un-pins and scrolls
+	    away (the top bar becomes the only sticky chrome) and the bar crossfades brand ↔
+	    record on scroll. */
+	const collapseOn = $derived(!desktop && contextual && collapseHeader && hasStickyHeader);
 
 	/** Mode-aware content padding. Contextual pages carry a `data-appshell-sticky`
 	    header that must pin flush to the scrollport, so the contextual default zeroes
@@ -162,9 +190,12 @@
 	const sectionEl = (rootEl: HTMLElement, id: string) =>
 		rootEl.querySelector<HTMLElement>('#' + (typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(id) : id));
 
-	/** Scroll offset — explicit, else auto-measured from a sticky record header. */
+	/** Scroll offset — explicit wins. When the header collapses into the top bar it scrolls
+	    away, so anchors must clear the *top bar* (the remaining sticky chrome), not the
+	    record header. Otherwise auto-measure the pinned record header. */
 	const offsetFor = (rootEl: HTMLElement): number => {
 		if (typeof scrollSpyOffset === 'number') return scrollSpyOffset;
+		if (collapseOn && topbarEl) return topbarEl.offsetHeight + 14;
 		const sticky = rootEl.querySelector<HTMLElement>('[data-appshell-sticky]');
 		return sticky ? sticky.offsetHeight + 14 : 16;
 	};
@@ -238,6 +269,56 @@
 		return () => {
 			rootEl.removeEventListener('scroll', onScroll);
 			window.removeEventListener('resize', onScroll);
+		};
+	});
+
+	/** Detect the consumer's `[data-appshell-sticky]` header in the slotted content so the
+	    collapse defaults on only when there's actually a header to collapse. Re-checked when
+	    the context changes (a new record mounts/replaces the header). */
+	$effect(() => {
+		navKey; // re-detect on context change
+		const el = mainEl;
+		hasStickyHeader = !!(contextual && el && el.querySelector('[data-appshell-sticky]'));
+	});
+
+	/** Drive the mobile collapse: watch the consumer's `[data-appshell-sticky]` header
+	    against the top bar. Once it scrolls fully up under the bar it's "collapsed" — the
+	    top bar crossfades brand → record (CSS opacity transition on the flag). Reverts on
+	    scroll-up. Re-binds on context change (a new record mounts a new header) and on
+	    resize (the top-bar height feeds the observer's root margin). */
+	$effect(() => {
+		if (!collapseOn) {
+			collapsed = false;
+			return;
+		}
+		const rootEl = mainEl;
+		const bar = topbarEl;
+		if (!rootEl || !bar) return;
+		navKey; // re-bind when the open record changes (its header element is replaced)
+		const sticky = rootEl.querySelector<HTMLElement>('[data-appshell-sticky]');
+		if (!sticky) {
+			collapsed = false; // nothing to collapse → keep the brand
+			return;
+		}
+		collapsed = false; // fresh context starts expanded; the observer corrects on first fire
+		let io: IntersectionObserver;
+		const bind = () => {
+			io?.disconnect();
+			// The header is "under the bar" once it clears the bar's height from the top of
+			// the scrollport — shrink the observer root by that much from the top.
+			io = new IntersectionObserver(([entry]) => (collapsed = !entry.isIntersecting), {
+				root: rootEl,
+				rootMargin: `-${bar.offsetHeight}px 0px 0px 0px`,
+				threshold: 0
+			});
+			io.observe(sticky);
+		};
+		bind();
+		const onResize = () => bind();
+		window.addEventListener('resize', onResize);
+		return () => {
+			io?.disconnect();
+			window.removeEventListener('resize', onResize);
 		};
 	});
 
@@ -378,16 +459,44 @@
 
 	<div class="main">
 		{#if !desktop}
-			<header class="topbar" class:drawer-open={drawer} inert={drawer}>
+			<header
+				class="topbar"
+				class:drawer-open={drawer}
+				class:collapsed
+				inert={drawer}
+				bind:this={topbarEl}
+			>
 				<IconButton tone="soft" size={32} onclick={() => (drawer = true)} aria-label="menu">
 					{@render shellIcon('menu', 18)}
 				</IconButton>
-				<AppIcon {app} size={30} />
-				{#if title != null}
-					<span class="topbar-title">{@render node(title)}</span>
-				{:else}
-					<Wordmark {root} size={21} />
-				{/if}
+				<!-- Brand ↔ record crossfade: two stacked layers, opacity-toggled by `collapsed`.
+				     When collapse is off the collapsed layer isn't rendered, so the top bar keeps
+				     today's behaviour (title-or-wordmark beside the app icon). -->
+				<div class="topbar-lead">
+					<div class="topbar-face" aria-hidden={collapsed}>
+						<AppIcon {app} size={30} />
+						{#if title != null && !collapseOn}
+							<span class="topbar-title">{@render node(title)}</span>
+						{:else}
+							<Wordmark {root} size={21} />
+						{/if}
+					</div>
+					{#if collapseOn && title != null}
+						<div class="topbar-face topbar-face-record" aria-hidden={!collapsed}>
+							{#if icon != null}
+								<span class="topbar-rec-icon">{@render node(icon)}</span>
+							{:else}
+								<AppIcon {app} size={30} />
+							{/if}
+							<span class="topbar-rec-text">
+								<span class="topbar-title">{@render node(title)}</span>
+								{#if subtitle != null}
+									<span class="topbar-subtitle">{@render node(subtitle)}</span>
+								{/if}
+							</span>
+						</div>
+					{/if}
+				</div>
 				<span class="topbar-end">
 					{#if onSettings}
 						<IconButton tone="soft" size={32} onclick={go(onSettings)} aria-label="settings">
@@ -401,7 +510,12 @@
 			</header>
 		{/if}
 
-		<main class="content" style:padding={pad} bind:this={mainEl}>
+		<main
+			class="content"
+			class:collapse-on={collapseOn}
+			style:padding={pad}
+			bind:this={mainEl}
+		>
 			<div class="content-inner" style:max-width="{maxWidth}px">
 				{@render children?.()}
 			</div>
@@ -690,10 +804,76 @@
 		opacity: 0;
 		pointer-events: none;
 	}
+
+	/* Brand ↔ record crossfade. Both faces share one grid cell, so the top bar is sized by
+	   the taller (the two-line record face) and never reflows as the flag flips — the swap
+	   is a pure opacity crossfade. */
+	.topbar-lead {
+		flex: 1;
+		min-width: 0;
+		display: grid;
+		align-items: center;
+	}
+	.topbar-face {
+		grid-area: 1 / 1;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		min-width: 0;
+		transition: opacity var(--dur-base) var(--ease-out);
+	}
+	/* The record face sits on top, hidden until collapsed. */
+	.topbar-face-record {
+		opacity: 0;
+		pointer-events: none;
+	}
+	.topbar.collapsed .topbar-face:not(.topbar-face-record) {
+		opacity: 0;
+		pointer-events: none;
+	}
+	.topbar.collapsed .topbar-face-record {
+		opacity: 1;
+		pointer-events: auto;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.topbar-face {
+			transition: none;
+		}
+	}
+
 	.topbar-title {
 		font-family: var(--font-display);
 		font-weight: 700;
 		font-size: 17px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		min-width: 0;
+	}
+	/* Record face: emoji/icon tile + a tight two-line title/subtitle stack. */
+	.topbar-rec-icon {
+		font-size: 24px;
+		line-height: 1;
+		width: 30px;
+		height: 30px;
+		flex: none;
+		display: grid;
+		place-items: center;
+	}
+	.topbar-rec-text {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		min-width: 0;
+		line-height: 1.15;
+	}
+	.topbar-face-record .topbar-title {
+		font-size: 15px;
+	}
+	.topbar-subtitle {
+		font-size: 11.5px;
+		font-weight: 700;
+		color: var(--color-text-muted);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -704,6 +884,15 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
+	}
+
+	/* When collapse is engaged the consumer's record header un-pins and scrolls away — the
+	   top bar is the only sticky chrome. Reaches the slotted header via :global (it lives in
+	   the consumer's content). Desktop/opt-out keep `collapse-on` off, so the header stays
+	   exactly as the consumer styles it. */
+	.content.collapse-on :global([data-appshell-sticky]) {
+		position: static;
+		top: auto;
 	}
 
 	.content {

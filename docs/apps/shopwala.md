@@ -52,6 +52,9 @@ Two levels:
 
 …then a dimmed **`soon`** group: `Insights 📈 · Promote 🚀 · Similar sold 🔁`. The sticky
 listing header is marked `data-appshell-sticky`; mobile top-bar `title` = the listing name.
+On **mobile** the listing header collapses into the top bar (kit, v0.4.0) — also pass
+`subtitle` (price · `StatusBadge` text) and `icon` (the listing thumbnail/emoji) so the bar
+crossfades brand → listing identity as the header scrolls under it.
 
 ## Screens
 
