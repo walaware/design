@@ -151,7 +151,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 		AppShell,
 		Button, IconButton, Card, CardHeader, Chip, Tooltip,
 		Avatar, AvatarUpload, AvatarGroup, LeanMeter,
-		TextField, SegmentedControl, Composer,
+		TextField, DateField, SegmentedControl, Composer,
 		StatusBadge, EmptyState, ChatMessage
 	} from '@walaware/design';
 	let rsvp = $state('Going');
@@ -171,7 +171,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 | `shell`    | `AppShell` (+ `NavItem`, `ShellAccount`, `ShellBack` types) |
 | `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip`, `Tooltip` |
 | `people`   | `Avatar`, `AvatarUpload`, `AvatarGroup`, `LeanMeter` (+ `colorFor`) |
-| `forms`    | `TextField`, `SegmentedControl`, `Composer` |
+| `forms`    | `TextField`, `DateField`, `SegmentedControl`, `Composer` |
 | `feedback` | `StatusBadge`, `EmptyState`, `ChatMessage`  |
 
 `AppShell` is the standard app chrome: a desktop left sidebar that collapses to a
@@ -247,6 +247,45 @@ Pair it with **`AppShell`'s `account.onProfile`** — when set, the shell accoun
 render a real `<a>` styled as a button — so nav-as-button stays a true link (`target="_blank"`
 auto-adds `rel="noopener noreferrer"`). `AppShell` nav items take the same `href` to render each
 row as a real link.
+
+### DateField
+
+A native, accessible date primitive — **one single date OR a start–end range** in one
+component, styled like `TextField`. It bakes in the mobile fix every consumer otherwise
+rediscovers: a native `<input type="date">` carries an intrinsic min-width that `min-width: 0`
+alone can't override, so two side-by-side range fields spill out of their card on phones. The
+field forces `appearance: none` + `min-width: 0` + `width: 100%` so it always shrinks to its
+container. Range mode owns `To.min` auto-tracking `From`, clearing `End` if `Start` moves past
+it, an optional `minNights` minimum, and a shrink-safe two-up layout (fits at 360px). No custom
+calendar popover — it uses the OS-native picker (best a11y, nothing to maintain).
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `label` | node | field label; in range mode, the group label above both inputs |
+| `hint` | node | helper / error line below (turns accent-red when the range is invalid) |
+| `min` / `max` | `string` | bounds, `"YYYY-MM-DD"` |
+| `size` | `'sm' \| 'md'` | form size scale (default `md`) |
+| `disabled`, `required`, `name` | — | native form attributes |
+| `range` | `boolean` | `false` (default) = single date; `true` = start/end |
+| `value` | `string` | **single:** bound date (`$bindable`) |
+| `start` / `end` | `string` | **range:** bound start/end (`$bindable`) |
+| `startLabel` / `endLabel` | node | range input labels (default `From` / `To`) |
+| `minNights` | `number` | min gap in days: sets `End`'s effective `min` and flags the range invalid when shorter (`0` = none) |
+| `nameStart` / `nameEnd` | `string` | override the submit names (default `${name}_start` / `${name}_end`) |
+
+```svelte
+<script>
+  import { DateField } from '@walaware/design';
+  let day = $state(''), start = $state(''), end = $state('');
+  const today = new Date().toISOString().slice(0, 10);
+</script>
+
+<!-- single -->
+<DateField label="Date" bind:value={day} min={today} />
+
+<!-- range, min 2 nights -->
+<DateField range bind:start bind:end min={today} minNights={2} hint="At least 2 nights" />
+```
 
 ### Exported types: `Status` & `Lean`
 

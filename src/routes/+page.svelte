@@ -14,6 +14,7 @@
 		AvatarGroup,
 		LeanMeter,
 		TextField,
+		DateField,
 		SegmentedControl,
 		Composer,
 		StatusBadge,
@@ -27,6 +28,12 @@
 
 	let rsvp = $state('Going');
 	let cond = $state('Used');
+
+	// DateField demo state. `today` bounds the pickers; the range starts empty.
+	const today = new Date().toISOString().slice(0, 10);
+	let day = $state('');
+	let tripStart = $state('');
+	let tripEnd = $state('');
 
 	// A self-contained avatar photo (data URI — always loads, no network), so the
 	// demo shows a real photo; the "broken" demo uses a URL that 404s → initial.
@@ -114,6 +121,27 @@
 				<IconButton aria-label="Info">ⓘ</IconButton>
 			</Tooltip>
 			<IconButton aria-label="More">⋯</IconButton>
+		</div>
+	</Card>
+
+	<Card>
+		<CardHeader icon="📅" title="When are we going?" />
+		<DateField label="Trip date" bind:value={day} min={today} hint="Pick a day to start." />
+		<div style="margin-top:14px">
+			<DateField
+				range
+				label="Trip dates"
+				bind:start={tripStart}
+				bind:end={tripEnd}
+				min={today}
+				minNights={2}
+				hint={tripStart && tripEnd ? 'Looks good! ✨' : 'At least 2 nights — To can’t come before From.'}
+			/>
+		</div>
+		<!-- Narrow-width proof: a range field two-up inside a 320px box, zero overflow. -->
+		<p class="narrow-note">Two-up at 320px (the mobile no-overflow guarantee):</p>
+		<div class="narrow">
+			<DateField range size="sm" startLabel="Check in" endLabel="Check out" min={today} />
 		</div>
 	</Card>
 
@@ -336,6 +364,19 @@
 		gap: 10px;
 		flex-wrap: wrap;
 		margin-top: 12px;
+	}
+	.narrow-note {
+		margin: 16px 0 6px;
+		font-size: 12.5px;
+		font-weight: 700;
+		color: var(--color-text-muted);
+	}
+	.narrow {
+		width: 320px;
+		max-width: 100%;
+		border: 1px dashed var(--color-sand-300);
+		border-radius: var(--radius-md);
+		padding: 12px;
 	}
 	/* A "claim row" composed from primitives — the pattern lives in the
 	   app, not the shared kit (see README: rule of three). */

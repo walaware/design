@@ -34,6 +34,7 @@ export { type Lean } from './people/lean.js';
 
 // Forms
 export { default as TextField } from './forms/TextField.svelte';
+export { default as DateField } from './forms/DateField.svelte';
 export { default as SegmentedControl } from './forms/SegmentedControl.svelte';
 export { default as Composer } from './forms/Composer.svelte';
 
