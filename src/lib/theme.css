@@ -302,47 +302,57 @@
 
 /* ============================================================
    Base element defaults — light reset + brand body defaults.
-   ============================================================ */
-*,
-*::before,
-*::after {
-	box-sizing: border-box;
-}
+   --------------------------------------------------------------
+   Wrapped in `@layer base` so Tailwind's `@layer utilities` can
+   override them. UNLAYERED rules beat LAYERED ones regardless of
+   specificity, so an unlayered `h1{margin:0}` would silently no-op
+   a consumer's `mb-*` utility on a heading. Tailwind's layer order
+   is theme → base → components → utilities; appending to `base`
+   here keeps these resets below every utility. (The @theme block and
+   the :root / [data-app] variable blocks above stay UNLAYERED on
+   purpose — tokens + runtime vars must win globally.) */
+@layer base {
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
 
-body {
-	margin: 0;
-	font-family: var(--font-body);
-	font-weight: var(--fw-body);
-	font-size: var(--text-body);
-	line-height: var(--lh-normal);
-	color: var(--color-text-strong);
-	background: var(--color-bg-app);
-	-webkit-font-smoothing: antialiased;
-	text-rendering: optimizeLegibility;
-}
+	body {
+		margin: 0;
+		font-family: var(--font-body);
+		font-weight: var(--fw-body);
+		font-size: var(--text-body);
+		line-height: var(--lh-normal);
+		color: var(--color-text-strong);
+		background: var(--color-bg-app);
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+	}
 
-h1,
-h2,
-h3,
-h4 {
-	font-family: var(--font-display);
-	font-weight: var(--fw-display-b);
-	line-height: var(--lh-snug);
-	letter-spacing: var(--ls-tight);
-	color: var(--color-text-strong);
-	margin: 0;
-}
+	h1,
+	h2,
+	h3,
+	h4 {
+		font-family: var(--font-display);
+		font-weight: var(--fw-display-b);
+		line-height: var(--lh-snug);
+		letter-spacing: var(--ls-tight);
+		color: var(--color-text-strong);
+		margin: 0;
+	}
 
-button {
-	font-family: var(--font-display);
-	cursor: pointer;
-}
-input,
-textarea {
-	font-family: var(--font-body);
-}
+	button {
+		font-family: var(--font-display);
+		cursor: pointer;
+	}
+	input,
+	textarea {
+		font-family: var(--font-body);
+	}
 
-::selection {
-	background: var(--color-coral-200);
-	color: var(--color-cocoa-900);
+	::selection {
+		background: var(--color-coral-200);
+		color: var(--color-cocoa-900);
+	}
 }

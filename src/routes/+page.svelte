@@ -233,6 +233,14 @@
 			<AvatarUpload name="Sam" size={72} onPick={(f) => alert('Picked ' + f.name)} />
 		</div>
 
+		<!-- Cascade check: the base reset zeroes heading margins, but a Tailwind
+		     utility must still win (resets now live in @layer base). This h2 must
+		     compute margin-bottom: 2rem, and the box below it sits 2rem clear. -->
+		<div data-cascade-check>
+			<h2 class="mb-8">Utility-over-reset check</h2>
+			<div>If <code>mb-8</code> wins, there's a 2rem gap above this line.</div>
+		</div>
+
 		<p class="shell-link">See the full app chrome — sidebar ⇄ mobile drawer:</p>
 		<div class="shell-cta">
 			<Button href="/shell" variant="soft" size="sm">Open the AppShell demo →</Button>
