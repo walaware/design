@@ -40,6 +40,8 @@
 		/** Subtitle line under the name; defaults to "Sign out" when onSignOut is set. */
 		meta?: NodeLike;
 		onSignOut?: () => void;
+		/** When set, the avatar becomes a button that opens the user's profile. */
+		onProfile?: () => void;
 	}
 </script>
 
@@ -314,6 +316,18 @@
 	{/key}
 {/snippet}
 
+{#snippet accountAvatar(acct: ShellAccount)}
+	{#if acct.onProfile}
+		<!-- Clickable when the app wires a profile destination; falls back to a plain
+		     avatar otherwise (no visual/behavioural change for existing consumers). -->
+		<button type="button" class="avatar-btn" onclick={go(acct.onProfile)} aria-label="Your profile">
+			<Avatar name={acct.name} color={acct.color} src={acct.avatar} size={32} />
+		</button>
+	{:else}
+		<Avatar name={acct.name} color={acct.color} src={acct.avatar} size={32} />
+	{/if}
+{/snippet}
+
 {#snippet footer()}
 	<div class="foot">
 		{#if onSettings}
@@ -324,7 +338,7 @@
 		{/if}
 		{#if account}
 			<div class="account">
-				<Avatar name={account.name} color={account.color} src={account.avatar} size={32} />
+				{@render accountAvatar(account)}
 				<div class="account-text">
 					<div class="account-name">{account.name}</div>
 					{#if account.onSignOut}
@@ -381,7 +395,7 @@
 						</IconButton>
 					{/if}
 					{#if account}
-						<Avatar name={account.name} color={account.color} src={account.avatar} size={32} />
+						{@render accountAvatar(account)}
 					{/if}
 				</span>
 			</header>
@@ -623,6 +637,30 @@
 		background: none;
 		font-family: var(--font-body);
 		cursor: pointer;
+	}
+
+	/* Avatar-as-profile-link — a bare button hugging the 32px avatar, with a soft
+	   ring/scale affordance on hover + keyboard focus. Resting state is visually
+	   identical to a plain avatar so consumers without `onProfile` see no change. */
+	.avatar-btn {
+		display: block;
+		flex: none;
+		padding: 0;
+		border: none;
+		background: none;
+		border-radius: var(--radius-pill);
+		cursor: pointer;
+		line-height: 0;
+		transition:
+			transform var(--dur-fast) var(--ease-out),
+			box-shadow var(--dur-fast) var(--ease-out);
+	}
+	.avatar-btn:hover {
+		transform: scale(1.06);
+	}
+	.avatar-btn:focus-visible {
+		outline: none;
+		box-shadow: 0 0 0 3px var(--color-primary-soft);
 	}
 
 	/* ---- Main column ---- */

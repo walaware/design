@@ -34,6 +34,12 @@ is live today; the rest are dimmed `soon` roadmap rows (matches the current upst
 > **Not "Today".** Earlier drafts of this doc said "Trips · Today" — that was wrong. The live
 > app-level nav is **Trips** + the three `soon` rows above.
 
+> **Profile entry point.** The account avatar in the shell is the way into the profile editor:
+> pass `account.onProfile` to `AppShell` (added in **v0.3.3**) and the avatar — in both the
+> desktop sidebar footer and the mobile top bar — becomes a `"Your profile"` button. Leave
+> `onProfile` unset and the avatar stays non-interactive (today's behaviour). Wire it to open
+> the **Profile editor** screen below.
+
 **Contextual (a trip is open)** — the sidebar becomes a **section nav over ONE scrollable
 page** (no sub-routes): `back={{ label: 'All trips', onClick }}` exits (also closes the
 drawer); `scrollSpy` turns `nav` into in-page anchors; `title={trip.name}` shows the trip
@@ -118,6 +124,27 @@ they're how the cleaned-up mocks read:
 - Toggle rows (Trip notifications) + an **account row**: `Avatar 36` + "Maya" + "No account
   — just a claimed name" + a right-aligned `Button variant="ghost" size="sm"` "Sign out".
   The no-account line is the identity model stated plainly.
+
+### Profile editor (`#profile` — opened from the shell avatar)
+Lets someone set their **nickname** and **change their photo** — the identity they carry across
+the suite (no account; just a claimed name + an optional photo). Reached via `account.onProfile`.
+
+- **Layout**: a single `Card` over the content column (app level, coral accent). Top: a centred
+  **`AvatarUpload`** (`size≈96`, `name={nickname}`, `src={photoUrl}`) — the camera badge opens
+  the OS file picker and previews the chosen image immediately. Below it: a **`TextField`** bound
+  to the nickname (label "Display name", seeded with the current name). Footer: right-aligned
+  `Button variant="ghost"` "Cancel" + `Button variant="primary"` "Save" (the layout-convention
+  button order).
+- **Photo flow** (app-domain — tripwala owns it): `AvatarUpload`'s `onPick(file)` hands tripwala
+  the `File`; tripwala uploads it (PocketBase `users.avatar` per the org data convention), then
+  feeds the stored URL back as `src` — which supersedes `AvatarUpload`'s local preview. While the
+  upload is in flight, pass `disabled` to the editor's controls. Keep a too-large/wrong-type guard
+  before upload (the `accept="image/*"` picker filter is a hint, not validation).
+- **Save**: writes the nickname (and, once uploaded, the avatar URL) to the profile record; on
+  success, confirm with the standard toast ("Saved ✨") and return to where they came from.
+- **What's shared vs. app-domain**: `AvatarUpload` + `TextField` + `Button` + `Card` are all the
+  shared package (v0.3.3). The **editor screen itself** — the form, validation, the upload, the
+  persistence — is tripwala's, built in its own repo (rule of three).
 
 ### Global: toast
 - Actions confirm with a fixed bottom-center pill toast ("You've got it 🙌", "Signed out 👋").

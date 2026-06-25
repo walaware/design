@@ -58,7 +58,12 @@
 	scrollSpy={!!record}
 	title={record}
 	back={record ? { label: 'All trips', onClick: close } : null}
-	account={{ name: 'Maya', avatar: photo, onSignOut: () => alert('Signed out') }}
+	account={{
+		name: 'Maya',
+		avatar: photo,
+		onProfile: () => alert('Profile'),
+		onSignOut: () => alert('Signed out')
+	}}
 	onSettings={record ? null : () => (screen = 'settings')}
 	settingsActive={screen === 'settings'}
 >

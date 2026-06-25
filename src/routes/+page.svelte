@@ -10,6 +10,7 @@
 		Chip,
 		Tooltip,
 		Avatar,
+		AvatarUpload,
 		AvatarGroup,
 		LeanMeter,
 		TextField,
@@ -224,6 +225,12 @@
 			<Avatar name="Sam" size={48} />
 			<Avatar name="Leo" emoji="🦊" size={48} />
 			<AvatarGroup people={crew} max={5} size={40} />
+		</div>
+
+		<div class="avatars">
+			<span class="avatars-label">AvatarUpload — editable photo (profile editor):</span>
+			<AvatarUpload name="Maya" src={photo} size={72} onPick={(f) => alert('Picked ' + f.name)} />
+			<AvatarUpload name="Sam" size={72} onPick={(f) => alert('Picked ' + f.name)} />
 		</div>
 
 		<p class="shell-link">See the full app chrome — sidebar ⇄ mobile drawer:</p>

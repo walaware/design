@@ -26,6 +26,7 @@ export { type NavItem, type ShellAccount, type ShellBack } from './shell/AppShel
 
 // People
 export { default as Avatar } from './people/Avatar.svelte';
+export { default as AvatarUpload } from './people/AvatarUpload.svelte';
 export { default as AvatarGroup } from './people/AvatarGroup.svelte';
 export { default as LeanMeter } from './people/LeanMeter.svelte';
 export { colorFor } from './people/colors.js';

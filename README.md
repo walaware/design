@@ -150,7 +150,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 	import {
 		AppShell,
 		Button, IconButton, Card, CardHeader, Chip, Tooltip,
-		Avatar, AvatarGroup, LeanMeter,
+		Avatar, AvatarUpload, AvatarGroup, LeanMeter,
 		TextField, SegmentedControl, Composer,
 		StatusBadge, EmptyState, ChatMessage
 	} from '@walaware/design';
@@ -170,7 +170,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 | `brand`    | `Wordmark`, `AppIcon` (+ `WALA_SUITE`, `WALA_GLYPHS`) |
 | `shell`    | `AppShell` (+ `NavItem`, `ShellAccount`, `ShellBack` types) |
 | `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip`, `Tooltip` |
-| `people`   | `Avatar`, `AvatarGroup`, `LeanMeter` (+ `colorFor`) |
+| `people`   | `Avatar`, `AvatarUpload`, `AvatarGroup`, `LeanMeter` (+ `colorFor`) |
 | `forms`    | `TextField`, `SegmentedControl`, `Composer` |
 | `feedback` | `StatusBadge`, `EmptyState`, `ChatMessage`  |
 
@@ -212,6 +212,23 @@ one long page of `<section id="…">`s and mark the sticky record header
 
 `AvatarGroup` takes `people: (string \| { name, color?, src? })[]` — each person's `src`
 flows down to its `Avatar`, with the same fallback.
+
+`AvatarUpload` is the editable avatar for profile editors — it composes `Avatar`, overlays
+a camera badge (a real focusable button), and wires a hidden file input. Picking a photo
+calls `onPick(file)` (the app uploads it) and previews it locally right away.
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `onPick` | `(file: File) => void` | fired with the chosen file |
+| `src` | `string \| null` | current photo; a new value supersedes the local preview |
+| `size` | `number` | diameter px (default 96) |
+| `preview` | `boolean` | preview the picked file locally (default true) |
+| `accept` | `string` | picker file types (default `image/*`) |
+| `label` | `string` | badge `aria-label` (default `"Change photo"`) |
+| `disabled` | `boolean` | disable picking (e.g. while saving) |
+
+Pair it with **`AppShell`'s `account.onProfile`** — when set, the shell account avatar
+(sidebar + mobile top bar) becomes a `"Your profile"` button that opens the editor.
 
 `Button` `variant`: `primary` (follows the app accent) · `secondary` (amber) · `accent` (berry) ·
 `soft` · `ghost`. Sizes: `sm` · `md` · `lg`. Pass **`href`** (with optional `target`/`rel`) to
