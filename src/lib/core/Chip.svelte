@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 
-	type Tone = 'neutral' | 'coral' | 'sun' | 'berry' | 'leaf';
+	type Tone = 'neutral' | 'coral' | 'sun' | 'berry' | 'leaf' | 'danger';
 
 	interface Props extends HTMLAttributes<HTMLSpanElement> {
 		tone?: Tone;
@@ -63,5 +63,10 @@
 		--chip-bg: var(--color-leaf-200);
 		--chip-fg: var(--color-leaf-600);
 		--chip-bd: var(--color-leaf-200);
+	}
+	.t-danger {
+		--chip-bg: var(--color-danger-soft);
+		--chip-fg: var(--color-danger-ink);
+		--chip-bd: var(--color-danger-soft);
 	}
 </style>

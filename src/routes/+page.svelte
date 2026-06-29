@@ -9,6 +9,8 @@
 		CardHeader,
 		Chip,
 		Tooltip,
+		Disclosure,
+		OverflowMenu,
 		Avatar,
 		AvatarUpload,
 		AvatarGroup,
@@ -261,6 +263,29 @@
 			<AvatarUpload name="Sam" size={72} onPick={(f) => alert('Picked ' + f.name)} />
 		</div>
 
+		<div class="primitives" data-app="shopwala">
+			<span class="avatars-label">Disclosure &amp; OverflowMenu — collapse + ⋯ actions:</span>
+			<div class="primitives-row">
+				<div class="narrow">
+					<Disclosure icon="⚙️" summary="Advanced options" defaultOpen={false}>
+						<p class="claim-note">Hidden until you ask for it — eases open, chevron flips.</p>
+					</Disclosure>
+					<Disclosure icon="🛡️" summary="What the agent may send on its own">
+						<p class="claim-note">Availability replies, location, scheduling — negotiation always asks you.</p>
+					</Disclosure>
+				</div>
+				<OverflowMenu
+					label="Trek road bike · 54cm"
+					actions={[
+						{ icon: '✅', label: 'Mark sold', onClick: () => alert('Marked sold') },
+						{ icon: '🕓', label: 'Mark pending', onClick: () => alert('Marked pending') },
+						{ icon: '🔗', label: 'Open listing', onClick: () => alert('Opened') },
+						{ icon: '🗑️', label: 'Delete', danger: true, onClick: () => alert('Deleted') }
+					]}
+				/>
+			</div>
+		</div>
+
 		<!-- Cascade check: the base reset zeroes heading margins, but a Tailwind
 		     utility must still win (resets now live in @layer base). This h2 must
 		     compute margin-bottom: 2rem, and the box below it sits 2rem clear. -->
@@ -321,6 +346,15 @@
 		font-size: 15px;
 		color: var(--color-text-body);
 		margin-right: 4px;
+	}
+	.primitives {
+		margin: 22px 0 0;
+	}
+	.primitives-row {
+		display: flex;
+		align-items: flex-start;
+		gap: 16px;
+		margin-top: 10px;
 	}
 	.shell-link {
 		margin: 18px 0 0;

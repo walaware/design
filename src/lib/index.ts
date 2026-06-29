@@ -19,6 +19,8 @@ export { default as Card } from './core/Card.svelte';
 export { default as CardHeader } from './core/CardHeader.svelte';
 export { default as Chip } from './core/Chip.svelte';
 export { default as Tooltip } from './core/Tooltip.svelte';
+export { default as Disclosure } from './core/Disclosure.svelte';
+export { default as OverflowMenu, type OverflowAction } from './core/OverflowMenu.svelte';
 
 // Shell
 export { default as AppShell } from './shell/AppShell.svelte';

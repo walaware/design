@@ -149,7 +149,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 <script>
 	import {
 		AppShell,
-		Button, IconButton, Card, CardHeader, Chip, Tooltip,
+		Button, IconButton, Card, CardHeader, Chip, Tooltip, Disclosure, OverflowMenu,
 		Avatar, AvatarUpload, AvatarGroup, LeanMeter,
 		TextField, DateField, SegmentedControl, Composer,
 		StatusBadge, EmptyState, ChatMessage
@@ -169,7 +169,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 | ---------- | ------------------------------------------- |
 | `brand`    | `Wordmark`, `AppIcon` (+ `WALA_SUITE`, `WALA_GLYPHS`) |
 | `shell`    | `AppShell` (+ `NavItem`, `ShellAccount`, `ShellBack` types) |
-| `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip`, `Tooltip` |
+| `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip`, `Tooltip`, `Disclosure`, `OverflowMenu` (+ `OverflowAction` type) |
 | `people`   | `Avatar`, `AvatarUpload`, `AvatarGroup`, `LeanMeter` (+ `colorFor`) |
 | `forms`    | `TextField`, `DateField`, `SegmentedControl`, `Composer` |
 | `feedback` | `StatusBadge`, `EmptyState`, `ChatMessage`  |

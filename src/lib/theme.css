@@ -75,6 +75,13 @@
 	--color-teal-500: #2fb6a3;
 	--color-teal-600: #259384;
 
+	/* Danger — risk / scam / destructive. A dedicated warm alert red, kept
+	   distinct from coral (the --color-wala constant) and berry so a risk
+	   pill never reads as a brand accent. */
+	--color-danger-200: #fbded7;
+	--color-danger-500: #d94436;
+	--color-danger-600: #b8392c;
+
 	/* Cocoa — ink */
 	--color-cocoa-900: #3a2d28;
 	--color-cocoa-700: #6b5247;
@@ -122,6 +129,18 @@
 	--color-status-maybe: var(--color-sun-500);
 	--color-status-maybe-soft: var(--color-sun-200);
 	--color-status-out: var(--color-cocoa-500);
+
+	/* Risk / destructive — escalation pills, scam flags, delete actions. */
+	--color-danger: var(--color-danger-500);
+	--color-danger-press: var(--color-danger-600);
+	--color-danger-soft: var(--color-danger-200);
+	--color-danger-ink: var(--color-danger-600);
+
+	/* Confidence signal — one consistent mapping wherever a model confidence /
+	   risk score is shown (inbox dots, recents, listing conversations). */
+	--color-confidence-ok: var(--color-leaf-600);
+	--color-confidence-low: var(--color-sun-600);
+	--color-confidence-risk: var(--color-danger);
 
 	--color-focus-ring: var(--color-coral-400);
 
