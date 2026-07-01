@@ -185,6 +185,24 @@ it's proven in ~3 apps (the "rule of three" — see README). When an upstream ex
 contains app-domain components (e.g. a `trip/` category), **do not port them**;
 list them as intentionally out-of-scope.
 
+## Requests from app agents
+
+App agents don't build new shared surfaces themselves. Per
+[for-agents.md](https://github.com/walaware/.github/blob/main/docs/for-agents.md#need-a-new-visual-surface-route-it-through-design),
+when an app needs a new component / page / visual surface that isn't app-specific,
+it **requests a new package from this repo** rather than building the shared piece
+in the app. This repo is the entry point — take the request, then run it through
+the sync below:
+
+1. **Consult Claude Design** for the design guidance for the requested surface.
+2. **Pull it in** and port to Svelte (the design-sync flow), releasing an updated
+   `@walaware/design` (`pnpm version …`).
+3. **Hand back** the released **package + the app-specific guidance** (captured in
+   `docs/apps/<app>.md`) so the app agent can resume its frontend work.
+
+App-**domain** components still stay in the app's own repo — see "Scope". Only
+generic, non-app-specific surfaces come through here.
+
 ## Design-sync workflow (two-way, via the DesignSync MCP)
 
 Recurring task: keep this repo and the **walaware Design System** Claude Design project
