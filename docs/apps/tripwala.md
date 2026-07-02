@@ -27,9 +27,18 @@ is live today; the rest are dimmed `soon` roadmap rows (matches the current upst
 | key | label | icon | state |
 | --- | ----- | ---- | ----- |
 | `trips` | Trips | 🧭 | **active** (stays active while a trip is open) |
-| `calendar` | Calendar | 📅 | `soon` |
+| `ideas` | Ideas | 💭 | **active** on the Someday wishlist page (see Screens) |
+| `calendar` | Calendar | 📅 | **active** on `/calendar` (friend-graph feature — see Screens); was `soon` |
 | `planner` | Planner | 🗓️ | `soon` |
 | `map` | Map | 🗺️ | `soon` |
+
+> **`ideas` is a live top-level destination — not a `soon` row, and not a section of the
+> dated Trips home.** Idea-trips (`status='idea'`) are deliberately kept out of the
+> current/upcoming/past date buckets, so they get their own AppShell destination — the
+> *undated* counterpart to dated **Trips**. This is the right AppShell pattern (the shell
+> exists for multiple destinations) and keeps the dated dashboard uncluttered. It's purely
+> a consumer-side `NavItem` — **no kit change**. Do **not** repurpose Calendar/Planner/Map:
+> those are different future concepts, not "trips without dates".
 
 > **Not "Today".** Earlier drafts of this doc said "Trips · Today" — that was wrong. The live
 > app-level nav is **Trips** + the three `soon` rows above.
@@ -98,6 +107,99 @@ they're how the cleaned-up mocks read:
   tile (gradient sand) + title + `dates · where`, a crew `Avatar` stack (`ring`, −8px
   overlap), and right-aligned `Chip`s (`leaf` "N going", `sun` "N maybe"). Past cards are
   dimmed (`opacity 0.82`), smaller, with "N went".
+
+### Someday wishlist / trip ideas (`#ideas` app level)
+
+A private place to capture whole-trip *ideas* still tentative ("road trip to Vancouver
+Island someday") — no dates, just gathering thoughts. Visible only to you, or to a
+co-organizer you invite. It's the undated sibling of Trips home. Backend model (tripwala's):
+an idea is a trip in a new `status='idea'` stage; "promote to trip" is a one-field change
+`idea`→`planning`. **This whole screen composes shipped `@walaware/design` v0.6.0 primitives
++ tripwala-domain composition — no new shared package.**
+
+- **Header:** `h1` "Someday" (or "Trip ideas") + a muted subtitle ("Trips you're daydreaming
+  about."). No date-bucket labels (that's the point — ideas aren't dated).
+- **Quick-add (title-only capture):** the shared **`Composer`** — the sanctioned rounded
+  input + send affordance. `me={null}`, `placeholder="Somewhere you're dreaming about…"`,
+  `onSend={(title) => createIdea(title)}` (writes `status='idea'`). Reuse it as-is; don't
+  build a bespoke quick-add. (A labelled `TextField` + `Button` is the alternative if you
+  ever want a full form, but `Composer` is the closest quick-add match.)
+- **Idea cards** in a responsive grid (`repeat(auto-fill, minmax(260px, 1fr))`, same as Trips
+  home). Tap → opens the idea on the existing planning canvas (location ideas, map pins,
+  description) as the "gather thoughts" surface.
+- **Empty state:** the shared **`EmptyState`** — `emoji="💭"`,
+  `title="Nothing on the someday list yet"`,
+  `body="Capture a trip you're daydreaming about — no dates needed."`,
+  `action="Add an idea"`, `onAction={focusQuickAdd}`. Reuse as-is.
+
+**Idea card — app-domain (tripwala's repo), built as a `variant="idea"` on tripwala's own
+`TripCard`.** `TripCard` is already app-domain (not in the shared kit), and an idea is the
+same visual skeleton with a few data deltas, so prefer a **prop variant** over a whole new
+component (less divergence to maintain). Deltas vs. the dated card:
+
+| | dated `TripCard` | `TripCard variant="idea"` |
+| --- | --- | --- |
+| second line | `dates · where` | **optional rough location only** (muted; omit entirely if none yet) |
+| status | `leaf` "N going" / `sun` "N maybe" RSVP `Chip`s | a **"Someday" lifecycle `Chip`** (see below) |
+| people | crew `Avatar` stack | co-organizer `AvatarGroup` (often just you, or you + 1) |
+| primary affordance | — (tap opens) | **"Promote to trip"** `Button variant="soft" size="sm"` |
+
+Shared parts it composes: `Card`, `Chip`, `AvatarGroup`, `Button` (all v0.6.0).
+
+**"Someday" badge → shared `Chip`, not `StatusBadge`.** `StatusBadge`/`status.ts` are
+explicitly **RSVP / claim** state (Going/Maybe/Out/Set/Open); trip **lifecycle**
+(idea/planning/confirmed/completed) is a different axis and is tripwala-domain. Render the
+badge as `<Chip tone="neutral">💭 Someday</Chip>` (or `tone="coral"` if you want it to read
+warmer/on-brand). **Do not add `someday` to `status.ts`** — it would muddy that map's RSVP
+semantic. If a lifecycle badge later proves out across ~3 apps, promote it then (rule of
+three); until then it's a `Chip` in tripwala's repo.
+
+**Promote-to-trip action.** One-field `idea`→`planning`. Button vocabulary per the layout
+conventions: inline on the card = `Button variant="soft" size="sm"` "Promote to trip"; on the
+idea's detail/canvas header = `Button variant="primary"` "Promote to trip". On promote, the
+idea leaves the wishlist and appears in Trips home's dated buckets; confirm with the standard
+toast ("On the calendar 🎉").
+
+**Visibility (just me / + co-organizer).** Reuses tripwala's membership model — no design-system
+surface. The invited co-organizer renders in the card's `AvatarGroup` and on the idea page's
+crew row; an "Invite a co-organizer" affordance is a `Button variant="ghost" size="sm"`.
+
+### Friend graph & shared calendar (`@walaware/design` v0.7.0)
+
+The friend-graph feature (accepted friendships between accounts, invite-friends-to-a-trip,
+and friends-see-your-trips-on-a-calendar) is built from **three new shared primitives** shipped
+in **v0.7.0** — `CalendarMonth`, `RequestCard`, `PersonList`. They're all generic (they know
+nothing about trips or friendships); the friendship data model, the `trip_invitations`
+collection, the `'friends'`-visibility opt-in, the **teaser redaction** (name/dates/location
+only — never private details), and every trip→event / friend→row mapping stay **app-local**.
+See the README prop tables for full contracts. Where each lands:
+
+- **`/calendar` page (`#calendar` app level).** An AppShell content column holding a
+  `CalendarMonth`. Map the current user's trips to `CalendarEvent[]` with `tone: 'owned'`
+  (+ `href` to the trip) and each accepted friend's `'friends'`-visible trip to a **redacted
+  teaser** event `tone: 'teaser'` (title = e.g. "Maya · Banff", dates + rough location only,
+  **no `href`** — the kit renders teasers muted and non-interactive so private detail can't be
+  reached). Drive `onPrev`/`onNext` by stepping month/year in the loader; `onSelectDay` /
+  `onOverflow` open a day sheet if you want one. **Teaser redaction is enforced server-side in
+  the calendar query, not by the component** — never send private fields to a friend's client.
+- **Dashboard inbox — friend requests + trip invitations.** Both render as **`RequestCard`**:
+  a friend request uses `avatar={{name}}` + `title="X wants to be friends"` + `onAccept`/`onDecline`;
+  a trip invitation uses `emoji` (the trip glyph) + `title={trip.name}` + `meta="{dates} · {where} · from {inviter}"`
+  + `onAccept`/`onDecline`. Outgoing/pending requests you sent use `pending` + `onCancel`.
+- **Invite-from-friends flow.** A **`PersonList selectable`** bound to a `selected` id array
+  (map your friends to `Person[]`), with a primary "Invite N" `Button` — then create
+  `trip_invitations` for the selected ids (which land as `RequestCard`s on their dashboards).
+- **Friends list & "people you've traveled with" suggestions.** Non-selectable **`PersonList`**;
+  suggestion rows use the `action` snippet for a per-row "Add friend" `Button variant="soft" size="sm"`.
+  (This supersedes reaching for `AvatarGroup` here — that's the overlapping *stack* for crews on a
+  card; a managed list of people is `PersonList`.) A friends-management home can be its own
+  destination or live under Settings — app's call.
+
+**Shared vs local, at a glance:** shared = `CalendarMonth`, `RequestCard`, `PersonList` (v0.7.0,
+already exported). Local (tripwala repo) = friendships/`trip_invitations`/visibility data model +
+migrations, the server-side teaser query + redaction, trip→`CalendarEvent` and friend→`Person`
+mappings, the `/calendar` page assembly, the dashboard inbox list, and all accept/decline/cancel
+handlers.
 
 ### Trip page (contextual mode — one scroll of `<section id>` modules)
 - **Purpose:** everything about one trip on one page; module nav + scrollspy navigate it.

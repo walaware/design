@@ -22,6 +22,10 @@
 		StatusBadge,
 		EmptyState,
 		ChatMessage,
+		CalendarMonth,
+		RequestCard,
+		PersonList,
+		type CalendarEvent,
 		WALA_SUITE,
 		type WalaApp
 	} from '$lib/index.js';
@@ -30,6 +34,37 @@
 
 	let rsvp = $state('Going');
 	let cond = $state('Used');
+
+	// Calendar demo — owned trips (accent, link through) vs friend teasers (muted, read-only).
+	const calEvents: CalendarEvent[] = [
+		{ id: 't1', title: 'Tofino', emoji: '🏄', start: '2026-07-08', end: '2026-07-12', tone: 'owned', href: '#' },
+		{ id: 't2', title: 'Camp', emoji: '🏕️', start: '2026-07-18', end: '2026-07-19', tone: 'owned', href: '#' },
+		{ id: 'f1', title: "Maya · Banff", start: '2026-07-10', end: '2026-07-14', tone: 'teaser' },
+		{ id: 'f2', title: "Theo · Portland", start: '2026-07-24', end: '2026-07-26', tone: 'teaser' },
+		{ id: 't3', title: 'Day trip', start: '2026-07-11', tone: 'owned', href: '#' }
+	];
+	let calYear = $state(2026);
+	let calMonth = $state(7);
+	function stepMonth(delta: number) {
+		const m = calMonth + delta;
+		if (m < 1) { calMonth = 12; calYear -= 1; }
+		else if (m > 12) { calMonth = 1; calYear += 1; }
+		else calMonth = m;
+	}
+
+	// Friend picker demo.
+	let pickFriends = $state<string[]>(['u2']);
+	const friends = [
+		{ id: 'u1', name: 'Maya', src: photoRef(), meta: '3 trips together' },
+		{ id: 'u2', name: 'Arjun', meta: '1 trip together' },
+		{ id: 'u3', name: 'Priya' },
+		{ id: 'u4', name: 'Leo', meta: 'New friend' }
+	];
+	function photoRef() {
+		return `data:image/svg+xml,${encodeURIComponent(
+			"<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><rect width='96' height='96' fill='#FFB23E'/></svg>"
+		)}`;
+	}
 
 	// DateField demo state. `today` bounds the pickers; the range starts empty.
 	const today = new Date().toISOString().slice(0, 10);
@@ -300,6 +335,56 @@
 		</div>
 	</section>
 
+	<section class="social" data-app="tripwala">
+		<h2 class="social-h">Calendar, requests &amp; people <span class="tag">v0.7.0</span></h2>
+		<p class="social-note">
+			The friend-graph &amp; shared-calendar surfaces — generic primitives; the trip/friend
+			domain stays in the app.
+		</p>
+		<div class="social-grid">
+			<Card>
+				<CalendarMonth
+					year={calYear}
+					month={calMonth}
+					events={calEvents}
+					onPrev={() => stepMonth(-1)}
+					onNext={() => stepMonth(1)}
+					today="2026-07-11"
+				/>
+				<p class="social-legend">
+					<span class="dot owned"></span> your trips &nbsp;
+					<span class="dot teaser"></span> friends' shared trips (read-only)
+				</p>
+			</Card>
+
+			<div class="social-col">
+				<RequestCard
+					avatar={{ name: 'Maya' }}
+					title="Maya wants to be friends"
+					meta="3 mutual friends"
+					onAccept={() => alert('Accepted')}
+					onDecline={() => alert('Declined')}
+				/>
+				<RequestCard
+					emoji="🏄"
+					title="Tofino surf weekend"
+					meta="Aug 8–12 · Tofino · from Theo"
+					onAccept={() => alert('Joined')}
+					onDecline={() => alert('Declined')}
+				/>
+				<Card>
+					<CardHeader icon="🧑‍🤝‍🧑" title="Invite friends" />
+					<PersonList people={friends} selectable bind:selected={pickFriends} />
+					<div class="social-actions">
+						<Button variant="primary" size="sm" disabled={pickFriends.length === 0}>
+							Invite {pickFriends.length || ''}
+						</Button>
+					</div>
+				</Card>
+			</div>
+		</div>
+	</section>
+
 	<section class="frames">
 		{@render phone('tripwala', 'trip', tripBody)}
 		{@render phone('shopwala', 'shop', shopBody)}
@@ -369,6 +454,70 @@
 		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 		gap: 24px;
 		margin-top: 24px;
+	}
+	.social {
+		margin-top: 40px;
+	}
+	.social-h {
+		font-family: var(--font-display);
+		font-weight: 600;
+		font-size: 22px;
+		color: var(--color-text-strong);
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+	.social-h .tag {
+		font-family: var(--font-body);
+		font-weight: 800;
+		font-size: 11px;
+		color: var(--color-primary-press);
+		background: var(--color-primary-soft);
+		padding: 3px 9px;
+		border-radius: var(--radius-pill);
+	}
+	.social-note {
+		font-size: 14px;
+		color: var(--color-text-muted);
+		margin: 6px 0 18px;
+		max-width: 60ch;
+	}
+	.social-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: var(--stack-gap);
+		align-items: start;
+	}
+	.social-col {
+		display: flex;
+		flex-direction: column;
+		gap: var(--stack-gap);
+	}
+	.social-legend {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin: 12px 0 0;
+		font-size: 12px;
+		font-weight: 700;
+		color: var(--color-text-muted);
+	}
+	.social-legend .dot {
+		width: 12px;
+		height: 12px;
+		border-radius: var(--radius-sm);
+		display: inline-block;
+	}
+	.social-legend .dot.owned {
+		background: var(--color-primary-soft);
+	}
+	.social-legend .dot.teaser {
+		background: var(--color-sand-200);
+	}
+	.social-actions {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 12px;
 	}
 	.phone {
 		display: flex;

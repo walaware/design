@@ -150,9 +150,10 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 	import {
 		AppShell,
 		Button, IconButton, Card, CardHeader, Chip, Tooltip, Disclosure, OverflowMenu,
-		Avatar, AvatarUpload, AvatarGroup, LeanMeter,
+		CalendarMonth,
+		Avatar, AvatarUpload, AvatarGroup, LeanMeter, PersonList,
 		TextField, DateField, SegmentedControl, Composer,
-		StatusBadge, EmptyState, ChatMessage
+		StatusBadge, EmptyState, ChatMessage, RequestCard
 	} from '@walaware/design';
 	let rsvp = $state('Going');
 </script>
@@ -170,9 +171,10 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 | `brand`    | `Wordmark`, `AppIcon` (+ `WALA_SUITE`, `WALA_GLYPHS`) |
 | `shell`    | `AppShell` (+ `NavItem`, `ShellAccount`, `ShellBack` types) |
 | `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip`, `Tooltip`, `Disclosure`, `OverflowMenu` (+ `OverflowAction` type) |
-| `people`   | `Avatar`, `AvatarUpload`, `AvatarGroup`, `LeanMeter` (+ `colorFor`) |
+| `calendar` | `CalendarMonth` (+ `CalendarEvent`, `CalendarTone` types) |
+| `people`   | `Avatar`, `AvatarUpload`, `AvatarGroup`, `LeanMeter`, `PersonList` (+ `colorFor`, `Person` type) |
 | `forms`    | `TextField`, `DateField`, `SegmentedControl`, `Composer` |
-| `feedback` | `StatusBadge`, `EmptyState`, `ChatMessage`  |
+| `feedback` | `StatusBadge`, `EmptyState`, `ChatMessage`, `RequestCard` (+ `RequestPerson` type) |
 
 `AppShell` is the standard app chrome: a desktop left sidebar that collapses to a
 top bar + slide-in drawer below `breakpoint` (default 920px). The app supplies
@@ -208,6 +210,80 @@ non-interactive roadmap row with a "soon" tag). Consumer contract: render the mo
 one long page of `<section id="…">`s and mark the sticky record header
 `data-appshell-sticky`. See the `/shell` demo ("Open a trip") and
 [docs/apps/tripwala.md](docs/apps/tripwala.md).
+
+### CalendarMonth
+
+A mobile-first month grid with **multi-day event spans** and a built-in header (title +
+prev/next). Events carry a `tone` that sets both look and behaviour: `owned` bars are
+accent-tinted and interactive (they link through via `href`); `teaser` bars — a friend's
+shared trip seen on your calendar — are **muted and read-only** (never a link). Overlapping
+events stack into lanes; a day with more than `maxPerDay` collapses the rest into `+N`.
+
+```svelte
+<CalendarMonth
+  year={2026} month={7} events={events}
+  onPrev={() => step(-1)} onNext={() => step(1)}
+  onSelectDay={(d) => open(d)}
+/>
+```
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `year` | `number` | displayed year |
+| `month` | `number` | displayed month, **1–12** (not 0-based) |
+| `events` | `CalendarEvent[]` | see shape below |
+| `weekStartsOn` | `0 \| 1` | 0 Sunday (default) / 1 Monday |
+| `showAdjacent` | `boolean` | dim leading/trailing days from neighbour months (default `true`) |
+| `maxPerDay` | `number` | event bars per day before `+N more` (default 3) |
+| `today` | `string` | highlighted day `YYYY-MM-DD`; omit to derive from the clock |
+| `title` | `string` | header title override (default e.g. `"July 2026"`) |
+| `header` | `boolean` | show the built-in header (default `true`) |
+| `onPrev` / `onNext` | `() => void` | header chevrons |
+| `onSelectDay` | `(date: string) => void` | a day cell tapped (`YYYY-MM-DD`) |
+| `onOverflow` | `(date: string) => void` | a `+N more` tapped |
+
+`CalendarEvent` = `{ id, title, start, end?, tone?, emoji?, href?, onClick? }` — `start`/`end`
+are inclusive `YYYY-MM-DD` (omit `end` for a single day). `tone`: `'owned'` (default) ·
+`'teaser'` · `'neutral'`. The calendar renders generic events — mapping your trips (and a
+friend's shared, redacted teasers) into `CalendarEvent[]` is the app's job.
+
+### RequestCard
+
+A self-contained inbound-request card for a dashboard inbox — a **friend request** (leading
+`avatar`) or a **trip invitation** (leading `emoji` tile). Shows Accept + Decline for an
+incoming request, or a `Cancel` + `Pending` chip for an outgoing one. Renders its own `Card`.
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `avatar` | `{ name, color?, src? } \| null` | leading person (friend request) |
+| `emoji` | `string \| null` | leading emoji tile (trip invite); ignored when `avatar` is set |
+| `emojiBg` | `string` | emoji tile background |
+| `title` | `string \| Snippet` | headline |
+| `meta` | `string \| Snippet` | sub-line (mutuals / `dates · where · from …`) |
+| `onAccept` / `acceptLabel` | `() => void` / `string` | primary action (default "Accept") |
+| `onDecline` / `declineLabel` | `() => void` / `string` | ghost action (default "Decline") |
+| `onCancel` / `cancelLabel` | `() => void` / `string` | soft action for outgoing requests (default "Cancel") |
+| `pending` | `boolean` | show a muted "Pending" chip |
+| `children` | `Snippet` | extra body under the meta line |
+
+`RequestCard` is the **generic** card; the friendship / invitation domain (states, who can
+accept, what a teaser exposes) lives in the app.
+
+### PersonList
+
+A vertical list of people — a friends list, a "traveled with" suggestion list, or a
+multi-select **friend picker** (`selectable`). Compose it inside a `Card`.
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `people` | `Person[]` | `{ id, name, color?, src?, emoji?, meta? }` |
+| `selectable` | `boolean` | multi-select — each row gets a check + toggles on tap |
+| `selected` | `string[]` | selected ids (**`$bindable`**) |
+| `onToggle` | `(id, next) => void` | selection flipped (selectable mode) |
+| `onSelect` | `(person) => void` | row tap in non-selectable mode |
+| `action` | `Snippet<[Person]>` | trailing per-row action (e.g. an Invite button) |
+| `size` | `number` | avatar diameter (default 40) |
+| `divider` | `boolean` | hairline between rows, first omitted (default `true`) |
 
 ### Avatars
 

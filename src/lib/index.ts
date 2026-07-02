@@ -26,11 +26,16 @@ export { default as OverflowMenu, type OverflowAction } from './core/OverflowMen
 export { default as AppShell } from './shell/AppShell.svelte';
 export { type NavItem, type ShellAccount, type ShellBack } from './shell/AppShell.svelte';
 
+// Calendar
+export { default as CalendarMonth } from './calendar/CalendarMonth.svelte';
+export { type CalendarEvent, type CalendarTone } from './calendar/calendar.js';
+
 // People
 export { default as Avatar } from './people/Avatar.svelte';
 export { default as AvatarUpload } from './people/AvatarUpload.svelte';
 export { default as AvatarGroup } from './people/AvatarGroup.svelte';
 export { default as LeanMeter } from './people/LeanMeter.svelte';
+export { default as PersonList, type Person } from './people/PersonList.svelte';
 export { colorFor } from './people/colors.js';
 export { type Lean } from './people/lean.js';
 
@@ -45,3 +50,4 @@ export { default as StatusBadge } from './feedback/StatusBadge.svelte';
 export { type Status } from './feedback/status.js';
 export { default as EmptyState } from './feedback/EmptyState.svelte';
 export { default as ChatMessage } from './feedback/ChatMessage.svelte';
+export { default as RequestCard, type RequestPerson } from './feedback/RequestCard.svelte';
