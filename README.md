@@ -405,7 +405,7 @@ mocks there, thoroughly.
 
 | App | Layout | Screens & context |
 | --- | ------ | ----------------- |
-| `tripwala` | single page | [docs/apps/tripwala.md](docs/apps/tripwala.md) |
+| `tripwala` | AppShell (two-level) | [docs/apps/tripwala.md](docs/apps/tripwala.md) |
 | `healthwala` | — | _not yet designed_ |
 | `stuffwala` | — | _not yet designed_ |
 | `moneywala` | — | _not yet designed_ |
