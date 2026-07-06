@@ -51,3 +51,5 @@ export { type Status } from './feedback/status.js';
 export { default as EmptyState } from './feedback/EmptyState.svelte';
 export { default as ChatMessage } from './feedback/ChatMessage.svelte';
 export { default as RequestCard, type RequestPerson } from './feedback/RequestCard.svelte';
+export { default as Skeleton } from './feedback/Skeleton.svelte';
+export { default as SkeletonText } from './feedback/SkeletonText.svelte';

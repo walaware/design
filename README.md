@@ -153,7 +153,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 		CalendarMonth,
 		Avatar, AvatarUpload, AvatarGroup, LeanMeter, PersonList,
 		TextField, DateField, SegmentedControl, Composer,
-		StatusBadge, EmptyState, ChatMessage, RequestCard
+		StatusBadge, EmptyState, ChatMessage, RequestCard, Skeleton, SkeletonText
 	} from '@walaware/design';
 	let rsvp = $state('Going');
 </script>
@@ -174,7 +174,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 | `calendar` | `CalendarMonth` (+ `CalendarEvent`, `CalendarTone` types) |
 | `people`   | `Avatar`, `AvatarUpload`, `AvatarGroup`, `LeanMeter`, `PersonList` (+ `colorFor`, `Person` type) |
 | `forms`    | `TextField`, `DateField`, `SegmentedControl`, `Composer` |
-| `feedback` | `StatusBadge`, `EmptyState`, `ChatMessage`, `RequestCard` (+ `RequestPerson` type) |
+| `feedback` | `StatusBadge`, `EmptyState`, `ChatMessage`, `RequestCard` (+ `RequestPerson` type), `Skeleton`, `SkeletonText` |
 
 `AppShell` is the standard app chrome: a desktop left sidebar that collapses to a
 top bar + slide-in drawer below `breakpoint` (default 920px). The app supplies
@@ -268,6 +268,45 @@ incoming request, or a `Cancel` + `Pending` chip for an outgoing one. Renders it
 
 `RequestCard` is the **generic** card; the friendship / invitation domain (states, who can
 accept, what a teaser exposes) lives in the app.
+
+### Skeleton / SkeletonText
+
+Calm loading placeholders in the house style. A `Skeleton` block mirrors one piece of the
+ready layout; `SkeletonText` stacks text lines with a ragged last line. Default animation is
+a soft **pulse**; opt into a **shimmer** sweep per block. Both freeze to a static sand tint
+under `prefers-reduced-motion`. Placeholders are `aria-hidden` — mark the surrounding loading
+region `aria-busy="true"` so assistive tech announces the wait.
+
+```svelte
+<div aria-busy="true">
+  <Skeleton variant="circle" width={44} />
+  <Skeleton variant="text" width="55%" />
+  <Skeleton variant="rect" height={120} radius="var(--radius-lg)" motion="shimmer" />
+  <SkeletonText lines={3} />
+</div>
+```
+
+**`Skeleton`**
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `variant` | `'rect' \| 'text' \| 'circle'` | shape; default `rect` |
+| `width` | `string \| number` | number → px; default fill (`100%`), circle `40px` |
+| `height` | `string \| number` | default per variant (text `0.85em`, circle = width, rect `16px`) |
+| `radius` | `string` | override; defaults `radius-md` / `radius-sm` (text) / `radius-pill` (circle) |
+| `motion` | `'pulse' \| 'shimmer' \| 'none'` | default `pulse` |
+
+**`SkeletonText`**
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `lines` | `number` | line count; default `3` |
+| `lineHeight` | `string \| number` | per-line height; default `0.85em` |
+| `lastLine` | `string` | width of the ragged final line; default `60%` |
+| `gap` | `string \| number` | gap between lines; default `10` (px) |
+| `motion` | `'pulse' \| 'shimmer' \| 'none'` | passed to each line; default `pulse` |
+
+The primitive is generic; where you show it and which ready-layout it mirrors stays in the app.
 
 ### PersonList
 

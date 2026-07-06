@@ -25,6 +25,8 @@
 		CalendarMonth,
 		RequestCard,
 		PersonList,
+		Skeleton,
+		SkeletonText,
 		type CalendarEvent,
 		WALA_SUITE,
 		type WalaApp
@@ -385,6 +387,33 @@
 		</div>
 	</section>
 
+	<section class="skeletons" data-app="tripwala">
+		<h2>Loading skeletons <span class="tag">v0.8.0</span></h2>
+		<p class="lede">
+			Calm placeholders that mirror the ready layout. Soft pulse by default; shimmer sweep
+			opt-in; both freeze to a static sand tint under reduced motion.
+		</p>
+		<div class="skel-grid">
+			<Card pad>
+				<div class="skel-row">
+					<Skeleton variant="circle" width={44} />
+					<div style="flex:1">
+						<Skeleton variant="text" width="55%" height="1em" />
+						<div style="height:8px"></div>
+						<Skeleton variant="text" width="35%" height="0.8em" />
+					</div>
+				</div>
+				<div style="height:14px"></div>
+				<SkeletonText lines={3} />
+			</Card>
+			<Card pad>
+				<Skeleton variant="rect" height={120} radius="var(--radius-lg)" motion="shimmer" />
+				<div style="height:12px"></div>
+				<Skeleton variant="text" width="70%" motion="shimmer" />
+			</Card>
+		</div>
+	</section>
+
 	<section class="frames">
 		{@render phone('tripwala', 'trip', tripBody)}
 		{@render phone('shopwala', 'shop', shopBody)}
@@ -454,6 +483,44 @@
 		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 		gap: 24px;
 		margin-top: 24px;
+	}
+	.skeletons {
+		margin-top: 40px;
+	}
+	.skeletons h2 {
+		font-family: var(--font-display);
+		font-weight: 600;
+		font-size: 22px;
+		color: var(--color-text-strong);
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+	.skeletons .tag {
+		font-family: var(--font-body);
+		font-weight: 800;
+		font-size: 11px;
+		color: var(--color-primary-press);
+		background: var(--color-primary-soft);
+		padding: 3px 9px;
+		border-radius: var(--radius-pill);
+	}
+	.skeletons .lede {
+		font-size: 14px;
+		color: var(--color-text-muted);
+		margin: 6px 0 18px;
+		max-width: 60ch;
+	}
+	.skel-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: var(--stack-gap);
+		align-items: start;
+	}
+	.skel-row {
+		display: flex;
+		align-items: center;
+		gap: 12px;
 	}
 	.social {
 		margin-top: 40px;
