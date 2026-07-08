@@ -192,9 +192,10 @@ App agents don't build new shared surfaces themselves. Per
 when an app needs a new component / page / visual surface that isn't app-specific,
 it **requests a new package from this repo** rather than building the shared piece
 in the app. This repo is the entry point — take the request, then run it through
-the sync below. Requests usually arrive over **clideck** (`clideck ask
-@design/<session>` — the same channel the shopwala/tripwala agents use); the brief
-describes the surface and the job it does.
+the sync below. Requests usually arrive over **Paseo** — the app agent finds this
+repo's design agent with `paseo ls -g` and sends the brief with
+`paseo send <design-agent-id> "…"` (the same channel the shopwala/tripwala agents
+use); the brief describes the surface and the job it does.
 
 1. **Consult Claude Design** for the requested surface — drive it with
    [`tools/designer/`](tools/designer/README.md) (the [designer](https://github.com/pro-vi/designer)
@@ -206,7 +207,8 @@ describes the surface and the job it does.
 2. **Pull it in** and port to Svelte (the design-sync flow), releasing an updated
    `@walaware/design` (`pnpm version …`).
 3. **Hand back** the released **package + the app-specific guidance** (captured in
-   `docs/apps/<app>.md`) over clideck so the app agent can resume its frontend work.
+   `docs/apps/<app>.md`) over Paseo (reply to the app agent's `paseo send`, or post in
+   the shared coordination room) so the app agent can resume its frontend work.
 
 App-**domain** components still stay in the app's own repo — see "Scope". Only
 generic, non-app-specific surfaces come through here.

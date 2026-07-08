@@ -8,7 +8,7 @@ feed our [`design-sync`](../../.claude/skills/design-sync/SKILL.md) pull.
 ```
 brief → designer (drives claude.ai/design in real Chrome, codebase-aware)
       → designer handoff (export zip → project/ + decision-record.md)
-      → /design-sync (pull into this repo) → port to Svelte → verify → release → clideck notify app
+      → /design-sync (pull into this repo) → port to Svelte → verify → release → paseo notify app
 ```
 
 designer is a **design-phase tool, not part of the shipped `@walaware/design` kit** — this
