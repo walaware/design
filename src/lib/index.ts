@@ -28,7 +28,13 @@ export { type NavItem, type ShellAccount, type ShellBack } from './shell/AppShel
 
 // Calendar
 export { default as CalendarMonth } from './calendar/CalendarMonth.svelte';
-export { type CalendarEvent, type CalendarTone } from './calendar/calendar.js';
+export { default as RangeCalendar, type InvalidReason } from './calendar/RangeCalendar.svelte';
+export {
+	type CalendarEvent,
+	type CalendarTone,
+	type DateRange,
+	type RangeTone
+} from './calendar/calendar.js';
 
 // People
 export { default as Avatar } from './people/Avatar.svelte';
@@ -44,6 +50,8 @@ export { default as TextField } from './forms/TextField.svelte';
 export { default as DateField } from './forms/DateField.svelte';
 export { default as SegmentedControl } from './forms/SegmentedControl.svelte';
 export { default as Composer } from './forms/Composer.svelte';
+export { default as Switch } from './forms/Switch.svelte';
+export { default as CopyField } from './forms/CopyField.svelte';
 
 // Feedback
 export { default as StatusBadge } from './feedback/StatusBadge.svelte';

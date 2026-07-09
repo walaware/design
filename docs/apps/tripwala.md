@@ -201,6 +201,53 @@ migrations, the server-side teaser query + redaction, trip→`CalendarEvent` and
 mappings, the `/calendar` page assembly, the dashboard inbox list, and all accept/decline/cancel
 handlers.
 
+### Dates section — one calendar, not two (`@walaware/design` v0.9.0)
+
+The Dates module used to stack two surfaces in one card: a `DateField range` for proposing a
+candidate span, and a hand-rolled month grid for tapping your free days. Both collapse into a
+single `RangeCalendar`. `DateField range` stays for plain forms (Settings); the planning page
+just shows the calendar.
+
+**Wiring the three overlays without turning it into mud.** The component gives you four
+non-competing visual channels — the rule is *one meaning per channel*, and never send the same
+information down two of them:
+
+| tripwala concept | prop | channel |
+| ---------------- | ---- | ------- |
+| how much of the crew is free that day | `heat[date] = free / memberCount` | cell background (sand ramp) |
+| **your own** free ranges | `ranges` with `tone: 'outline'` | stroked band |
+| the organizer's proposed candidates | `ranges` with `tone: 'candidate'` | lane bars |
+| the span being proposed right now | `bind:start` / `bind:end` | solid accent pills |
+
+- **Don't** also mark your own free days in `heat` — heat is the *group* signal. If you shade
+  your own availability too, a day where only you are free looks identical to a day where four
+  people are.
+- **Do** normalize `heat` to `0..1` on the server (`free / memberCount`), and pass
+  `heatLabel={(d, v) => `${Math.round(v * memberCount)} of ${memberCount} free`}` so screen
+  readers get the count, not the ratio. Omit days with zero free — `0` renders nothing.
+- **Don't** re-tint the day number based on heat. The ramp is capped at `sand-400` precisely so
+  `--color-text-strong` never drops below ~9.2:1. The old flip-to-white-past-0.5 rule is gone.
+- **Voting** stays in the app's list beside the calendar, not on the bars. A 16px bar is a poor
+  tap target and the list already carries 👍/🤔/👎. Pass `onClick` on a `candidate` range only
+  to *scroll to / focus* that candidate's row in the list.
+- **Gating "Propose":** pass `minNights` and gate the button on `onSelect` having fired —
+  `onSelect` fires only for valid spans, and `onInvalidSelect` hands you `'too-short' |
+  'contains-disabled' | 'out-of-bounds'` to explain why. The span still completes and renders in
+  a danger tone, so the user sees what they picked rather than having it silently clamped.
+- **Bounds:** pass `min={todayIso}` (no proposing the past) and `max` about a year out. The
+  chevrons disable themselves at both edges; you don't need to bound paging separately.
+- **Responsive:** leave `months="auto"`. It measures the *container*, not the viewport, and
+  renders 1 / 2 / 3 months (<640 / <1024 / ≥1024). Delete the `matchMedia` shim. SSR renders one
+  month and widens on hydration.
+
+**Shared vs local:** shared = `RangeCalendar`, `Switch`, `CopyField`. Local (tripwala repo) =
+the availability + candidate data model, the `free/memberCount` aggregation query, the
+candidate→`DateRange` and availability→`heat` mappings, the vote list beside the calendar, and
+the Propose handler.
+
+`Switch` replaces the hand-rolled "Trip notifications" pill; `CopyField` replaces the three
+hand-rolled copy rows (invite link, co-organizer link, Immich album URL).
+
 ### Trip page (contextual mode — one scroll of `<section id>` modules)
 - **Purpose:** everything about one trip on one page; module nav + scrollspy navigate it.
 - **Sticky header** (`data-appshell-sticky`): emoji tile + trip title + `dates · where · N

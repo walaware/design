@@ -27,7 +27,11 @@
 		PersonList,
 		Skeleton,
 		SkeletonText,
+		RangeCalendar,
+		Switch,
+		CopyField,
 		type CalendarEvent,
+		type DateRange,
 		WALA_SUITE,
 		type WalaApp
 	} from '$lib/index.js';
@@ -36,6 +40,27 @@
 
 	let rsvp = $state('Going');
 	let cond = $state('Used');
+
+	// RangeCalendar demo — a trip-planning grid: my free days (outline), the
+	// organizer's candidates (bars), and how much of the group is free (heat).
+	let rcStart = $state<string | null>('2026-07-08');
+	let rcEnd = $state<string | null>('2026-07-12');
+	let rcNote = $state('Pick a start, then an end.');
+	let notify = $state(true);
+	let digest = $state(false);
+
+	const rcHeat: Record<string, number> = {
+		'2026-07-06': 0.17, '2026-07-07': 0.33, '2026-07-08': 0.83, '2026-07-09': 1,
+		'2026-07-10': 1, '2026-07-11': 0.83, '2026-07-12': 0.67, '2026-07-13': 0.33,
+		'2026-07-14': 0.17, '2026-07-17': 0.5, '2026-07-18': 0.83, '2026-07-19': 0.67,
+		'2026-07-20': 0.5
+	};
+
+	const rcRanges: DateRange[] = [
+		{ id: 'mine', start: '2026-07-06', end: '2026-07-14', tone: 'outline', label: 'my free days' },
+		{ id: 'c1', start: '2026-07-08', end: '2026-07-12', tone: 'candidate', label: 'Tofino', emoji: '🏄' },
+		{ id: 'c2', start: '2026-07-17', end: '2026-07-20', tone: 'candidate', label: 'Banff', emoji: '🏔' }
+	];
 
 	// Calendar demo — owned trips (accent, link through) vs friend teasers (muted, read-only).
 	const calEvents: CalendarEvent[] = [
@@ -387,6 +412,50 @@
 		</div>
 	</section>
 
+	<section class="planner" data-app="tripwala">
+		<h2>RangeCalendar <span class="tag">v0.9.0</span></h2>
+		<p class="lede">
+			Inline range picking with two overlays on one grid: <strong>heat</strong> shades the cell on a
+			sand ramp, an <strong>outline</strong> range strokes a band, <strong>candidate</strong> ranges
+			draw accent bars, and the live selection owns the solid accent pills. Arrow keys navigate,
+			Enter sets start then end, Escape cancels a half-made span.
+		</p>
+		<Card pad>
+			<RangeCalendar
+				bind:start={rcStart}
+				bind:end={rcEnd}
+				today="2026-07-09"
+				min="2026-07-01"
+				max="2027-06-30"
+				minNights={2}
+				heat={rcHeat}
+				heatLabel={(_d, v) => `${Math.round(v * 6)} of 6 people free`}
+				ranges={rcRanges}
+				onSelect={(s, e) => (rcNote = `Selected ${s} → ${e}`)}
+				onInvalidSelect={(s, e, why) => (rcNote = `Rejected ${s} → ${e} (${why})`)}
+			/>
+			<p class="rc-note">{rcNote}</p>
+		</Card>
+	</section>
+
+	<section class="bits" data-app="tripwala">
+		<h2>Switch &amp; CopyField <span class="tag">v0.9.0</span></h2>
+		<div class="bits-grid">
+			<Card pad>
+				<Switch bind:checked={notify} label="Trip notifications" meta="Push when plans change" />
+				<div style="height:14px"></div>
+				<Switch bind:checked={digest} label="Weekly digest" meta="Every Sunday morning" />
+				<div style="height:14px"></div>
+				<Switch checked={false} disabled label="Location sharing" meta="Coming soon" />
+			</Card>
+			<Card pad>
+				<CopyField label="Invite link" value="https://tripwala.app/join/8fk2-qm41" />
+				<div style="height:12px"></div>
+				<CopyField label="Immich album" value="https://photos.wala.home/share/tofino-2026" />
+			</Card>
+		</div>
+	</section>
+
 	<section class="skeletons" data-app="tripwala">
 		<h2>Loading skeletons <span class="tag">v0.8.0</span></h2>
 		<p class="lede">
@@ -483,6 +552,49 @@
 		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 		gap: 24px;
 		margin-top: 24px;
+	}
+	.planner,
+	.bits {
+		margin-top: 40px;
+	}
+	.planner h2,
+	.bits h2 {
+		font-family: var(--font-display);
+		font-weight: 600;
+		font-size: 22px;
+		color: var(--color-text-strong);
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+	.planner .tag,
+	.bits .tag {
+		font-family: var(--font-body);
+		font-weight: 800;
+		font-size: 11px;
+		color: var(--color-primary-press);
+		background: var(--color-primary-soft);
+		padding: 3px 9px;
+		border-radius: var(--radius-pill);
+	}
+	.planner .lede {
+		font-size: 14px;
+		color: var(--color-text-muted);
+		margin: 6px 0 18px;
+		max-width: 70ch;
+	}
+	.rc-note {
+		margin: 14px 0 0;
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--color-text-muted);
+	}
+	.bits-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: var(--stack-gap);
+		align-items: start;
+		margin-top: 16px;
 	}
 	.skeletons {
 		margin-top: 40px;

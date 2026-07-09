@@ -26,6 +26,11 @@
 </button>
 
 <style>
+	.wala-iconbtn:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+		box-shadow: none;
+	}
 	.wala-iconbtn {
 		flex: none;
 		display: grid;

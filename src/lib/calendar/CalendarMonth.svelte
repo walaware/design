@@ -5,6 +5,14 @@
 <script lang="ts">
 	import IconButton from '../core/IconButton.svelte';
 	import type { CalendarEvent } from './calendar.js';
+	import {
+		MONTH_NAMES,
+		toIso,
+		buildWeeks,
+		weekdayLabels as weekdayLabelsFor,
+		packLanes,
+		sortSpans
+	} from './calendar.js';
 
 	interface Props {
 		/** Displayed year (e.g. 2026). */
@@ -50,108 +58,20 @@
 		onOverflow
 	}: Props = $props();
 
-	const MONTHS = [
-		'January', 'February', 'March', 'April', 'May', 'June',
-		'July', 'August', 'September', 'October', 'November', 'December'
-	];
-	const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-	function toIso(dt: Date): string {
-		const y = dt.getFullYear();
-		const m = String(dt.getMonth() + 1).padStart(2, '0');
-		const d = String(dt.getDate()).padStart(2, '0');
-		return `${y}-${m}-${d}`;
-	}
-	function fromIso(iso: string): Date {
-		const [y, m, d] = iso.split('-').map(Number);
-		return new Date(y, m - 1, d);
-	}
-	function dayDiff(a: string, b: string): number {
-		return Math.round((fromIso(b).getTime() - fromIso(a).getTime()) / 86400000);
-	}
-	function clamp(n: number, lo: number, hi: number): number {
-		return Math.min(hi, Math.max(lo, n));
-	}
-
-	const heading = $derived(title ?? `${MONTHS[month - 1]} ${year}`);
-	const weekdayLabels = $derived(
-		Array.from({ length: 7 }, (_, i) => WEEKDAYS[(i + weekStartsOn) % 7])
-	);
+	const heading = $derived(title ?? `${MONTH_NAMES[month - 1]} ${year}`);
+	const weekdayLabels = $derived(weekdayLabelsFor(weekStartsOn));
 	const todayIso = $derived(today ?? toIso(new Date()));
 
-	// The grid: whole weeks covering the month, padded with adjacent-month days.
-	const weeks = $derived.by(() => {
-		const first = new Date(year, month - 1, 1);
-		const lead = (first.getDay() - weekStartsOn + 7) % 7;
-		const daysInMonth = new Date(year, month, 0).getDate();
-		const totalCells = Math.ceil((lead + daysInMonth) / 7) * 7;
-		const start = new Date(year, month - 1, 1 - lead);
-		const out: { date: string; day: number; inMonth: boolean; isToday: boolean }[][] = [];
-		for (let w = 0; w < totalCells / 7; w++) {
-			const row = [];
-			for (let d = 0; d < 7; d++) {
-				const dt = new Date(start.getFullYear(), start.getMonth(), start.getDate() + w * 7 + d);
-				const iso = toIso(dt);
-				row.push({
-					date: iso,
-					day: dt.getDate(),
-					inMonth: dt.getMonth() === month - 1,
-					isToday: iso === todayIso
-				});
-			}
-			out.push(row);
-		}
-		return out;
-	});
-
-	interface Bar {
-		event: CalendarEvent;
-		colStart: number; // 1-based grid column
-		colEnd: number; // exclusive (grid-column end)
-		lane: number;
-		continuesLeft: boolean;
-		continuesRight: boolean;
-	}
+	const weeks = $derived(buildWeeks(year, month, weekStartsOn, todayIso));
 
 	// Per-week: pack intersecting events into non-overlapping lanes, then split
 	// into visible bars (lanes < maxPerDay) and per-day overflow counts.
 	const layout = $derived.by(() => {
-		// Longer spans first, then by start — keeps multi-day trips on low lanes.
-		const sorted = [...events].sort((a, b) => {
-			const la = dayDiff(a.start, a.end ?? a.start);
-			const lb = dayDiff(b.start, b.end ?? b.start);
-			return lb - la || a.start.localeCompare(b.start);
-		});
+		const sorted = sortSpans(events);
 		return weeks.map((week) => {
-			const weekStart = week[0].date;
-			const weekEnd = week[6].date;
-			const laneEnds: number[] = []; // last occupied col index per lane
-			const bars: Bar[] = [];
-			for (const ev of sorted) {
-				const evEnd = ev.end ?? ev.start;
-				if (ev.start > weekEnd || evEnd < weekStart) continue; // no overlap this week
-				const segStart = ev.start < weekStart ? weekStart : ev.start;
-				const segEnd = evEnd > weekEnd ? weekEnd : evEnd;
-				const c0 = clamp(dayDiff(weekStart, segStart), 0, 6);
-				const c1 = clamp(dayDiff(weekStart, segEnd), 0, 6);
-				let lane = laneEnds.findIndex((end) => end < c0);
-				if (lane === -1) {
-					lane = laneEnds.length;
-					laneEnds.push(c1);
-				} else {
-					laneEnds[lane] = c1;
-				}
-				bars.push({
-					event: ev,
-					colStart: c0 + 1,
-					colEnd: c1 + 2,
-					lane,
-					continuesLeft: ev.start < weekStart,
-					continuesRight: evEnd > weekEnd
-				});
-			}
+			const { bars, laneCount: total } = packLanes(week[0].date, week[6].date, sorted);
 			const visible = bars.filter((b) => b.lane < maxPerDay);
-			const laneCount = Math.min(laneEnds.length, maxPerDay);
+			const laneCount = Math.min(total, maxPerDay);
 			// Overflow per day: count hidden bars covering each column.
 			const overflow = Array.from({ length: 7 }, (_, col) =>
 				bars.filter((b) => b.lane >= maxPerDay && b.colStart - 1 <= col && b.colEnd - 2 >= col)
@@ -183,8 +103,8 @@
 		</div>
 	{/if}
 
-	<div class="cal-weekdays" role="row">
-		{#each weekdayLabels as w (w)}<div class="wd" role="columnheader">{w}</div>{/each}
+	<div class="cal-weekdays" aria-hidden="true">
+		{#each weekdayLabels as w (w)}<div class="wd">{w}</div>{/each}
 	</div>
 
 	<div class="cal-grid">
@@ -204,22 +124,22 @@
 				{/each}
 
 				<!-- event lanes -->
-				{#each visible as bar (bar.event.id)}
-					{@const tag = barTag(bar.event)}
+				{#each visible as bar (bar.item.id)}
+					{@const tag = barTag(bar.item)}
 					<svelte:element
 						this={tag}
-						href={tag === 'a' ? bar.event.href : undefined}
+						href={tag === 'a' ? bar.item.href : undefined}
 						role={tag === 'span' ? 'note' : undefined}
-						class="cal-bar tone-{bar.event.tone ?? 'owned'}"
+						class="cal-bar tone-{bar.item.tone ?? 'owned'}"
 						class:cl={bar.continuesLeft}
 						class:cr={bar.continuesRight}
 						style:grid-column="{bar.colStart} / {bar.colEnd}"
 						style:grid-row={bar.lane + 2}
-						onclick={tag === 'button' ? () => bar.event.onClick?.() : undefined}
-						title={bar.event.title}
+						onclick={tag === 'button' ? () => bar.item.onClick?.() : undefined}
+						title={bar.item.title}
 					>
-						{#if bar.event.emoji}<span class="bar-emoji">{bar.event.emoji}</span>{/if}
-						<span class="bar-title">{bar.event.title}</span>
+						{#if bar.item.emoji}<span class="bar-emoji">{bar.item.emoji}</span>{/if}
+						<span class="bar-title">{bar.item.title}</span>
 					</svelte:element>
 				{/each}
 

@@ -150,9 +150,9 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 	import {
 		AppShell,
 		Button, IconButton, Card, CardHeader, Chip, Tooltip, Disclosure, OverflowMenu,
-		CalendarMonth,
+		CalendarMonth, RangeCalendar,
 		Avatar, AvatarUpload, AvatarGroup, LeanMeter, PersonList,
-		TextField, DateField, SegmentedControl, Composer,
+		TextField, DateField, SegmentedControl, Composer, Switch, CopyField,
 		StatusBadge, EmptyState, ChatMessage, RequestCard, Skeleton, SkeletonText
 	} from '@walaware/design';
 	let rsvp = $state('Going');
@@ -171,9 +171,9 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 | `brand`    | `Wordmark`, `AppIcon` (+ `WALA_SUITE`, `WALA_GLYPHS`) |
 | `shell`    | `AppShell` (+ `NavItem`, `ShellAccount`, `ShellBack` types) |
 | `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip`, `Tooltip`, `Disclosure`, `OverflowMenu` (+ `OverflowAction` type) |
-| `calendar` | `CalendarMonth` (+ `CalendarEvent`, `CalendarTone` types) |
+| `calendar` | `CalendarMonth`, `RangeCalendar` (+ `CalendarEvent`, `CalendarTone`, `DateRange`, `RangeTone`, `InvalidReason` types) |
 | `people`   | `Avatar`, `AvatarUpload`, `AvatarGroup`, `LeanMeter`, `PersonList` (+ `colorFor`, `Person` type) |
-| `forms`    | `TextField`, `DateField`, `SegmentedControl`, `Composer` |
+| `forms`    | `TextField`, `DateField`, `SegmentedControl`, `Composer`, `Switch`, `CopyField` |
 | `feedback` | `StatusBadge`, `EmptyState`, `ChatMessage`, `RequestCard` (+ `RequestPerson` type), `Skeleton`, `SkeletonText` |
 
 `AppShell` is the standard app chrome: a desktop left sidebar that collapses to a
@@ -246,6 +246,101 @@ events stack into lanes; a day with more than `maxPerDay` collapses the rest int
 are inclusive `YYYY-MM-DD` (omit `end` for a single day). `tone`: `'owned'` (default) ·
 `'teaser'` · `'neutral'`. The calendar renders generic events — mapping your trips (and a
 friend's shared, redacted teasers) into `CalendarEvent[]` is the app's job.
+
+### RangeCalendar
+
+An inline, selectable range calendar. Click a start, then an end — the tentative span
+previews on hover *and* on keyboard focus, so it works by tap on mobile where there is no
+hover. A second click before the anchor cancels and restarts. Use `DateField range` for
+plain forms; use this when the calendar *is* the surface.
+
+```svelte
+<RangeCalendar
+  bind:start bind:end
+  min={todayIso} max={oneYearOut}
+  minNights={2}
+  heat={freeByDay}
+  heatLabel={(d, v) => `${Math.round(v * memberCount)} of ${memberCount} free`}
+  ranges={[
+    { id: 'mine', start, end, tone: 'outline', label: 'your free days' },
+    { id: c.id, start: c.start, end: c.end, tone: 'candidate', label: c.name, onClick: vote }
+  ]}
+  onSelect={(s, e) => propose(s, e)}
+  onInvalidSelect={(s, e, why) => explain(why)}
+/>
+```
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `start` / `end` | `string \| null` | selected span, `YYYY-MM-DD`. **Bindable** |
+| `months` | `number \| 'auto'` | `auto` (default) → 1 / 2 / 3 by *container* width (<640 / <1024 / ≥1024) |
+| `defaultYear` / `defaultMonth` | `number` | leading visible month; seeds the view once (defaults to `start`, else today) |
+| `min` / `max` | `string` | selectable bounds, inclusive. Also bound paging — chevrons disable at the edges |
+| `minNights` | `number` | minimum span (default `0`). Shorter spans **complete but read as invalid** — never silently clamped |
+| `weekStartsOn` | `0 \| 1` | 0 Sunday (default), 1 Monday |
+| `heat` | `Record<string, number>` | per-day density 0–1, shaded on a sand ramp |
+| `heatLabel` | `(date, value) => string` | turns a heat value into a phrase for the cell's accessible name |
+| `ranges` | `DateRange[]` | committed spans drawn under the selection layer |
+| `isDisabled` | `(date) => boolean` | extra per-day disabling on top of `min`/`max` |
+| `maxLanes` | `number` | `candidate` bars per day before the rest collapse into `+N` (default `3`) |
+| `today` | `string` | override the clock |
+| `label` | `string` | accessible name for the widget |
+| `onSelect` | `(start, end) => void` | fires only for a **valid** completed span |
+| `onInvalidSelect` | `(start, end, reason) => void` | `reason`: `'too-short' \| 'contains-disabled' \| 'out-of-bounds'` |
+| `onViewChange` | `(year, month) => void` | the leading visible month changed |
+
+`DateRange` is `{ id, start, end?, tone?, label?, emoji?, onClick? }` with
+`tone: 'candidate' | 'outline' | 'muted'` (default `candidate`).
+
+**The overlays don't fight because each owns a different visual property, not a different
+intensity of the same fill:**
+
+| Channel | Draws as | Token |
+| ------- | -------- | ----- |
+| `heat` | cell background | white → `sand-400` ramp |
+| `outline` range | stroked band, never filled | `cocoa-300` |
+| `candidate` range | lane bar under the day number | `primary-soft` |
+| selection | solid endpoint pills + wash | `primary` |
+
+The heat ramp stays entirely in *sand* and tops out at `sand-400`, so `--color-text-strong`
+holds **≥ 9.2:1** contrast at every heat value — the day number never flips colour. Heat is
+suppressed under the live selection so tints never stack. Give `heat` a value only where you
+mean it; `0` renders nothing.
+
+**A11y** (owned by the component): one `role="grid"` per month with a roving tabindex,
+`←/→` by day, `↑/↓` by week, `Home`/`End` to the week edges, `PageUp`/`PageDown` by month
+(`Shift` for a year), `Enter`/`Space` to set start then end, `Escape` to cancel a half-made
+span — restoring whatever was committed before it. Cells carry `aria-selected` and
+`aria-disabled`; completed spans are announced politely with their night count.
+
+### Switch
+
+A `role="switch"` pill toggle for an immediate boolean. Use a `Button` for anything that
+needs confirming, and `SegmentedControl` for a choice between named options.
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `checked` | `boolean` | **Bindable** |
+| `label` / `meta` | `string` | visible label + sub-line |
+| `ariaLabel` | `string` | accessible name when there's no visible `label` |
+| `disabled` | `boolean` | |
+| `onChange` | `(checked) => void` | |
+
+### CopyField
+
+Readonly value with a Copy button that flips to "Copied!" — invite links, share URLs, album
+addresses. The result is announced politely, so screen-reader users get the same confirmation
+the flip gives everyone else. When the clipboard isn't reachable (non-secure context, denied
+permission) the value is **selected** rather than failing silently.
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `value` | `string` | shown and copied |
+| `label` | `string` | field label |
+| `ariaLabel` | `string` | accessible name when there's no visible `label` |
+| `copyLabel` / `copiedLabel` | `string` | default `"Copy"` / `"Copied!"` |
+| `resetAfter` | `number` | ms the copied state sticks (default `1500`) |
+| `onCopy` | `(value) => void` | fires on a successful copy |
 
 ### RequestCard
 
