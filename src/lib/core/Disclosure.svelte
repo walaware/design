@@ -45,12 +45,23 @@
 	const isControlled = $derived(open != null);
 	const isOpen = $derived(isControlled ? !!open : inner);
 
+	const contentId = $props.id();
+	let summaryEl: HTMLButtonElement | undefined = $state();
+	let clipEl: HTMLDivElement | undefined = $state();
+
 	function toggle() {
 		if (disabled) return;
 		const next = !isOpen;
 		if (!isControlled) inner = next;
 		onToggle?.(next);
 	}
+
+	// Collapsing strands focus on an `inert` node — pull it back to the summary.
+	// An effect (not just `toggle`) so controlled consumers are covered too.
+	$effect(() => {
+		if (isOpen || !clipEl) return;
+		if (clipEl.contains(document.activeElement)) summaryEl?.focus();
+	});
 </script>
 
 <!--
@@ -59,12 +70,18 @@
 	(`defaultOpen`); the body eases open/closed via a grid-rows trick and the
 	chevron flips. Respects prefers-reduced-motion. Use for settings groups,
 	gear/packing lists, "show more", or any expand/collapse row.
+
+	While collapsed the body is `inert`, so its focusable children leave the tab
+	order and the a11y tree; collapsing with focus inside returns focus to the
+	summary rather than stranding it.
 -->
 <div class="wala-disclosure {klass}" {...rest}>
 	<button
+		bind:this={summaryEl}
 		type="button"
 		class="summary"
 		aria-expanded={isOpen}
+		aria-controls={contentId}
 		{disabled}
 		onclick={toggle}
 		style={summaryStyle}
@@ -82,7 +99,15 @@
 		{/if}
 	</button>
 	<div class="content {isOpen ? 'open' : ''}">
-		<div class="content-clip">
+		<!--
+			`inert` while collapsed: `overflow: hidden` only clips paint, so without
+			it the body's buttons and inputs stay in the tab order and in the a11y
+			tree — a closed group of six Disclosures would hand a keyboard user
+			~30 invisible focus stops. Not `hidden="until-found"`: that applies
+			`content-visibility: hidden`, which collapses the measured height and
+			breaks the grid-rows open/close animation.
+		-->
+		<div class="content-clip" bind:this={clipEl} id={contentId} inert={!isOpen}>
 			<div class="content-pad" style={contentStyle}>
 				{#if children}{@render children()}{/if}
 			</div>

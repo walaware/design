@@ -247,6 +247,19 @@ are inclusive `YYYY-MM-DD` (omit `end` for a single day). `tone`: `'owned'` (def
 `'teaser'` · `'neutral'`. The calendar renders generic events — mapping your trips (and a
 friend's shared, redacted teasers) into `CalendarEvent[]` is the app's job.
 
+### Disclosure
+
+A collapsible section — summary row + rotating chevron over height-animated content.
+Controlled (`open` + `onToggle`) or uncontrolled (`defaultOpen`).
+
+While collapsed the body is **`inert`**: its focusable children leave the tab order and the
+accessibility tree, so a stack of closed groups doesn't hand keyboard users a run of invisible
+focus stops. Collapsing while focus is inside returns focus to the summary rather than
+stranding it on `<body>`. The summary is wired to the body with `aria-controls`.
+
+(Deliberately not `hidden="until-found"` — it applies `content-visibility: hidden`, which
+collapses the measured height and breaks the open/close animation.)
+
 ### RangeCalendar
 
 An inline, selectable range calendar. Click a start, then an end — the tentative span
@@ -272,7 +285,7 @@ plain forms; use this when the calendar *is* the surface.
 
 | Prop | Type | Notes |
 | ---- | ---- | ----- |
-| `start` / `end` | `string \| null` | selected span, `YYYY-MM-DD`. **Bindable** |
+| `start` / `end` | `string \| null` | selected span, `YYYY-MM-DD`. **Bindable**. `''` is treated as unset, so a `$state('')` binding is safe |
 | `months` | `number \| 'auto'` | `auto` (default) → 1 / 2 / 3 by *container* width (<640 / <1024 / ≥1024) |
 | `defaultYear` / `defaultMonth` | `number` | leading visible month; seeds the view once (defaults to `start`, else today) |
 | `min` / `max` | `string` | selectable bounds, inclusive. Also bound paging — chevrons disable at the edges |

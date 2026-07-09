@@ -93,13 +93,15 @@
 		onViewChange
 	}: Props = $props();
 
-	const todayIso = $derived(today ?? toIso(new Date()));
+	// Falsy, not nullish: an empty string is a natural value for a binding backed
+	// by `$state('')`, and `?? ` would pass it straight into `fromIso` as NaN.
+	const todayIso = $derived(today || toIso(new Date()));
 
 	/* ── view window ─────────────────────────────────────────────────── */
 
 	/** One-shot seed: the view is uncontrolled after mount, driven by paging. */
 	function initialViewIdx(): number {
-		const seed = fromIso(start ?? today ?? toIso(new Date()));
+		const seed = fromIso(start || today || toIso(new Date()));
 		return monthIndex(defaultYear ?? seed.getFullYear(), defaultMonth ?? seed.getMonth() + 1);
 	}
 
@@ -173,7 +175,7 @@
 	let hoverDate = $state<string | null>(null);
 	/** One-shot seed: thereafter driven by keyboard navigation and focus. */
 	function initialFocus(): string {
-		return start ?? today ?? toIso(new Date());
+		return start || today || toIso(new Date());
 	}
 
 	let focusedDate = $state(initialFocus());
