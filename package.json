@@ -45,7 +45,7 @@
     "postversion": "git push --follow-tags"
   },
   "peerDependencies": {
-    "svelte": "^5.0.0",
+    "svelte": "^5.20.0",
     "tailwindcss": "^4.0.0"
   },
   "peerDependenciesMeta": {

@@ -348,6 +348,45 @@
 			</div>
 		</div>
 
+		<!--
+			Composition guard — a popover on the *bottom edge* of an open Disclosure.
+			Disclosure's body needs `overflow: hidden` for its grid-rows height
+			animation, which used to clip any absolutely-positioned child to the
+			content box: ~10px of a 145px OverflowMenu survived, on desktop only
+			(the mobile sheet is `position: fixed` and always escaped).
+
+			`defaultOpen` is load-bearing here: an already-open Disclosure runs no
+			transition at mount, so this also guards the un-clip against ever being
+			made conditional on `transitionend`.
+
+			Regression check: at a desktop width (≥720px), open the ⋯ — all four
+			actions must render, overhanging the dashed body edge.
+		-->
+		<div class="primitives" data-app="shopwala">
+			<span class="avatars-label">
+				OverflowMenu inside an open Disclosure — the popover must escape the body's clip:
+			</span>
+			<div class="primitives-row">
+				<div class="narrow">
+					<Disclosure icon="🔔" summary="Snooze this thread" defaultOpen>
+						<p class="claim-note">The ⋯ menu sits on the body's bottom edge on purpose.</p>
+						<div class="menu-row">
+							<span>Trek road bike · 54cm</span>
+							<OverflowMenu
+								label="Snooze until"
+								actions={[
+									{ icon: '🌆', label: 'This evening', onClick: () => alert('This evening') },
+									{ icon: '☀️', label: 'Tomorrow', onClick: () => alert('Tomorrow') },
+									{ icon: '📅', label: 'This weekend', onClick: () => alert('This weekend') },
+									{ icon: '🗓️', label: 'Next week', onClick: () => alert('Next week') }
+								]}
+							/>
+						</div>
+					</Disclosure>
+				</div>
+			</div>
+		</div>
+
 		<!-- Cascade check: the base reset zeroes heading margins, but a Tailwind
 		     utility must still win (resets now live in @layer base). This h2 must
 		     compute margin-bottom: 2rem, and the box below it sits 2rem clear. -->
@@ -538,6 +577,15 @@
 		align-items: flex-start;
 		gap: 16px;
 		margin-top: 10px;
+	}
+	.menu-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		font-family: var(--font-body);
+		font-size: 13.5px;
+		color: var(--color-text-body);
 	}
 	.shell-link {
 		margin: 18px 0 0;

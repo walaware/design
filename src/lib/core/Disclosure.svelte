@@ -74,6 +74,13 @@
 	While collapsed the body is `inert`, so its focusable children leave the tab
 	order and the a11y tree; collapsing with focus inside returns focus to the
 	summary rather than stranding it.
+
+	**Popovers in the body are supported.** The body clips itself while it animates
+	(that's what the height transition needs), but un-clips once open, so an
+	`OverflowMenu`, `Tooltip`, or an app's own absolutely-positioned dropdown may
+	overhang the content box. Give the popover a `z-index` if it must paint over a
+	sibling below it. The one thing that still clips is a popover opened *during*
+	the ~200ms open/close transition, which no pointer can realistically hit.
 -->
 <div class="wala-disclosure {klass}" {...rest}>
 	<button
@@ -167,9 +174,32 @@
 	.content.open {
 		grid-template-rows: 1fr;
 	}
+	/*
+		`overflow: hidden` is what makes the height animation read as a wipe — without
+		it the body spills out of the 0fr row. But it also clips absolutely-positioned
+		children, so a popover in the body (OverflowMenu, Tooltip, an app's dropdown)
+		got cut off at the content box.
+
+		Once the row has finished growing it is exactly content height, so `visible`
+		clips nothing — it only lets popovers overhang. `overflow` is a discrete
+		property: `allow-discrete` lets it flip mid-transition, and giving it a delay
+		(and no duration) of its own defers the flip to the end of the height
+		transition. Collapsing has neither, so it snaps back to `hidden` before the
+		row shrinks.
+
+		Deliberately CSS, not a `transitionend` listener: this stays correct for a
+		Disclosure that mounts already open (no transition ever runs), for one hidden
+		behind `display: none`, and under reduced motion — all cases a JS latch has to
+		special-case.
+	*/
 	.content-clip {
 		overflow: hidden;
 		min-height: 0;
+		transition: overflow 0s allow-discrete;
+	}
+	.content.open > .content-clip {
+		overflow: visible;
+		transition-delay: var(--dur-base);
 	}
 	.content-pad {
 		padding-bottom: 4px;
@@ -179,6 +209,10 @@
 		.chevron,
 		.content {
 			transition: none;
+		}
+		/* No height transition to wait out — un-clip on the spot. */
+		.content.open > .content-clip {
+			transition-delay: 0s;
 		}
 	}
 </style>
