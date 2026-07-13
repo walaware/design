@@ -180,8 +180,13 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 top bar + slide-in drawer below `breakpoint` (default 920px). The app supplies
 `nav` + `account` + content; the shell owns the brand lockup, active states,
 drawer mechanics, and accent wiring (`data-app`). No bottom tab bar.
-`ShellAccount` is `{ name, color?, avatar?, meta?, onSignOut? }` — pass `avatar` (a
-photo URL) and the footer/top-bar avatar shows the photo, falling back to the initial.
+`ShellAccount` is `{ name, color?, avatar?, meta?, onProfile?, onSignOut?, actions? }` —
+pass `avatar` (a photo URL) and the footer/top-bar avatar shows the photo, falling back to
+the initial. When `onProfile`, `onSignOut`, or extra `actions` are set the account row
+becomes a **menu** (a popover on desktop, a bottom sheet on mobile): the whole footer row
+opens it, and on mobile the top-bar avatar does. Items render in order **Profile → your
+`actions` → Sign out** (Sign out in the danger tone). `meta` is now purely an
+informational subtitle (e.g. an email); sign-out lives in the menu, not that line.
 
 **Contextual mode** turns the same sidebar into a section nav over **one scrollable
 page** (no sub-routes) — for opening a record (a trip, an order) without leaving the shell:
@@ -462,8 +467,9 @@ calls `onPick(file)` (the app uploads it) and previews it locally right away.
 | `label` | `string` | badge `aria-label` (default `"Change photo"`) |
 | `disabled` | `boolean` | disable picking (e.g. while saving) |
 
-Pair it with **`AppShell`'s `account.onProfile`** — when set, the shell account avatar
-(sidebar + mobile top bar) becomes a `"Your profile"` button that opens the editor.
+Pair it with **`AppShell`'s `account.onProfile`** — when set, the shell account menu
+(opened from the sidebar footer row or the mobile top-bar avatar) gets a **Profile** item
+that opens the editor.
 
 `Button` `variant`: `primary` (follows the app accent) · `secondary` (amber) · `accent` (berry) ·
 `soft` · `ghost`. Sizes: `sm` · `md` · `lg`. Pass **`href`** (with optional `target`/`rel`) to

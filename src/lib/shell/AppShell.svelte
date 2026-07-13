@@ -1,5 +1,6 @@
 <script lang="ts" module>
 	import type { Snippet } from 'svelte';
+	import type { OverflowAction } from '../core/OverflowMenu.svelte';
 
 	/** Renderable bit — a plain string/number, or a Snippet for richer nodes. */
 	type NodeLike = string | number | Snippet;
@@ -37,11 +38,15 @@
 		color?: string;
 		/** Profile photo URL; falls back to the coloured initial. */
 		avatar?: string;
-		/** Subtitle line under the name; defaults to "Sign out" when onSignOut is set. */
+		/** Subtitle line under the name (e.g. an email or workspace). Purely informational —
+		    sign-out and profile now live in the account menu, not this line. */
 		meta?: NodeLike;
+		/** Add a "Sign out" item to the account menu. */
 		onSignOut?: () => void;
-		/** When set, the avatar becomes a button that opens the user's profile. */
+		/** Add a "Profile" item to the account menu (and make the whole account row open it). */
 		onProfile?: () => void;
+		/** Extra account-menu items, inserted between Profile and Sign out. */
+		actions?: OverflowAction[];
 	}
 </script>
 
@@ -52,6 +57,7 @@
 	import Wordmark from '../brand/Wordmark.svelte';
 	import Avatar from '../people/Avatar.svelte';
 	import IconButton from '../core/IconButton.svelte';
+	import OverflowMenu from '../core/OverflowMenu.svelte';
 	import type { WalaApp } from '../brand/suite.js';
 
 	// Omit `title` — we repurpose it as a contextual label node, not the DOM tooltip string.
@@ -329,15 +335,25 @@
 		settings:
 			'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
 		menu: '<line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/>',
-		back: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>'
+		back: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+		user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+		logout:
+			'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
+		expand: '<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>'
 	};
+
+	/** Whether the account block has anything to put in its menu (Profile / Sign out / extras).
+	    When false the footer renders a plain, non-interactive account row (legacy behaviour). */
+	const hasAccountMenu = $derived(
+		!!account && !!(account.onProfile || account.onSignOut || account.actions?.length)
+	);
 </script>
 
 {#snippet node(value: NodeLike | undefined | null)}
 	{#if typeof value === 'function'}{@render value()}{:else if value != null}{value}{/if}
 {/snippet}
 
-{#snippet shellIcon(name: 'settings' | 'menu' | 'back', size: number)}
+{#snippet shellIcon(name: 'settings' | 'menu' | 'back' | 'user' | 'logout' | 'expand', size: number)}
 	<svg
 		width={size}
 		height={size}
@@ -397,13 +413,77 @@
 	{/key}
 {/snippet}
 
-{#snippet accountAvatar(acct: ShellAccount)}
-	{#if acct.onProfile}
-		<!-- Clickable when the app wires a profile destination; falls back to a plain
-		     avatar otherwise (no visual/behavioural change for existing consumers). -->
-		<button type="button" class="avatar-btn" onclick={go(acct.onProfile)} aria-label="Your profile">
+{#snippet userIcon()}{@render shellIcon('user', 17)}{/snippet}
+{#snippet logoutIcon()}{@render shellIcon('logout', 17)}{/snippet}
+
+<!-- Build the account-menu actions (Profile → extras → Sign out) and render an OverflowMenu
+     with the supplied trigger. Handlers are wrapped in `go` so they also close the mobile
+     drawer. Popover-on-desktop / bottom-sheet-on-mobile is OverflowMenu's own behaviour. -->
+{#snippet accountMenu(
+	acct: ShellAccount,
+	placement: 'top' | 'bottom',
+	wrapClass: string,
+	menuTrigger: Snippet<[{ toggle: () => void; open: boolean }]>
+)}
+	{@const actions = [
+		acct.onProfile ? { icon: userIcon, label: 'Profile', onClick: go(acct.onProfile) } : null,
+		...(acct.actions ?? []).map((a) => ({ ...a, onClick: a.onClick ? go(a.onClick) : undefined })),
+		acct.onSignOut
+			? { icon: logoutIcon, label: 'Sign out', danger: true, onClick: go(acct.onSignOut) }
+			: null
+	].filter((a) => a != null) as OverflowAction[]}
+	<OverflowMenu
+		{actions}
+		{placement}
+		align="start"
+		label={acct.name}
+		menuStyle="min-width: 208px;"
+		triggerLabel="Account menu"
+		class={wrapClass}
+	>
+		{#snippet trigger(api)}{@render menuTrigger(api)}{/snippet}
+	</OverflowMenu>
+{/snippet}
+
+<!-- Sidebar/drawer footer account row: the whole row is the menu trigger. -->
+{#snippet accountRowTrigger(acct: ShellAccount)}
+	{#snippet inner({ toggle, open }: { toggle: () => void; open: boolean })}
+		<button
+			type="button"
+			class="account account-trigger"
+			class:open
+			onclick={toggle}
+			aria-haspopup="menu"
+			aria-expanded={open}
+		>
 			<Avatar name={acct.name} color={acct.color} src={acct.avatar} size={32} />
+			<div class="account-text">
+				<div class="account-name">{acct.name}</div>
+				{#if acct.meta != null}<div class="account-meta">{@render node(acct.meta)}</div>{/if}
+			</div>
+			<span class="account-caret">{@render shellIcon('expand', 16)}</span>
 		</button>
+	{/snippet}
+	{@render accountMenu(acct, 'top', 'account-menu-wrap', inner)}
+{/snippet}
+
+<!-- Mobile top-bar account: the avatar itself is the menu trigger. -->
+{#snippet accountAvatar(acct: ShellAccount)}
+	{#if hasAccountMenu}
+		{#snippet inner({ toggle, open }: { toggle: () => void; open: boolean })}
+			<button
+				type="button"
+				class="avatar-btn"
+				class:open
+				onclick={toggle}
+				aria-haspopup="menu"
+				aria-expanded={open}
+				aria-label="Account menu"
+			>
+				<Avatar name={acct.name} color={acct.color} src={acct.avatar} size={32} />
+			</button>
+		{/snippet}
+		{@render accountMenu(acct, 'bottom', '', inner)}
 	{:else}
 		<Avatar name={acct.name} color={acct.color} src={acct.avatar} size={32} />
 	{/if}
@@ -418,19 +498,19 @@
 			</button>
 		{/if}
 		{#if account}
-			<div class="account">
-				{@render accountAvatar(account)}
-				<div class="account-text">
-					<div class="account-name">{account.name}</div>
-					{#if account.onSignOut}
-						<button type="button" class="account-meta link" onclick={account.onSignOut}>
-							{#if account.meta != null}{@render node(account.meta)}{:else}Sign out{/if}
-						</button>
-					{:else if account.meta != null}
-						<div class="account-meta">{@render node(account.meta)}</div>
-					{/if}
+			{#if hasAccountMenu}
+				{@render accountRowTrigger(account)}
+			{:else}
+				<div class="account">
+					<Avatar name={account.name} color={account.color} src={account.avatar} size={32} />
+					<div class="account-text">
+						<div class="account-name">{account.name}</div>
+						{#if account.meta != null}
+							<div class="account-meta">{@render node(account.meta)}</div>
+						{/if}
+					</div>
 				</div>
-			</div>
+			{/if}
 		{/if}
 	</div>
 {/snippet}
@@ -716,13 +796,42 @@
 	}
 
 	/* ---- Account block ---- */
+	/* The footer OverflowMenu wraps the trigger in its own inline-flex span; in the
+	   sidebar/drawer footer we want that row to span the full column so the menu
+	   anchors edge-to-edge. */
+	.foot :global(.account-menu-wrap) {
+		display: block;
+		width: 100%;
+	}
 	.account {
 		display: flex;
 		align-items: center;
 		gap: 10px;
+		width: 100%;
 		padding: 12px 10px 6px;
 		margin-top: 6px;
 		border-top: 1px solid var(--color-sand-300);
+		text-align: left;
+	}
+	/* When the row is the account-menu trigger it's a real button — reset chrome and
+	   give it the same soft hover/active affordance as the nav rows. */
+	.account-trigger {
+		border-left: none;
+		border-right: none;
+		border-bottom: none;
+		background: transparent;
+		font-family: var(--font-body);
+		cursor: pointer;
+		border-radius: 0 0 var(--radius-md) var(--radius-md);
+		transition: background var(--dur-fast) var(--ease-out);
+	}
+	.account-trigger:hover,
+	.account-trigger.open {
+		background: var(--color-sand-100);
+	}
+	.account-trigger:focus-visible {
+		outline: none;
+		box-shadow: inset 0 0 0 2px var(--color-primary-soft);
 	}
 	.account-text {
 		line-height: 1.2;
@@ -739,23 +848,23 @@
 	}
 	.account-meta {
 		font-size: 12px;
-		color: var(--color-wala);
+		color: var(--color-text-muted);
 		font-weight: 700;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
-	.account-meta.link {
-		display: block;
-		width: 100%;
-		text-align: left;
-		padding: 0;
-		border: none;
-		background: none;
-		font-family: var(--font-body);
-		cursor: pointer;
+	/* Chevrons-up-down affordance signalling the row opens a menu. */
+	.account-caret {
+		flex: none;
+		display: grid;
+		place-items: center;
+		color: var(--color-text-muted);
 	}
 
-	/* Avatar-as-profile-link — a bare button hugging the 32px avatar, with a soft
-	   ring/scale affordance on hover + keyboard focus. Resting state is visually
-	   identical to a plain avatar so consumers without `onProfile` see no change. */
+	/* Avatar-as-menu-trigger (mobile top bar) — a bare button hugging the 32px avatar,
+	   with a soft ring/scale affordance on hover + keyboard focus. Resting state is
+	   visually identical to a plain avatar. */
 	.avatar-btn {
 		display: block;
 		flex: none;
@@ -769,7 +878,8 @@
 			transform var(--dur-fast) var(--ease-out),
 			box-shadow var(--dur-fast) var(--ease-out);
 	}
-	.avatar-btn:hover {
+	.avatar-btn:hover,
+	.avatar-btn.open {
 		transform: scale(1.06);
 	}
 	.avatar-btn:focus-visible {

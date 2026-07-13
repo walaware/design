@@ -43,11 +43,12 @@ is live today; the rest are dimmed `soon` roadmap rows (matches the current upst
 > **Not "Today".** Earlier drafts of this doc said "Trips · Today" — that was wrong. The live
 > app-level nav is **Trips** + the three `soon` rows above.
 
-> **Profile entry point.** The account avatar in the shell is the way into the profile editor:
-> pass `account.onProfile` to `AppShell` (added in **v0.3.3**) and the avatar — in both the
-> desktop sidebar footer and the mobile top bar — becomes a `"Your profile"` button. Leave
-> `onProfile` unset and the avatar stays non-interactive (today's behaviour). Wire it to open
-> the **Profile editor** screen below.
+> **Profile entry point.** The account row in the shell opens an **account menu** (added in
+> **v0.9.3**): pass `account.onProfile` for a **Profile** item and `account.onSignOut` for a
+> **Sign out** item. The menu opens from the desktop sidebar footer row (whole row is the
+> trigger) and from the mobile top-bar avatar. Wire `onProfile` to open the **Profile editor**
+> screen below. Leave all handlers unset and the account row stays a plain, non-interactive
+> label (today's behaviour).
 
 **Contextual (a trip is open)** — the sidebar becomes a **section nav over ONE scrollable
 page** (no sub-routes): `back={{ label: 'All trips', onClick }}` exits (also closes the
@@ -282,9 +283,11 @@ hand-rolled copy rows (invite link, co-organizer link, Immich album URL).
   — just a claimed name" + a right-aligned `Button variant="ghost" size="sm"` "Sign out".
   The no-account line is the identity model stated plainly.
 
-### Profile editor (`#profile` — opened from the shell avatar)
+### Profile editor (`#profile` — opened from the shell account menu)
 Lets someone set their **nickname** and **change their photo** — the identity they carry across
-the suite (no account; just a claimed name + an optional photo). Reached via `account.onProfile`.
+the suite (no account; just a claimed name + an optional photo). Reached via the shell account
+menu's **Profile** item (`account.onProfile`). Sign-out now lives in that same menu
+(`account.onSignOut`), so the settings-screen "Sign out" button above is optional once wired.
 
 - **Layout**: a single `Card` over the content column (app level, coral accent). Top: a centred
   **`AvatarUpload`** (`size≈96`, `name={nickname}`, `src={photoUrl}`) — the camera badge opens
