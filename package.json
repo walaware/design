@@ -1,6 +1,6 @@
 {
   "name": "@walaware/design",
-  "version": "0.9.3",
+  "version": "0.10.0",
   "description": "Shared design system for the walaware family of life apps — tokens, the wala wordmark, and Svelte 5 components in the warm Campfire house style.",
   "type": "module",
   "license": "MIT",
