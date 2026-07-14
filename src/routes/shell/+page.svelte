@@ -9,7 +9,9 @@
 		Avatar,
 		WALA_SUITE,
 		type WalaApp,
-		type NavItem
+		type NavItem,
+		type ShellNotifications,
+		type NotificationItem
 	} from '$lib/index.js';
 
 	const appNames = Object.keys(WALA_SUITE) as WalaApp[];
@@ -50,6 +52,41 @@
 
 	const open = (name: string) => (record = name);
 	const close = () => (record = null);
+
+	// ---- Notifications demo — app owns the items + actions; the shell owns the bell. ----
+	let notes = $state<NotificationItem[]>([
+		{
+			key: 'fr-alice',
+			icon: '🙋',
+			title: 'Alice sent you a friend request',
+			meta: '2m ago',
+			actions: [
+				{ key: 'accept', label: 'Accept', variant: 'primary', onClick: () => resolve('fr-alice') },
+				{ key: 'decline', label: 'Decline', variant: 'ghost', onClick: () => resolve('fr-alice') }
+			]
+		},
+		{
+			key: 'inv-reyes',
+			icon: '🏔️',
+			title: 'Sam invited you to Point Reyes',
+			meta: 'Trip · 1h ago',
+			actions: [
+				{ key: 'join', label: 'Join', variant: 'primary', onClick: () => resolve('inv-reyes') },
+				{ key: 'no', label: 'Not now', variant: 'ghost', onClick: () => resolve('inv-reyes') }
+			]
+		},
+		{ key: 'gear', icon: '🎒', title: 'Priya added the shared gear list', meta: 'Yesterday', href: '#gear', read: true }
+	]);
+	const resolve = (key: string): void => {
+		notes = notes.filter((n: NotificationItem) => n.key !== key);
+	};
+	const unreadCount = $derived(notes.filter((n: NotificationItem) => !n.read).length);
+	const notifications = $derived<ShellNotifications>({
+		items: notes,
+		unread: unreadCount,
+		onOpen: () => {},
+		onMarkAllRead: () => (notes = notes.map((n: NotificationItem) => ({ ...n, read: true })))
+	});
 </script>
 
 <AppShell
@@ -66,6 +103,7 @@
 		onProfile: () => alert('Profile'),
 		onSignOut: () => alert('Signed out')
 	}}
+	{notifications}
 	onSettings={record ? null : () => (screen = 'settings')}
 	settingsActive={screen === 'settings'}
 >

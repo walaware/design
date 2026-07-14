@@ -24,7 +24,15 @@ export { default as OverflowMenu, type OverflowAction } from './core/OverflowMen
 
 // Shell
 export { default as AppShell } from './shell/AppShell.svelte';
-export { type NavItem, type ShellAccount, type ShellBack } from './shell/AppShell.svelte';
+export {
+	type NavItem,
+	type ShellAccount,
+	type ShellBack,
+	type ShellNotifications,
+	type NotificationItem,
+	type NotificationAction
+} from './shell/AppShell.svelte';
+export { default as NotificationBell } from './shell/NotificationBell.svelte';
 
 // Calendar
 export { default as CalendarMonth } from './calendar/CalendarMonth.svelte';

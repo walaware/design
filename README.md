@@ -148,7 +148,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 ```svelte
 <script>
 	import {
-		AppShell,
+		AppShell, NotificationBell,
 		Button, IconButton, Card, CardHeader, Chip, Tooltip, Disclosure, OverflowMenu,
 		CalendarMonth, RangeCalendar,
 		Avatar, AvatarUpload, AvatarGroup, LeanMeter, PersonList,
@@ -169,7 +169,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 | Group      | Components                                  |
 | ---------- | ------------------------------------------- |
 | `brand`    | `Wordmark`, `AppIcon` (+ `WALA_SUITE`, `WALA_GLYPHS`) |
-| `shell`    | `AppShell` (+ `NavItem`, `ShellAccount`, `ShellBack` types) |
+| `shell`    | `AppShell`, `NotificationBell` (+ `NavItem`, `ShellAccount`, `ShellBack`, `ShellNotifications`, `NotificationItem`, `NotificationAction` types) |
 | `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip`, `Tooltip`, `Disclosure`, `OverflowMenu` (+ `OverflowAction` type) |
 | `calendar` | `CalendarMonth`, `RangeCalendar` (+ `CalendarEvent`, `CalendarTone`, `DateRange`, `RangeTone`, `InvalidReason` types) |
 | `people`   | `Avatar`, `AvatarUpload`, `AvatarGroup`, `LeanMeter`, `PersonList` (+ `colorFor`, `Person` type) |
@@ -187,6 +187,27 @@ becomes a **menu** (a popover on desktop, a bottom sheet on mobile): the whole f
 opens it, and on mobile the top-bar avatar does. Items render in order **Profile → your
 `actions` → Sign out** (Sign out in the danger tone). `meta` is now purely an
 informational subtitle (e.g. an email); sign-out lives in the menu, not that line.
+
+**Notifications.** Pass `notifications` to add a **notification bell** — top-right of the
+mobile top bar, and beside the wordmark at the top of the desktop sidebar. The app owns the
+data + actions; the shell owns the bell, the unread badge, and the panel (a popover on
+desktop, a bottom sheet on mobile) with focus-trap + Esc-to-close, mirroring the account
+menu. `ShellNotifications` is `{ items, unread, onOpen?, onMarkAllRead?, empty? }`:
+
+| Field | Type | Notes |
+| ----- | ---- | ----- |
+| `items` | `NotificationItem[]` | pre-sorted, newest first |
+| `unread` | `number` | badge count on the bell (hidden at 0, capped `99+`) |
+| `onOpen` | `() => void` | fired once when the panel opens — mark items seen here |
+| `onMarkAllRead` | `() => void` | header "Mark all read" action; omit or `unread: 0` hides it |
+| `empty` | node | empty-state node; defaults to a tidy "caught up" line |
+
+Each `NotificationItem` is `{ key, icon?, title, meta?, read?, href?, onClick?, actions? }` —
+`icon` is an emoji **or a snippet** (e.g. an `<Avatar>`); `read` dims the row and drops its
+unread dot; `href`/`onClick` make the row a link/button that **closes** the panel on activate;
+`actions` are inline `{ key, label, variant?: 'primary'|'ghost'|'danger', onClick, disabled? }`
+buttons (Accept/Decline …) that **keep** the panel open so the list can re-render in place.
+`NotificationBell` is also exported standalone for use outside the shell. Live demo at `/shell`.
 
 **Contextual mode** turns the same sidebar into a section nav over **one scrollable
 page** (no sub-routes) — for opening a record (a trip, an order) without leaving the shell:

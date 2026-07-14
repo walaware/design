@@ -1,6 +1,12 @@
 <script lang="ts" module>
 	import type { Snippet } from 'svelte';
 	import type { OverflowAction } from '../core/OverflowMenu.svelte';
+	import type { ShellNotifications } from './NotificationBell.svelte';
+	export type {
+		ShellNotifications,
+		NotificationItem,
+		NotificationAction
+	} from './NotificationBell.svelte';
 
 	/** Renderable bit — a plain string/number, or a Snippet for richer nodes. */
 	type NodeLike = string | number | Snippet;
@@ -58,6 +64,7 @@
 	import Avatar from '../people/Avatar.svelte';
 	import IconButton from '../core/IconButton.svelte';
 	import OverflowMenu from '../core/OverflowMenu.svelte';
+	import NotificationBell from './NotificationBell.svelte';
 	import type { WalaApp } from '../brand/suite.js';
 
 	// Omit `title` — we repurpose it as a contextual label node, not the DOM tooltip string.
@@ -68,6 +75,9 @@
 		nav?: NavItem[];
 		/** Account shown in the sidebar footer / mobile top bar. */
 		account?: ShellAccount | null;
+		/** Notification bell + panel (sidebar top on desktop, top-bar top-right on mobile).
+		    App owns the items + actions; the shell owns the bell, badge, and panel. Omit to hide. */
+		notifications?: ShellNotifications | null;
 		/** Settings affordance handler (sidebar footer + mobile top bar). Omit to hide. */
 		onSettings?: (() => void) | null;
 		/** Mark the settings row active. */
@@ -107,6 +117,7 @@
 		app = 'tripwala',
 		nav = [],
 		account = null,
+		notifications = null,
 		onSettings = null,
 		settingsActive = false,
 		back = null,
@@ -531,7 +542,12 @@
 <div data-app={app} class="wala-appshell {klass}" {...rest}>
 	{#if desktop}
 		<aside class="sidebar">
-			{@render brand(36, 25)}
+			<div class="side-head">
+				{@render brand(36, 25)}
+				{#if notifications}
+					<NotificationBell data={notifications} align="start" class="side-bell" />
+				{/if}
+			</div>
 			{@render navColumn()}
 			{@render footer()}
 		</aside>
@@ -578,6 +594,9 @@
 					{/if}
 				</div>
 				<span class="topbar-end">
+					{#if notifications}
+						<NotificationBell data={notifications} align="end" size={32} />
+					{/if}
 					{#if onSettings}
 						<IconButton tone="soft" size={32} onclick={go(onSettings)} aria-label="settings">
 							{@render shellIcon('settings', 18)}
@@ -645,6 +664,19 @@
 		background: var(--color-bg-app-alt);
 	}
 
+	/* Brand + optional notification bell share the sidebar's top row: brand left,
+	   bell pinned right. Without a bell this collapses to just the brand. */
+	.side-head {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 6px 6px 22px 8px;
+	}
+	.side-head .brand {
+		flex: 1;
+		min-width: 0;
+		padding: 0;
+	}
 	.brand {
 		display: flex;
 		align-items: center;
