@@ -645,18 +645,29 @@
 		height: 100vh;
 		height: 100dvh;
 		display: flex;
+		/* Clamp the shell to the viewport box so nothing can spill to the document and
+		   make the window scroll. Without this, Firefox lets a mis-measured flex child
+		   push the root taller than the viewport, the document scrolls, and the sticky
+		   sidebar rides up with it. Fixed-position chrome (drawer, scrim, bottom sheets,
+		   popovers) escapes this clip since the shell sets no transform/filter. */
+		overflow: hidden;
 		background: var(--color-bg-app);
 		font-family: var(--font-body);
 		color: var(--color-text-strong);
 	}
 
 	/* ---- Desktop sidebar ---- */
+	/* A fixed, self-contained region: it fills the shell's height and never scrolls with
+	   the main content. It is NOT `position: sticky` — sticky made it ride up with any
+	   document scroll (the Firefox bug). It also carries no `overflow` of its own: an
+	   `overflow-y` here would compute `overflow-x` to `auto` and clip the notification
+	   popover that escapes the column (cf. the Disclosure un-clip fix). The nav set is
+	   short by design, so the column never needs to scroll. */
 	.sidebar {
 		width: 248px;
 		flex: none;
-		position: sticky;
-		top: 0;
-		height: 100vh;
+		height: 100%;
+		min-height: 0;
 		display: flex;
 		flex-direction: column;
 		padding: 22px 16px;
@@ -1042,6 +1053,10 @@
 		min-width: 0;
 		min-height: 0; /* paired with .main min-height:0 → .content is the scroll root */
 		overflow-y: auto;
+		/* Keep the scroll self-contained: at the top/bottom edge the scroll must NOT chain
+		   out to the document (which in Firefox drags the whole shell + sidebar). This is
+		   what stops the "scrolls infinitely past the end" rubber-band from propagating. */
+		overscroll-behavior: contain;
 	}
 	.content-inner {
 		width: 100%;
