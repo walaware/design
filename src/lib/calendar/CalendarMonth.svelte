@@ -89,10 +89,12 @@
 </script>
 
 <!--
-	Month grid with multi-day event spans. Events carry a `tone`: `owned` trips are
-	accent-tinted and interactive (link through); `teaser` events (a friend's shared
-	trip) are muted and read-only — never a link. Mobile-first; drop it into an
-	AppShell content column or a Card.
+	Month grid with multi-day event spans. Events carry a `tone` (behaviour): `owned`
+	trips are accent-tinted and interactive (link through); `teaser` events (a friend's
+	shared trip) are muted and read-only — never a link. An optional per-event `color`
+	(any CSS colour / `--color-av-*` token) tints the bar in that hue on top of the tone
+	— use it to colour-code events by owner (e.g. each friend in their avatar colour).
+	Mobile-first; drop it into an AppShell content column or a Card.
 -->
 <div class="wala-calendarmonth">
 	{#if header}
@@ -131,8 +133,15 @@
 						href={tag === 'a' ? bar.item.href : undefined}
 						role={tag === 'span' ? 'note' : undefined}
 						class="cal-bar tone-{bar.item.tone ?? 'owned'}"
+						class:colored={!!bar.item.color}
 						class:cl={bar.continuesLeft}
 						class:cr={bar.continuesRight}
+						style:--bar-bg={bar.item.color
+							? `color-mix(in srgb, ${bar.item.color} 22%, var(--color-surface-card))`
+							: null}
+						style:--bar-fg={bar.item.color
+							? `color-mix(in srgb, ${bar.item.color} 68%, var(--color-cocoa-900))`
+							: null}
 						style:grid-column="{bar.colStart} / {bar.colEnd}"
 						style:grid-row={bar.lane + 2}
 						onclick={tag === 'button' ? () => bar.item.onClick?.() : undefined}
@@ -303,6 +312,15 @@
 	a.tone-neutral,
 	button.tone-neutral {
 		cursor: pointer;
+	}
+	/* Per-event colour (owner-coded bars): the inline --bar-bg/--bar-fg win over the
+	   tone palette; keep the hue at full strength even for read-only teaser trips. */
+	.cal-bar.colored {
+		opacity: 1;
+	}
+	a.cal-bar.colored:hover,
+	button.cal-bar.colored:hover {
+		filter: brightness(0.97);
 	}
 	.cal-more {
 		align-self: start;

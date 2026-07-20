@@ -66,8 +66,8 @@
 	const calEvents: CalendarEvent[] = [
 		{ id: 't1', title: 'Tofino', emoji: '🏄', start: '2026-07-08', end: '2026-07-12', tone: 'owned', href: '#' },
 		{ id: 't2', title: 'Camp', emoji: '🏕️', start: '2026-07-18', end: '2026-07-19', tone: 'owned', href: '#' },
-		{ id: 'f1', title: "Maya · Banff", start: '2026-07-10', end: '2026-07-14', tone: 'teaser' },
-		{ id: 'f2', title: "Theo · Portland", start: '2026-07-24', end: '2026-07-26', tone: 'teaser' },
+		{ id: 'f1', title: "Maya · Banff", start: '2026-07-10', end: '2026-07-14', tone: 'teaser', color: 'var(--color-av-3)' },
+		{ id: 'f2', title: "Theo · Portland", start: '2026-07-24', end: '2026-07-26', tone: 'teaser', color: 'var(--color-av-5)' },
 		{ id: 't3', title: 'Day trip', start: '2026-07-11', tone: 'owned', href: '#' }
 	];
 	let calYear = $state(2026);

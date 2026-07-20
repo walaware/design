@@ -15,6 +15,11 @@ export interface CalendarEvent {
 	end?: string;
 	/** Visual role (default `owned`). */
 	tone?: CalendarTone;
+	/** Per-event hue — any CSS colour or `--color-av-*` token. Tints the bar in this
+	    colour (soft fill + legible ink), overriding the `tone` palette while keeping the
+	    tone's *behaviour* (interactivity, muting). Use to colour-code events by owner —
+	    e.g. each friend's trips in their avatar colour. */
+	color?: string;
 	/** Leading glyph on the bar. */
 	emoji?: string;
 	/** Renders the bar as a link. Leave unset for read-only teasers. */
