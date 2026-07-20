@@ -1,8 +1,8 @@
 # tripwala — account-less group trips
 
 **Accent:** Coral `#FF7A59` (the house default + the constant `--color-wala`) · **Glyph:** `compass` · **Root:** `trip` · **`data-app`:** `tripwala`
-**Layout mode:** `AppShell`, two-level — global destinations → **contextual section nav** (scrollSpy) over one scrollable trip page
-**Status:** designing · **Last mock sync:** 2026-06-23 (`templates/tripwala` multi-trip + AppShell contextual workspace; `ui_kits/rally` single-page worked example — both in the Claude Design package)
+**Layout mode:** `AppShell`, two-level — global destinations → an open trip as a **contextual dashboard** (two-column dashboard + rail on desktop, hub-&-spoke on mobile), plus a dedicated **Trip settings** screen
+**Status:** designing · **Last mock sync:** 2026-07-19 (`Tripwala Redesign.dc.html` — trip-page IA redesign: dashboard + rail / hub-&-spoke, itinerary density, one settings home; pulled via design-sync)
 
 ## Context
 
@@ -249,34 +249,87 @@ the Propose handler.
 `Switch` replaces the hand-rolled "Trip notifications" pill; `CopyField` replaces the three
 hand-rolled copy rows (invite link, co-organizer link, Immich album URL).
 
-### Trip page (contextual mode — one scroll of `<section id>` modules)
-- **Purpose:** everything about one trip on one page; module nav + scrollspy navigate it.
-- **Sticky header** (`data-appshell-sticky`): emoji tile + trip title + `dates · where · N
-  going` + a right-aligned `Button variant="primary"` "Message crew". `scroll-margin-top`
-  on each section keeps anchored scrolls clear of it. On mobile this header **scrolls away**
-  and its identity (emoji + title + `dates · where`) crossfades into the top bar — wire the
-  shell's `title`/`subtitle`/`icon` to match it (the kit owns the collapse; no app CSS).
-- **Modules** (in nav order):
-  - `#overview ✨` — three stat tiles (`surface-sunk`, `radius-md`): **Countdown** ("in 12
-    days") · **Crew** ("6 going") · **Claimed** ("3/8"); then a "Gear & food claimed" label
-    with a right-aligned count and a **progress bar** (8px, `radius-pill`, sand-300 track,
-    `--color-primary` fill).
-  - `#dates 📅` — big date (`display`, 20px) + muted nights label; then a **day plan** list:
-    rows `day (104px, primary-press 800) + label`, divider-separated.
-  - `#crew 🙌 Who's coming?` — crew as **avatar pills** (`Avatar 28` + name on `sand-100`
-    `radius-pill`); header carries right-aligned going/maybe `Chip`s.
-  - `#gear 🎒` ("— who's bringing what") — rows: emoji + name + **either** a claimed
-    avatar-pill (`Avatar 22` + claimer) **or** a `Button variant="soft" size="sm"` "Claim".
-  - `#food 🍳` ("— who's cooking") — identical row pattern to Gear.
-  - `#packing 🧳` ("— your personal list") — a **personal checklist**: a check circle
-    (filled `--color-primary` + ✓ when done, else a 2px sand-300 ring) + item.
-  - `#expenses 💸` — rows: `Avatar` + who / what + right-aligned amount (`display`, 16px);
-    then a **balance box** (`--color-primary-soft`, `radius-md`): "You're owed $X" / "You owe
-    $X" (primary-press) + right-aligned "$Y each".
-  - `#tripsettings ⚙️ Trip settings` — toggle rows: **Trip notifications** (pill switch,
-    `--color-primary` on / sand-300 off, 22px knob) and **Leave this trip** (`Button
-    variant="ghost" size="sm"` "Leave").
-- **`soon` modules:** Itinerary · Map · Photos (dimmed nav rows, no section yet).
+### Trip page — dashboard + rail (desktop) · hub-&-spoke (mobile) — redesign 2026-07-19
+
+> **Supersedes** the previous "one scroll of `<section id>` modules, all expanded" spec —
+> which had drifted, in the shipped app, into a punishing single scroll (every module
+> expanded, a 20-night itinerary rendering ~21 empty "＋ Add entry" rows, an inline live map,
+> per-module "Hide" buttons, and a nested bottom Settings-in-Settings accordion).
+> **Reference impl:** `Tripwala Redesign.dc.html` (Claude Design, pulled 2026-07-19 via
+> design-sync; the interactive source lives in the sync export). **Recomposition only** —
+> existing Campfire components, **no new primitives, no token changes.** Needs `AppShell`
+> ≥ **v0.10.0** (contextual `scrollSpy`+`back`, `notifications`, mobile header-collapse),
+> `OverflowMenu`, `Switch`, `CopyField`, `SegmentedControl`, `NotificationBell`.
+
+**Shell wiring.** Contextual mode: `back` ("All trips"), `scrollSpy` (**desktop only**),
+`[data-appshell-sticky]` trip header, **`max-width: 1180`** (was 920), `notifications` (the
+bell), and `title`/`subtitle`/`icon` fed for the mobile header-collapse. The shell `nav` is
+the trip's **section nav** (Overview · Itinerary · Bookings · Map · Packing · Expenses) — and
+**hidden sections drop out of the nav** too.
+
+**Sticky trip header** (`data-appshell-sticky`): emoji tile · title · `dates · where · N going ·
+M maybe` · overlapped crew avatars · (desktop) `Button variant="soft"` "💬 Message crew" · a
+**"＋ Add" `OverflowMenu`** (primary Button trigger) → Itinerary entry · Booking · Expense · Map
+pin · Something to decide.
+
+**Overview stat strip (desktop)** — one row of cards under the header: **Countdown** · **Crew** ·
+**Next up** (flex 1.5, ellipsis) · **To decide** (a `--color-primary-soft` *button* → jump to the
+decisions block). Replaces the old three-tile Overview section.
+
+**Two-column body (desktop ≥920px)** — `display:flex; gap:26px; align-items:flex-start`:
+- **Main column** (`flex:1.5`) = **Itinerary** — "What's the plan?":
+  - **Open decisions surface at the TOP** of the card (`--color-primary-soft` block): 🤔 question
+    · `2 of 5 voted · closes Wed` · `Button variant="soft" size="sm"` "Vote". (Was buried at the
+    page bottom.)
+  - Days grouped under **city headers** (`📍 Lisbon · Jul 24 – 30 · 6 nights`). **Only planned
+    days render** — each with entry pills (`time` chip · title · claimer `Avatar 24`).
+  - Contiguous empty days collapse to **ONE dashed row per city** (`＋ Sun 26 → Thu 30 · 4 open
+    days`) that expands to per-day add-chips on click (plain state — no `Disclosure`), with a
+    "collapse" link. A 20-night trip is ~1 screen, not ~21 add-entry rows.
+- **Rail column** (`flex:1; min-width:300px`) = compact module summaries, each header with a `⋯`
+  `OverflowMenu`:
+  - **Bookings** "What's booked?" — rows (emoji · title · meta · status `Chip` leaf/sun) + "＋ Add
+    a booking".
+  - **Map** "Pins & places" — a **static peek card** (hatched preview + "N pins across M cities" +
+    "Open the map →"). **No inline live map** — the full map is its own screen.
+  - **Packing** "Who's bringing what?" — a **claim meter** (X of Y + progress bar) + unclaimed rows
+    (`Button variant="soft" size="sm"` "🙋 Claim") + "See all N items →"; "🎉 Everything's claimed"
+    when done.
+  - **Expenses** "Who paid what?" — a `--color-primary-soft` balance line ("You're owed $86" ·
+    "$1,240 so far") + last-expense line + "＋ Add an expense".
+- **Not-started / hidden modules** collapse to **one dashed row** ("＋ Not on this trip: ⛺ Gear ·
+  📷 Photos … — turn on in settings"), never full empty-state blocks.
+
+**Module `⋯` menu** (every module): **"Hide this section"** (syncs the Sections toggles; toast
+points at Trip settings to restore) · "Section settings…" (→ Trip settings). **The old inline
+per-module "Hide" buttons are removed.**
+
+**Mobile (<920px) = hub & spoke:**
+- **Trip home** = a status list: Countdown + Next-up tiles, then **one tappable row per active
+  module** (emoji tile · house-question title · live status line · ▸), then a dashed **"⚙️ Trip
+  settings"** row. No long scroll.
+- Tapping a row opens that **module focused** (one per screen) with a "← Trip home" row; the shell
+  header-collapse carries trip identity into the top bar. The "＋ Add" menu stays in the header.
+
+**Voice.** Module titles are the house questions: "What's the plan?" · "What's booked?" · "Pins
+& places" · "Who's bringing what?" · "Who paid what?".
+
+### Trip settings — one home (own screen, `max-width: 640`)
+
+Reached from the sidebar ⚙ (desktop) / the mobile trip-home row / any module `⋯`. **Replaces**
+the old bottom `#tripsettings` accordion AND every scattered inline control. Four groups:
+- **🧩 Sections — what this trip shows:** a `Switch` per module (Itinerary, Bookings, Map, Packing,
+  Expenses, Gear library, Photos, Meals) with a live meta line. **This is the restore-hidden-
+  sections surface** — it syncs with the module `⋯` "Hide".
+- **🔗 Access & invites:** `CopyField` invite link; three `SegmentedControl`s — **How people join**
+  (Instant / Request), **Who can invite & share** (Everyone / Organizers), **Friends' calendars
+  see** (Private / Busy / Name & place); a **People & roles** row (`Button variant="ghost"`
+  "Manage").
+- **🔔 Your notifications:** a single `Switch` (trip notifications — claims, RSVPs, meal updates).
+- **🧰 Manage:** Trip details (Edit) · Clone this trip (Make a copy) · Leave this trip (Leave).
+
+_(App-level `#settings` below stays for account/identity; per-trip config now lives in this
+Trip settings screen.)_
 
 ### App settings (`#settings` app level)
 - Toggle rows (Trip notifications) + an **account row**: `Avatar 36` + "Maya" + "No account
