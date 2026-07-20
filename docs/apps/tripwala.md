@@ -316,8 +316,19 @@ per-module "Hide" buttons are removed.**
 
 ### Trip settings — one home (own screen, `max-width: 640`)
 
-Reached from the sidebar ⚙ (desktop) / the mobile trip-home row / any module `⋯`. **Replaces**
-the old bottom `#tripsettings` accordion AND every scattered inline control. Four groups:
+**Stays inside the trip's contextual shell — it is NOT an app-level (level-0) page.** Even
+though it's its own route, render it with `AppShell` still in **contextual mode**: pass `back`
+(→ the trip, e.g. "← Portugal with the crew") and the **trip's section `nav`** (Overview ·
+Itinerary · … — so you can jump straight back into any section), with `title` = "⚙️ Trip
+settings" and **`scrollSpy` off** (it's a distinct screen, not an in-page anchor list; the
+section nav items navigate back to the trip route + section rather than scrolling in place). Do
+**NOT** let the shell fall back to the global destinations (Trips · Ideas · Bookings · …) — that
+dumps the user out of the trip context on entry, which is the bug to avoid.
+
+**Entry points (do not make it sidebar-only):** the sidebar ⚙ (desktop) **and** every module's
+`⋯` menu ("Section settings…", alongside "Hide this section") **and** the mobile trip-home ⚙ row.
+The settings screen itself carries a "← Back to trip" affordance. **Replaces** the old bottom
+`#tripsettings` accordion AND every scattered inline control. Four groups:
 - **🧩 Sections — what this trip shows:** a `Switch` per module (Itinerary, Bookings, Map, Packing,
   Expenses, Gear library, Photos, Meals) with a live meta line. **This is the restore-hidden-
   sections surface** — it syncs with the module `⋯` "Hide".
