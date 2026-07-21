@@ -364,6 +364,13 @@ to where the user already is (see **Distributed into context** below). What's le
 **Distributed into context (no longer in settings):**
 - **People & roles** → the **"Who's in" / Members** section — member rows carry make-guest / remove;
   add a co-organizer; the ＋ invite modal already lives there. That section *is* the people surface.
+  - **Tighten the crew summary card (space + clarity).** Today it stacks a full-width `AvatarGroup`
+    row, a **"No RSVPs yet"** line (which contradicts the people shown right above it), and a
+    full-width "See the crew →" row — narrow content in a wide card. Make it **one horizontal row**:
+    `AvatarGroup` cluster + an **inline, meaningful status** (stage-appropriate — "4 interested"
+    while planning, "X going · Y maybe" once dated; never a bare "No RSVPs yet" under listed
+    members) + **"See the crew →" as a right-aligned inline link** (or make the cluster/card the tap
+    target) — not its own row. Use the width; drop the empty-RSVP line.
 - **Inviting (share links + name/email)** → the **"Who's in" ＋ modal** (see **Inviting people**).
 - **How people join · Who can share** → **inside the invite modal** — they govern the link you're
   sharing, so they belong next to it.
