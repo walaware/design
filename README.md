@@ -170,7 +170,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 | ---------- | ------------------------------------------- |
 | `brand`    | `Wordmark`, `AppIcon` (+ `WALA_SUITE`, `WALA_GLYPHS`) |
 | `shell`    | `AppShell`, `NotificationBell` (+ `NavItem`, `ShellAccount`, `ShellBack`, `ShellNotifications`, `NotificationItem`, `NotificationAction` types) |
-| `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip`, `Tooltip`, `Disclosure`, `OverflowMenu` (+ `OverflowAction` type) |
+| `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip`, `Tooltip`, `Disclosure`, `OverflowMenu` (+ `OverflowAction` type), `Modal` |
 | `calendar` | `CalendarMonth`, `RangeCalendar` (+ `CalendarEvent`, `CalendarTone`, `DateRange`, `RangeTone`, `InvalidReason` types) |
 | `people`   | `Avatar`, `AvatarUpload`, `AvatarGroup`, `LeanMeter`, `PersonList` (+ `colorFor`, `Person` type) |
 | `forms`    | `TextField`, `DateField`, `SegmentedControl`, `Composer`, `Switch`, `CopyField` |

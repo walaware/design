@@ -21,6 +21,7 @@ export { default as Chip } from './core/Chip.svelte';
 export { default as Tooltip } from './core/Tooltip.svelte';
 export { default as Disclosure } from './core/Disclosure.svelte';
 export { default as OverflowMenu, type OverflowAction } from './core/OverflowMenu.svelte';
+export { default as Modal } from './core/Modal.svelte';
 
 // Shell
 export { default as AppShell } from './shell/AppShell.svelte';
