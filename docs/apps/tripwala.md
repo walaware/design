@@ -175,14 +175,38 @@ collection, the `'friends'`-visibility opt-in, the **teaser redaction** (name/da
 only — never private details), and every trip→event / friend→row mapping stay **app-local**.
 See the README prop tables for full contracts. Where each lands:
 
-- **`/calendar` page (`#calendar` app level).** An AppShell content column holding a
-  `CalendarMonth`. Map the current user's trips to `CalendarEvent[]` with `tone: 'owned'`
-  (+ `href` to the trip) and each accepted friend's `'friends'`-visible trip to a **redacted
-  teaser** event `tone: 'teaser'` (title = e.g. "Maya · Banff", dates + rough location only,
-  **no `href`** — the kit renders teasers muted and non-interactive so private detail can't be
-  reached). Drive `onPrev`/`onNext` by stepping month/year in the loader; `onSelectDay` /
-  `onOverflow` open a day sheet if you want one. **Teaser redaction is enforced server-side in
-  the calendar query, not by the component** — never send private fields to a friend's client.
+- **`/calendar` page (`#calendar` app level) — calendar + friends rail (redesign 2026-07-20).**
+  Today it's a lone `CalendarMonth` in the content column with the right half of the desktop
+  empty and a flat "Your trips / Shared by friends" legend. Make it **two-column on desktop**:
+  the `CalendarMonth` in the main column + a **"Whose trips" rail** on the side that is the
+  colour key **and** the filter. The rail = a row per person — **You** + each accepted friend —
+  each with the person's `Avatar`/colour swatch (`colorFor`), name, a trips-count meta ("3
+  together"), and a **`Switch`**; toggling a person shows/hides their trips on the grid. This
+  **replaces the flat legend**. On mobile: a horizontal colour-chip filter row (or a "Filter"
+  sheet) above a full-width calendar. Base mapping is unchanged — your trips → `tone: 'owned'`
+  (+ `href`); a friend's `'friends'`-visible trip → redacted `tone: 'teaser'` (rough title/dates,
+  **no `href`**; **redaction stays server-side**, never send private fields to a friend's client).
+  Drive `onPrev`/`onNext`, `onSelectDay`/`onOverflow` as before.
+- **Colour-code by owner — needs `@walaware/design` ≥ v0.11.0.** Set each `CalendarEvent`'s new
+  **`color`** to the owner's hue (`colorFor(name)` / the friend's avatar colour) so every
+  person's trips read in their own colour; the rail swatches match 1:1. `color` layers the hue on
+  top of `tone` (which still governs behaviour: owned interactive, teaser read-only).
+- **Dedup shared trips (you + a friend on the same trip).** When a friend's filter is on and a
+  trip is one you're BOTH on, **render it once, not twice** — today "Ben & Mindi's Wedding" shows
+  as both your owned bar AND a friend's teaser; that double must go. Keep your own `owned` bar
+  (yours to open) and **mark it shared** instead of adding the teaser: a **👥 leading glyph** +
+  co-travellers in the title / day-detail ("… · with Maya"), and the friend's rail row reads
+  "shared with you". (Dedup + marker only apply when the friend's filter is on; off, you just see
+  your own copy.) A richer co-traveller **avatar cluster on the bar** is a possible future
+  `CalendarMonth` capability — flag it if the 👥 marker reads too thin; not building it yet.
+- **Filtering** is client-side over the mapped events (owner toggle); pair it with the rail.
+- **Invite typeahead — add existing friends without typing their email.** On the invite inputs
+  (Trip settings → Access & invites "invite by email"; the friends / co-organizer invite fields),
+  as the user types a name/email show a **dropdown of matching accepted friends** (avatar + name);
+  picking one adds them directly (creates the `trip_invitation` / friend link) with no full-email
+  typing, while a non-matching entry falls back to the plain email invite. **App-local** for now —
+  a small accessible typeahead over the known friends list; revisit a shared `Combobox` primitive
+  only if a second app needs it (rule of three).
 - **Dashboard inbox — friend requests + trip invitations.** Both render as **`RequestCard`**:
   a friend request uses `avatar={{name}}` + `title="X wants to be friends"` + `onAccept`/`onDecline`;
   a trip invitation uses `emoji` (the trip glyph) + `title={trip.name}` + `meta="{dates} · {where} · from {inviter}"`
