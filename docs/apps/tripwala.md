@@ -200,13 +200,8 @@ See the README prop tables for full contracts. Where each lands:
   your own copy.) A richer co-traveller **avatar cluster on the bar** is a possible future
   `CalendarMonth` capability — flag it if the 👥 marker reads too thin; not building it yet.
 - **Filtering** is client-side over the mapped events (owner toggle); pair it with the rail.
-- **Invite typeahead — add existing friends without typing their email.** On the invite inputs
-  (Trip settings → Access & invites "invite by email"; the friends / co-organizer invite fields),
-  as the user types a name/email show a **dropdown of matching accepted friends** (avatar + name);
-  picking one adds them directly (creates the `trip_invitation` / friend link) with no full-email
-  typing, while a non-matching entry falls back to the plain email invite. **App-local** for now —
-  a small accessible typeahead over the known friends list; revisit a shared `Combobox` primitive
-  only if a second app needs it (rule of three).
+- _(Inviting people moved to a modal on the trip's "Who's in" section — see **Inviting people**
+  below. It's a trip-page action, not a calendar one.)_
 - **Dashboard inbox — friend requests + trip invitations.** Both render as **`RequestCard`**:
   a friend request uses `avatar={{name}}` + `title="X wants to be friends"` + `onAccept`/`onDecline`;
   a trip invitation uses `emoji` (the trip glyph) + `title={trip.name}` + `meta="{dates} · {where} · from {inviter}"`
@@ -356,15 +351,36 @@ The settings screen itself carries a "← Back to trip" affordance. **Replaces**
 - **🧩 Sections — what this trip shows:** a `Switch` per module (Itinerary, Bookings, Map, Packing,
   Expenses, Gear library, Photos, Meals) with a live meta line. **This is the restore-hidden-
   sections surface** — it syncs with the module `⋯` "Hide".
-- **🔗 Access & invites:** `CopyField` invite link; three `SegmentedControl`s — **How people join**
-  (Instant / Request), **Who can invite & share** (Everyone / Organizers), **Friends' calendars
-  see** (Private / Busy / Name & place); a **People & roles** row (`Button variant="ghost"`
-  "Manage").
+- **🔗 Access & privacy:** the access **policy** only — three `SegmentedControl`s: **How people
+  join** (Instant / Request), **Who can invite & share** (Everyone / Organizers), **Friends'
+  calendars see** (Private / Busy / Name & place); plus the **People & roles** row (`Button
+  variant="ghost"` "Manage"). **Inviting people — the share links + invite-by-name/email — no
+  longer lives here;** it's a one-tap action from the trip's "Who's in" section (see **Inviting
+  people** below).
 - **🔔 Your notifications:** a single `Switch` (trip notifications — claims, RSVPs, meal updates).
 - **🧰 Manage:** Trip details (Edit) · Clone this trip (Make a copy) · Leave this trip (Leave).
 
 _(App-level `#settings` below stays for account/identity; per-trip config now lives in this
 Trip settings screen.)_
+
+### Inviting people — from "Who's in", not settings (needs `@walaware/design` ≥ v0.12.0)
+
+Inviting is a one-tap action **right where you see the crew**, not buried in settings. The trip's
+**"Who's in" / Members** section header carries a simple **＋ button**; it opens the shared
+**`Modal`** (centred dialog on desktop, bottom sheet on mobile) — the single home for *getting
+people in*:
+- **Grab a share link.** `CopyField` for the **invite link** (and the **co-organizer link** when
+  you're an organizer) — the same links, just surfaced here instead of in settings. A compact note
+  reflects the current join policy ("people with this link request to join" / "…join instantly").
+- **Invite by name or email — with friend typeahead.** One input: as you type, show a **dropdown of
+  matching accepted friends** (`Avatar` + name); picking one invites them directly (creates the
+  `trip_invitation` / friend link) with no full-email typing. A non-matching entry falls back to a
+  plain **email invite**. Keep it a small, accessible typeahead over the known friends list —
+  **app-local**; revisit a shared `Combobox` primitive only if a second app needs it (rule of three).
+
+The **entire invite affordance moves into this modal** — the raw invite-link/email inputs leave the
+Trip settings **Access & privacy** group (which keeps only the join/share/calendar *policy* + roles).
+The `Modal` is shared (v0.12.0); the invite *content* (links, typeahead, email) is tripwala's.
 
 ### App settings (`#settings` app level)
 - Toggle rows (Trip notifications) + an **account row**: `Avatar 36` + "Maya" + "No account
