@@ -1,8 +1,8 @@
 # tripwala — account-less group trips
 
 **Accent:** Coral `#FF7A59` (the house default + the constant `--color-wala`) · **Glyph:** `compass` · **Root:** `trip` · **`data-app`:** `tripwala`
-**Layout mode:** `AppShell`, two-level — global destinations → an open trip as a **contextual dashboard** (two-column dashboard + rail on desktop, hub-&-spoke on mobile), plus a dedicated **Trip settings** screen
-**Status:** designing · **Last mock sync:** 2026-07-19 (`Tripwala Redesign.dc.html` — trip-page IA redesign: dashboard + rail / hub-&-spoke, itinerary density, one settings home; pulled via design-sync)
+**Layout mode:** `AppShell`, two-level — global destinations → an open trip as a **contextual dashboard** (two-column dashboard + rail on desktop, hub-&-spoke on mobile), plus a dedicated **Trip settings** screen. A separate **unauthenticated marketing landing** (below) sits in front of the app for signed-out visitors.
+**Status:** designing · **Last mock sync:** 2026-07-21 (`templates/tripwala-landing` — signed-out marketing landing page: hero + feature grid + how-it-works + wala family strip + coral CTA; pulled via design-sync. Composes only shipped kit primitives, no package change.)
 
 ## Context
 
@@ -99,6 +99,57 @@ they're how the cleaned-up mocks read:
   26px-wide centered slot; the label `flex:1` (700, 14.5px); the trailing claim/avatar/amount.
 
 ## Screens
+
+### Landing page — signed-out marketing (`/`, unauthenticated)
+
+**Reference mock:** `templates/tripwala-landing/TripwalaLanding.dc.html` (Claude Design, pulled
+2026-07-21 via design-sync). **This is a marketing page, not an app screen** — it does **not**
+use `AppShell`. It's a full-bleed, centred `max-width: 1120px` scrolling page on `--color-bg-app`,
+built entirely from **shipped `@walaware/design` v0.12.0 primitives** (`AppIcon`, `WalaWordmark`,
+`Button`) + the semantic tokens. **No new shared package** — tripwala builds the page in its own
+repo (it's an app-specific marketing surface, not a reusable primitive).
+
+**Auth gate (the whole point — this is the deploy job).** The tripwala root `/` is
+**identity-aware**:
+- **Signed out** (no claimed name / no session) → render **this landing page**. Its two CTAs are
+  the only ways in: **"Log in"** (nav, top-right, `Button variant="secondary" size="sm"`) → the
+  login/claim-your-name flow; **"Start a trip 🙌"** (hero `Button variant="primary" size="lg"`,
+  and the CTA-band `variant="secondary"`) → the sign-up / new-trip flow. In the mock both fire a
+  placeholder toast — wire them to tripwala's real entry points.
+- **Signed in** → **skip the landing** and go straight to **Trips home** (the AppShell app). The
+  landing is only ever shown to signed-out visitors; a returning user must never see marketing
+  before their trips.
+
+**Page sections (top → bottom), all `data-app="tripwala"` so coral resolves:**
+1. **Sticky nav** — translucent sand bar (`backdrop-filter: blur`, `--color-sand-300` bottom
+   hairline): `AppIcon app="tripwala" size=34` + `WalaWordmark root="trip"`, then anchor links
+   ("What it does" → `#features`, "How it works" → `#how`) and the **Log in** button.
+2. **Hero** — two-column (stacks on mobile): a `--color-primary-soft` pill eyebrow ("🎒 group
+   trips, not group-chat chaos"), a Fredoka display `h1` ("So… where are we going?"), a lead
+   paragraph, the **Start a trip** + **See how** (`variant="soft"`) button pair, and a "Free for
+   you and your crew · works on any phone" reassurance line. Right column: a **phone mockup**
+   (cocoa bezel, coral drop-shadow) framing a **9:19 app screenshot slot**.
+3. **Feature grid** — "Everything a trip actually needs": six white `--radius-lg` `--shadow-card`
+   cards in an `auto-fit minmax(250px,1fr)` grid, each a tinted emoji tile (reuses the *other*
+   apps' `--acc-*-soft` accents as category colours) + house-question title + one line: Who's
+   coming / Who brings the tent / What's for dinner / Who owes who / How do we get there / One
+   thread on topic. (These mirror the trip modules — RSVP, packing, food, expenses, map, chat.)
+4. **Wide screenshot band** — a single `--radius-xl` framed **16:8.5 desktop screenshot slot**.
+5. **How it works** (`#how`) — "Three steps and you're camping": three numbered coral-badge
+   cards (Make the trip page → Share the link → Watch it sort itself).
+6. **CTA band** — solid `--color-primary` (coral) rounded panel, white type, "Your next trip
+   starts with a link 🔥" + a **secondary** "Start a trip — it's free" button.
+7. **Footer** — a **wala family strip** (`AppIcon` for all seven apps with hover tooltips, the
+   `walaware` wordmark treatment), the `trip` wordmark, a **"🏠 Prefer your own server? You can
+   self-host tripwala"** line (matches the self-host stance), and a "made with ❤️" sign-off.
+
+**Screenshot slots** are the two `image-slot` placeholders in the mock (hero 9:19 phone, wide
+16:8.5 desktop). tripwala fills them with **real product screenshots** of a trip page — until
+those exist, a tasteful sand placeholder is fine; don't ship the raw slot outline.
+
+**Shared vs app-domain:** shared = `AppIcon`, `WalaWordmark`, `Button` (v0.12.0, already
+imported). App-domain (tripwala's repo) = the landing page assembly itself, the auth-gate/redirect
+logic at `/`, the login + new-trip entry wiring, and the screenshots. No design-system change.
 
 ### Trips home (`#trips` app level)
 - **Header:** `h1` "Your trips" + muted subtitle ("N trips coming up.") + a right-aligned
