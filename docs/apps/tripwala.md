@@ -289,7 +289,10 @@ the trip's **section nav** (Overview · Itinerary · Bookings · Map · Packing 
 **Sticky trip header** (`data-appshell-sticky`): emoji tile · title · `dates · where · N going ·
 M maybe` · overlapped crew avatars · (desktop) `Button variant="soft"` "💬 Message crew" · a
 **"＋ Add" `OverflowMenu`** (primary Button trigger) → Itinerary entry · Booking · Expense · Map
-pin · Something to decide.
+pin · Something to decide · **and a trip `⋯` `OverflowMenu`** for manage-this-trip actions moved
+out of settings → **Edit trip details** (or inline-edit the header) · **Clone** · **Move back to
+Ideas** · **Photo album** · **Leave** (danger). This is the in-context home for the old Settings →
+Manage group.
 
 **Overview stat strip (desktop)** — one row of cards under the header: **Countdown** · **Crew** ·
 **Next up** (flex 1.5, ellipsis) · **To decide** (a `--color-primary-soft` *button* → jump to the
@@ -346,22 +349,28 @@ dumps the user out of the trip context on entry, which is the bug to avoid.
 
 **Entry points (do not make it sidebar-only):** the sidebar ⚙ (desktop) **and** every module's
 `⋯` menu ("Section settings…", alongside "Hide this section") **and** the mobile trip-home ⚙ row.
-The settings screen itself carries a "← Back to trip" affordance. **Replaces** the old bottom
-`#tripsettings` accordion AND every scattered inline control. Four groups:
+The settings screen itself carries a "← Back to trip" affordance. It is now a **slim residual**:
+per the **[[prefer-in-context-actions-over-settings-screens]]** stance, most trip config has moved
+to where the user already is (see **Distributed into context** below). What's left here:
 - **🧩 Sections — what this trip shows:** a `Switch` per module (Itinerary, Bookings, Map, Packing,
-  Expenses, Gear library, Photos, Meals) with a live meta line. **This is the restore-hidden-
-  sections surface** — it syncs with the module `⋯` "Hide".
-- **🔗 Access & privacy:** the access **policy** only — three `SegmentedControl`s: **How people
-  join** (Instant / Request), **Who can invite & share** (Everyone / Organizers), **Friends'
-  calendars see** (Private / Busy / Name & place); plus the **People & roles** row (`Button
-  variant="ghost"` "Manage"). **Inviting people — the share links + invite-by-name/email — no
-  longer lives here;** it's a one-tap action from the trip's "Who's in" section (see **Inviting
-  people** below).
-- **🔔 Your notifications:** a single `Switch` (trip notifications — claims, RSVPs, meal updates).
-- **🧰 Manage:** Trip details (Edit) · Clone this trip (Make a copy) · Leave this trip (Leave).
+  Expenses, Gear library, Photos, Meals) with a live meta line — the central show/hide **manager**
+  and restore surface. (You can also enable a module inline from the "＋ Not on this trip: …" row and
+  hide one from its `⋯` menu; this list is the findable fallback.)
+- **🔔 Trip notifications:** a single `Switch` (claims, RSVPs, meal updates — just for you). Also
+  surfaced as "mute this trip" on the notification bell.
+- **🔒 Privacy — Friends' calendars see:** one `SegmentedControl` (Private / Busy / Name & place) for
+  what shows on friends' calendars outside the trip. (Also reachable from `/calendar`.)
 
-_(App-level `#settings` below stays for account/identity; per-trip config now lives in this
-Trip settings screen.)_
+**Distributed into context (no longer in settings):**
+- **People & roles** → the **"Who's in" / Members** section — member rows carry make-guest / remove;
+  add a co-organizer; the ＋ invite modal already lives there. That section *is* the people surface.
+- **Inviting (share links + name/email)** → the **"Who's in" ＋ modal** (see **Inviting people**).
+- **How people join · Who can share** → **inside the invite modal** — they govern the link you're
+  sharing, so they belong next to it.
+- **Trip details (edit) · Clone · Move back to Ideas · Leave · Photo album** → a **trip-header `⋯`
+  menu** (next to ＋ Add); editing details can also be inline on the header.
+
+_(App-level `#settings` below stays for account/identity.)_
 
 ### Inviting people — from "Who's in", not settings (needs `@walaware/design` ≥ v0.12.0)
 
@@ -370,8 +379,10 @@ Inviting is a one-tap action **right where you see the crew**, not buried in set
 **`Modal`** (centred dialog on desktop, bottom sheet on mobile) — the single home for *getting
 people in*:
 - **Grab a share link.** `CopyField` for the **invite link** (and the **co-organizer link** when
-  you're an organizer) — the same links, just surfaced here instead of in settings. A compact note
-  reflects the current join policy ("people with this link request to join" / "…join instantly").
+  you're an organizer) — the same links, just surfaced here instead of in settings. Right beside the
+  link, the **join policy that governs it** (moved from settings): **How people join** (Instant /
+  Request) and **Who can invite & share** (Everyone / Organizers) as compact `SegmentedControl`s, so
+  you set how the link behaves as you copy it.
 - **Invite by name or email — with friend typeahead.** One input: as you type, show a **dropdown of
   matching accepted friends** (`Avatar` + name); picking one invites them directly (creates the
   `trip_invitation` / friend link) with no full-email typing. A non-matching entry falls back to a
