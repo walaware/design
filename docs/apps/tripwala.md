@@ -1,7 +1,7 @@
 # tripwala — account-less group trips
 
 **Accent:** Coral `#FF7A59` (the house default + the constant `--color-wala`) · **Glyph:** `compass` · **Root:** `trip` · **`data-app`:** `tripwala`
-**Layout mode:** `AppShell`, two-level — global destinations → an open trip as a **contextual dashboard** (two-column dashboard + rail on desktop, hub-&-spoke on mobile), plus a dedicated **Trip settings** screen. A separate **unauthenticated marketing landing** (below) sits in front of the app for signed-out visitors.
+**Layout mode:** `AppShell`, two-level — global destinations → an open trip as a **contextual dashboard** (two-column dashboard + rail on desktop, hub-&-spoke on mobile) led by a **cover-hero** trip header, plus a dedicated **Trip settings** screen. A separate **unauthenticated marketing landing** (below) sits in front of the app for signed-out visitors.
 **Status:** designing · **Last mock sync:** 2026-07-21 (`templates/tripwala-landing` — signed-out marketing landing page: hero + feature grid + how-it-works + wala family strip + coral CTA; pulled via design-sync, then a mobile-fix re-sync same day: nav anchors hidden ≤640px + non-breaking "a link 🔥". Composes only shipped kit primitives, no package change.)
 
 ## Context
@@ -74,7 +74,8 @@ coupling itself — all now owned by the kit. Module nav (each row → a `<secti
 
 …then a dimmed **`soon`** group: `Itinerary 🗓️ · Map 🗺️ · Photos 📷`. **Consumer contract:**
 render the modules as one long page of `<section id="…">`s (the ids above), and mark the
-sticky trip header `data-appshell-sticky` so scrollSpy offsets land right.
+cover hero's **slim echo bar** `data-appshell-sticky` (see "Trip header = a cover hero" below)
+so scrollSpy offsets land right.
 
 ## Layout conventions (the 2026-06-23 cleanup)
 
@@ -338,18 +339,45 @@ hand-rolled copy rows (invite link, co-organizer link, Immich album URL).
 > `OverflowMenu`, `Switch`, `CopyField`, `SegmentedControl`, `NotificationBell`.
 
 **Shell wiring.** Contextual mode: `back` ("All trips"), `scrollSpy` (**desktop only**),
-`[data-appshell-sticky]` trip header, **`max-width: 1180`** (was 920), `notifications` (the
-bell), and `title`/`subtitle`/`icon` fed for the mobile header-collapse. The shell `nav` is
-the trip's **section nav** (Overview · Itinerary · Bookings · Map · Packing · Expenses) — and
-**hidden sections drop out of the nav** too.
+**`max-width: 1180`** (was 920), `notifications` (the bell), and `title`/`subtitle`/`icon` fed
+for the mobile header-collapse. The `[data-appshell-sticky]` element is the cover hero's **slim
+echo bar** (below), not a full header. The shell `nav` is the trip's **section nav** (Overview ·
+Itinerary · Bookings · Map · Packing · Expenses) — and **hidden sections drop out of the nav** too.
 
-**Sticky trip header** (`data-appshell-sticky`): emoji tile · title · `dates · where · N going ·
-M maybe` · overlapped crew avatars · (desktop) `Button variant="soft"` "💬 Message crew" · a
-**"＋ Add" `OverflowMenu`** (primary Button trigger) → Itinerary entry · Booking · Expense · Map
-pin · Something to decide · **and a trip `⋯` `OverflowMenu`** for manage-this-trip actions moved
-out of settings → **Edit trip details** (or inline-edit the header) · **Clone** · **Move back to
-Ideas** · **Photo album** · **Leave** (danger). This is the in-context home for the old Settings →
-Manage group.
+**Trip header = a cover hero** (shipped tripwala `100403d`, **app-local** — built in tripwala's
+repo from shipped `@walaware/design` v0.12.0; **no shared component, no AppShell change**). It
+replaces the old `TripBanner` (a low artwork strip) + `TripHeader` (an opaque sand-tile title row)
+stack, which read as two disconnected pieces, duplicated the trip artwork in a sand emoji tile, and
+repeated "N going" three times. This is the design-agent-blessed pattern (consult 2026-07-23); the
+promotion trigger to a shared `CoverHeader` / AppShell `cover` slot is a 2nd/3rd app wanting an
+image header that collapses into the compact bar (rule of three) — until then it's tripwala-domain.
+
+- **Cover (non-sticky, scrolls away)** — the trip's hero artwork (per-trip-type generated art, an
+  uploaded cover photo, or a picked-location photo) that **fades at its base into `--color-bg-app`**,
+  with the trip identity **overlaid** on that faded base: the **one real `<h1>`** (trip name) ·
+  `dates` · **crew faces** (`AvatarGroup`, overlapped + ring — *faces, not a repeated "N going"
+  count*) · the primary **"＋ Add" `OverflowMenu`**. Cinematic "cover photo" feel, no separate emoji
+  tile, less vertical waste.
+- **Slim echo bar (`[data-appshell-sticky]`)** — pulled up under the cover base (`margin-top:-52px`,
+  **zero footprint at rest**); it exists to (1) give scrollSpy its sticky offset and (2) **echo** the
+  title + ＋Add **only once the cover has scrolled under it** (stuck). The echo title is
+  **presentational** (`aria-hidden`, not a second `<h1>`) so the single-source rule holds — title +
+  ＋Add have one home at rest (the cover) and one echo when stuck, never both at once.
+- **Stuck-detection** is **desktop-only, app-local**: an `IntersectionObserver` on a sentinel scoped
+  to `main.content` drives the echo reveal. **Mobile is left entirely to the shell** — the reveal is
+  gated behind a 920px `matchMedia`, and the shell's own collapse crossfades `icon`/`title`/`subtitle`
+  (the props above) into the top bar. (On mobile ＋Add scrolls away with the cover — **not a
+  regression**, the old header did too; a persistent-mobile-＋Add would need a shared top-bar action
+  slot, deferred until Sam asks.)
+- **Legibility switches on artwork type:** generated pastel **art** → dark text on the fade-to-bg base
+  (little/no scrim); uploaded **photo** → dark scrim + light text + text-shadow. **reduced-motion**
+  gates the echo transition (snap, no fade).
+- **Past / 🎉 Wrapped state:** the cover desaturates and ＋Add swaps for a "🎉 Wrapped" `Chip`.
+
+The **trip `⋯` `OverflowMenu`** (manage-this-trip actions moved out of settings — **Edit trip
+details** / inline-edit · **Clone** · **Move back to Ideas** · **Photo album** · **Leave** (danger))
+and the desktop `Button variant="soft"` "💬 Message crew" ride with the cover's action cluster (next
+to ＋ Add). This is the in-context home for the old Settings → Manage group.
 
 **Overview stat strip (desktop)** — one row of cards under the header: **Countdown** · **Crew** ·
 **Next up** (flex 1.5, ellipsis) · **To decide** (a `--color-primary-soft` *button* → jump to the
