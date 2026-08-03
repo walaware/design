@@ -30,6 +30,7 @@
 		RangeCalendar,
 		Switch,
 		CopyField,
+		PhotoWall,
 		type CalendarEvent,
 		type DateRange,
 		WALA_SUITE,
@@ -520,6 +521,30 @@
 				<Skeleton variant="text" width="70%" motion="shimmer" />
 			</Card>
 		</div>
+	</section>
+
+	<section class="photowall" data-app="tripwala">
+		<h2>Post-trip photo wall <span class="tag">v0.13.0</span></h2>
+		<p class="lede">
+			The celebratory "look back at the trip" collage — a warm board of tilted polaroids with
+			washi tape, corner stickers and a link out to the full album. Graceful from one photo to
+			~30; hover lifts and straightens each frame, and it all freezes under reduced motion.
+		</p>
+		<PhotoWall
+			title="Lost Tost"
+			subtitle="Jul 18–21 · 5 crew"
+			albumUrl="https://example.com/album"
+			photos={[
+				{ src: 'https://picsum.photos/seed/tost1/400/400', alt: 'Crew on the ridge' },
+				{ src: 'https://picsum.photos/seed/tost2/400/400', alt: 'Campfire dinner' },
+				{ src: 'https://picsum.photos/seed/tost3/400/400', alt: 'The lake at dawn' },
+				{ src: 'https://picsum.photos/seed/tost4/400/400', alt: 'Trailhead sign' },
+				{ src: 'https://picsum.photos/seed/tost5/400/400', alt: 'Tent under stars' },
+				{ src: 'https://picsum.photos/seed/tost6/400/400', alt: 'Everyone at the summit' },
+				{ src: 'https://picsum.photos/seed/tost7/400/400' },
+				{ src: 'https://picsum.photos/seed/tost8/400/400' }
+			]}
+		/>
 	</section>
 
 	<section class="frames">

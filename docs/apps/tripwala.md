@@ -421,6 +421,34 @@ per-module "Hide" buttons are removed.**
 **Voice.** Module titles are the house questions: "What's the plan?" · "What's booked?" · "Pins
 & places" · "Who's bringing what?" · "Who paid what?".
 
+### Post-trip space — photo wall (needs `@walaware/design` ≥ v0.13.0)
+
+When a trip is **finished** (past its end date, or `status=completed`), the top of the trip page
+becomes a celebratory "look back" moment: a **`PhotoWall`** collage of real photos from the trip's
+Immich album, above the usual recap/dashboard. This is the design-agent-built shared surface
+(requested by the tripwala agent over Paseo, 2026-08-03); the **`PhotoWall` / `Polaroid` / `Sticker`**
+primitives ship in `@walaware/design` v0.13.0 (`scrapbook` group). Only the celebratory *look* is
+shared — pulling photos from Immich and deciding "is this trip finished?" stays **tripwala-domain**.
+
+- **`PostTripSection.svelte` (tripwala-local, thin).** Owns the app-side concerns and renders
+  `PhotoWall`:
+  - **Gate:** render only for finished trips (past end date or `status=completed`).
+  - **Photos:** fetch a capped sample of the trip's Immich album thumbnails and map them to
+    `PhotoWall`'s `photos={[{ src, alt? }]}` — where `src` is an **already-proxied** thumbnail URL
+    the app serves (the component just does `<img src>`, no auth/headers). Pass `alt` when you have a
+    caption/description; leave it off for a purely decorative frame. `PhotoWall` caps at `max` (30).
+  - **Copy:** `title` = trip name (e.g. "Lost Tost"), `subtitle` = `dates · N crew`
+    (e.g. "Jul 18–21 · 5 crew"), `albumUrl` = the deep link to the full Immich album
+    ("See all photos ↗").
+  - **Placement:** at the **very top of the finished-trip view**, above the recap/dashboard. It sits
+    *below* the cover hero, or (design's call in the app) can stand in for it on a finished trip.
+- **Accent:** keep it inside the `data-app="tripwala"` scope so the board resolves the coral accent
+  (the gradient uses coral/sun/berry tokens; `--color-wala` stays constant regardless).
+- **Gotchas:** import `@walaware/design/theme.css` (already wired app-wide). `PhotoWall` renders
+  **nothing** when it has no photos **and** no `title`, so it's safe to mount unconditionally and let
+  it light up once the album has images. Broken/expired thumbnails fall back to a soft 📷 placeholder
+  (no broken-image icon). Stickers/tape are `aria-hidden`; hover motion respects reduced-motion.
+
 ### Trip settings — one home (own screen, `max-width: 640`)
 
 **Stays inside the trip's contextual shell — it is NOT an app-level (level-0) page.** Even

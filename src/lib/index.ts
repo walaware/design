@@ -62,6 +62,11 @@ export { default as Composer } from './forms/Composer.svelte';
 export { default as Switch } from './forms/Switch.svelte';
 export { default as CopyField } from './forms/CopyField.svelte';
 
+// Scrapbook
+export { default as PhotoWall, type WallPhoto } from './scrapbook/PhotoWall.svelte';
+export { default as Polaroid } from './scrapbook/Polaroid.svelte';
+export { default as Sticker } from './scrapbook/Sticker.svelte';
+
 // Feedback
 export { default as StatusBadge } from './feedback/StatusBadge.svelte';
 export { type Status } from './feedback/status.js';

@@ -175,6 +175,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 | `people`   | `Avatar`, `AvatarUpload`, `AvatarGroup`, `LeanMeter`, `PersonList` (+ `colorFor`, `Person` type) |
 | `forms`    | `TextField`, `DateField`, `SegmentedControl`, `Composer`, `Switch`, `CopyField` |
 | `feedback` | `StatusBadge`, `EmptyState`, `ChatMessage`, `RequestCard` (+ `RequestPerson` type), `Skeleton`, `SkeletonText` |
+| `scrapbook` | `PhotoWall` (+ `WallPhoto` type), `Polaroid`, `Sticker` |
 
 `AppShell` is the standard app chrome: a desktop left sidebar that collapses to a
 top bar + slide-in drawer below `breakpoint` (default 920px). The app supplies
@@ -536,6 +537,47 @@ calendar popover — it uses the OS-native picker (best a11y, nothing to maintai
 <!-- range, min 2 nights -->
 <DateField range bind:start bind:end min={today} minNights={2} hint="At least 2 nights" />
 ```
+
+### PhotoWall
+
+The celebratory **post-trip** collage — a warm gradient board of scattered, lightly-tilted
+polaroids with washi tape, decorative corner stickers, and a link out to the full album. Built
+for the "look back at the trip" moment: feed it already-proxied thumbnails plus the trip name /
+dates / album link. Graceful from **1** photo (a single centered frame) to **~30** (a wrapping
+pile); photo `alt` passes straight through, all decoration is `aria-hidden`, and the hover
+lift/straighten respects `prefers-reduced-motion`.
+
+```svelte
+<script>
+  import { PhotoWall } from '@walaware/design';
+</script>
+
+<div data-app="tripwala">
+  <PhotoWall
+    title="Lost Tost"
+    subtitle="Jul 18–21 · 5 crew"
+    albumUrl="https://immich.example/album/…"
+    photos={[{ src: '/proxy/thumb/1', alt: 'On the ridge' }, { src: '/proxy/thumb/2' }]}
+  />
+</div>
+```
+
+| Prop | Type | Meaning |
+| ---- | ---- | ------- |
+| `photos` | `WallPhoto[]` | `{ src, alt? }` thumbnails (already proxied by the app). Capped at `max`. |
+| `title` | `string` | big scrapbook heading — usually the trip name |
+| `subtitle` | `string` | supporting line, e.g. `"Jul 18–21 · 5 crew"` |
+| `albumUrl` | `string` | link out to the full album; omit to hide the link |
+| `albumLabel` | `string` | link label (default `"See all photos ↗"`) |
+| `stickers` | `string[] \| false` | decorative corner emoji (up to 4); `false` drops them; default `['📸','✨','🌴','💛']` |
+| `max` | `number` | cap on photos rendered (default `30`) |
+
+Renders nothing when there are no photos **and** no `title`, so it's safe to mount
+unconditionally at the top of a trip view and let it light up once the trip is finished.
+Composed from two reusable primitives you can also use directly: **`Polaroid`**
+(`src`, `alt?`, `caption?`, `tilt?`, `tape?` — a single framed photo with a broken-image
+fallback) and **`Sticker`** (`emoji?`/children, `tone?`, `tilt?`, `size?`, `decorative?` — a
+fridge-magnet badge, `aria-hidden` by default).
 
 ### Exported types: `Status` & `Lean`
 
