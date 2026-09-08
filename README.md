@@ -750,12 +750,24 @@ speaking — primary actions and their quiet variants:
 | `Chip` `primary` | every other `Chip` tone — `coral`/`sun`/`berry`/`leaf` are **hue names**, so `tone="coral"` means coral in every app |
 | Form focus rings (`TextField`, `DateField`, `SelectField`) | `Wordmark`, `NotificationBell`, scrapbook decoration — the constant `wala` thread |
 
-**The rule that keeps this honest:** a component in an accent role must never read the
+**The rule that keeps this honest** (enforced by `pnpm run check:accent`, which runs in
+`preversion` so a leak can't be tagged): a component in an accent role must never read the
 `--color-coral-*` ramp. Coral is both the house lead **and** tripwala's accent, so a raw
 coral in an accent role looks perfect in tripwala and is wrong in the other six apps —
-which is exactly how the v0.14.x leak survived review. Read `--color-primary*` /
-`--color-focus-ring` for accent roles, and `--color-wala` / `--color-wala-soft` for
-anything that should stay coral everywhere.
+which is exactly how the v0.14.x leak survived review — `--acc-trip` is **byte-identical**
+to `--color-coral-500`. Read `--color-primary*` / `--color-focus-ring` for accent roles, and
+`--color-wala` / `--color-wala-soft` for anything that should stay coral everywhere.
+
+Two guards, because this class of bug is invisible in the reference app:
+
+- **`pnpm run check:accent`** — fails on any `--color-coral-*` in `src/lib/**/*.svelte`
+  that isn't marked. A deliberately named hue tone opts out with an
+  `accent-exempt: <reason>` comment above its CSS rule (only `Chip`'s `t-coral` uses one).
+  Wired into `preversion`, so a release can't carry a leak.
+- **The accent-contract strip** in the demo (`/`), pinned to **taskwala/sky** — the accent
+  furthest from coral. It shows every accent-role surface at once: primary/soft/ghost
+  `Button`, soft/solid `IconButton`, `Chip tone="primary"`, and the field focus ring. If
+  anything in that strip looks orange, the contract is broken.
 
 Each accent ships three stops (`--app-accent`, `-press`, `-soft`). Two more are **derived**
 from the live accent so a new app in the roster gets them free:

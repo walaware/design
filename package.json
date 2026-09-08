@@ -40,8 +40,9 @@
     "preview": "vite preview",
     "package": "svelte-kit sync && svelte-package && publint",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:accent": "node scripts/check-accent-contract.mjs",
     "prepare": "svelte-kit sync && svelte-package",
-    "preversion": "pnpm run check && pnpm run package",
+    "preversion": "pnpm run check && pnpm run check:accent && pnpm run package",
     "postversion": "git push --follow-tags"
   },
   "peerDependencies": {

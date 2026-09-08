@@ -456,6 +456,35 @@
 			</div>
 		</div>
 
+		<!--
+			Accent-contract proof, pinned to taskwala (sky) — the accent furthest from coral.
+			Every surface here is an ACCENT ROLE, so every one must read sky, not coral. These
+			are exactly the surfaces that shipped coral through v0.14.1: because --acc-trip is
+			byte-identical to --color-coral-500, a hardcoded coral is invisible in tripwala and
+			wrong in the other six apps. `pnpm run check:accent` guards this statically; this
+			strip is the visual half. If anything below looks orange, the contract is broken.
+		-->
+		<div class="primitives" data-app="taskwala">
+			<span class="avatars-label">
+				Accent contract (taskwala/sky) — nothing here may render coral:
+			</span>
+			<div class="primitives-row">
+				<Button>Primary</Button>
+				<Button variant="soft">Soft</Button>
+				<Button variant="ghost">Ghost</Button>
+				<IconButton tone="soft" aria-label="Soft icon">＋</IconButton>
+				<IconButton tone="solid" aria-label="Solid icon">✓</IconButton>
+				<Chip tone="primary">Accent chip</Chip>
+			</div>
+			<div class="narrow" style="margin-top:12px">
+				<!-- Focus these to check the ring: border --color-focus-ring, glow --color-primary-soft. -->
+				<TextField label="Focus me — the ring must be sky" placeholder="Tab in…" />
+				<div style="margin-top:10px">
+					<SelectField label="…and here" options={['One', 'Two']} />
+				</div>
+			</div>
+		</div>
+
 		<!-- Cascade check: the base reset zeroes heading margins, but a Tailwind
 		     utility must still win (resets now live in @layer base). This h2 must
 		     compute margin-bottom: 2rem, and the box below it sits 2rem clear. -->

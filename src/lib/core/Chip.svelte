@@ -51,6 +51,8 @@
 		--chip-fg: var(--color-primary-ink);
 		--chip-bd: var(--color-primary-soft);
 	}
+	/* accent-exempt: `coral` is a NAMED HUE the consumer asks for by name, like sun/berry/
+	   leaf — not an accent role. Use tone="primary" above for "belongs to this app". */
 	.t-coral {
 		--chip-bg: var(--color-coral-200);
 		--chip-fg: var(--color-coral-700);
