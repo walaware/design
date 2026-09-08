@@ -16,5 +16,6 @@ per app**.
 
 - [tripwala.md](tripwala.md) — account-less group trips (single page).
 - [shopwala.md](shopwala.md) — marketplace selling agent (AppShell, Berry).
+- [moneywala.md](moneywala.md) — cards, loyalty & benefits (AppShell, Leaf) — app-scaffolded, no mock yet.
 
 The full roster and status table lives in the [repo README → App layouts](../../README.md#app-layouts).

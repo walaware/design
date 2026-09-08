@@ -152,7 +152,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 		Button, IconButton, Card, CardHeader, Chip, Tooltip, Disclosure, OverflowMenu,
 		CalendarMonth, RangeCalendar,
 		Avatar, AvatarUpload, AvatarGroup, LeanMeter, PersonList,
-		TextField, DateField, SegmentedControl, Composer, Switch, CopyField,
+		TextField, DateField, SelectField, SegmentedControl, Composer, Switch, CopyField,
 		StatusBadge, EmptyState, ChatMessage, RequestCard, Skeleton, SkeletonText
 	} from '@walaware/design';
 	let rsvp = $state('Going');
@@ -173,7 +173,7 @@ fixed by the brand. The `wala` suffix never takes the per-app accent — it's th
 | `core`     | `Button`, `IconButton`, `Card`, `CardHeader`, `Chip`, `Tooltip`, `Disclosure`, `OverflowMenu` (+ `OverflowAction` type), `Modal` |
 | `calendar` | `CalendarMonth`, `RangeCalendar` (+ `CalendarEvent`, `CalendarTone`, `DateRange`, `RangeTone`, `InvalidReason` types) |
 | `people`   | `Avatar`, `AvatarUpload`, `AvatarGroup`, `LeanMeter`, `PersonList` (+ `colorFor`, `Person` type) |
-| `forms`    | `TextField`, `DateField`, `SegmentedControl`, `Composer`, `Switch`, `CopyField` |
+| `forms`    | `TextField`, `DateField`, `SelectField` (+ `SelectOption` type), `SegmentedControl`, `Composer`, `Switch`, `CopyField` |
 | `feedback` | `StatusBadge`, `EmptyState`, `ChatMessage`, `RequestCard` (+ `RequestPerson` type), `Skeleton`, `SkeletonText` |
 | `scrapbook` | `PhotoWall` (+ `WallPhoto` type), `Polaroid`, `Sticker` |
 
@@ -538,6 +538,67 @@ calendar popover — it uses the OS-native picker (best a11y, nothing to maintai
 <DateField range bind:start bind:end min={today} minNights={2} hint="At least 2 nights" />
 ```
 
+### SelectField
+
+The **pick-one-record-among-N** form primitive — a holder, a program, a card, a benefit
+rule — sibling to `TextField` / `DateField`. It's a real native `<select>`, so it submits
+with the form via `name=`, works with **no JS** (server-action forms), and inherits the
+OS picker and its accessibility for free. Only the native arrow is swapped out
+(`appearance: none` + our own chevron) so the affordance reads the same in every engine;
+everything else is TextField's chrome. Like `DateField` it's `min-width: 0` /
+`width: 100%`, so a long option label can never push the field out of its card on a phone.
+
+Feed it `options` for the common case, or drop raw `<option>` / `<optgroup>` markup in as
+children when you need groups or already have the markup.
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `label` | node | field label (associated with the select) |
+| `hint` | node | helper line below |
+| `options` | `SelectOption[]` | `string` (value = label) or `{ value, label, disabled? }` (default `[]`) |
+| `prefix` | `string \| null` | leading emoji / glyph inside the field (default `null`) |
+| `placeholder` | `string` | empty-value first option; unselectable when `required`, so native validation fires on an untouched field |
+| `size` | `'sm' \| 'md'` | form size scale (default `md`) — **not** the native visible-row count |
+| `disabled`, `required`, `name` | — | native form attributes |
+| `value` | `string` | selected value (`$bindable`, default `''`) |
+| `children` | snippet | escape hatch — raw `<option>` / `<optgroup>`, rendered after `options` |
+
+```svelte
+<script>
+  import { SelectField } from '@walaware/design';
+  let card = $state('');
+  const cards = [
+    { value: 'hdfc-regalia', label: 'HDFC Regalia · 4821' },
+    { value: 'amex-plat', label: 'Amex Platinum Travel · 1007' }
+  ];
+</script>
+
+<!-- options array -->
+<SelectField
+  label="Which card?"
+  prefix="💳"
+  name="card"
+  required
+  placeholder="Choose a card…"
+  options={cards}
+  bind:value={card}
+/>
+
+<!-- escape hatch: groups -->
+<SelectField label="Reset cycle" name="cycle" bind:value={cycle}>
+  <optgroup label="Recurring">
+    <option value="monthly">Every statement</option>
+    <option value="yearly">Every year</option>
+  </optgroup>
+</SelectField>
+```
+
+**Focus ring:** the ring is coral (`--color-coral-400` / `--color-coral-200`), matching
+`TextField` and `DateField` rather than `--color-focus-ring` — that token resolves to the
+**app accent** under `[data-app]`, which would leave a select ringed in leaf sitting next
+to a text field ringed in coral in the same form. Moving the whole field family onto
+`--color-focus-ring` is a house-wide decision, not a per-component one.
+
 ### PhotoWall
 
 The celebratory **post-trip** collage — a warm gradient board of scattered, lightly-tilted
@@ -624,7 +685,7 @@ mocks there, thoroughly.
 | `tripwala` | AppShell (two-level) | [docs/apps/tripwala.md](docs/apps/tripwala.md) |
 | `healthwala` | — | _not yet designed_ |
 | `stuffwala` | — | _not yet designed_ |
-| `moneywala` | — | _not yet designed_ |
+| `moneywala` | AppShell | [docs/apps/moneywala.md](docs/apps/moneywala.md) _(app-scaffolded, no mock yet)_ |
 | `shopwala` | AppShell | [docs/apps/shopwala.md](docs/apps/shopwala.md) |
 | `taskwala` | — | _not yet designed_ |
 | `folkwala` | — | _not yet designed_ |

@@ -17,6 +17,7 @@
 		LeanMeter,
 		TextField,
 		DateField,
+		SelectField,
 		SegmentedControl,
 		Composer,
 		StatusBadge,
@@ -99,6 +100,17 @@
 	let day = $state('');
 	let tripStart = $state('');
 	let tripEnd = $state('');
+
+	// SelectField demo state — "which record?" pickers (the moneywala form case).
+	const cards = [
+		{ value: 'hdfc-regalia', label: 'HDFC Regalia · 4821' },
+		{ value: 'amex-plat', label: 'Amex Platinum Travel · 1007' },
+		{ value: 'sbi-cashback', label: 'SBI Cashback · 9330' },
+		{ value: 'icici-amazon', label: 'ICICI Amazon Pay · 2244 (closed)', disabled: true }
+	];
+	let card = $state('');
+	let holder = $state('maya');
+	let cycle = $state('monthly');
 
 	// A self-contained avatar photo (data URI — always loads, no network), so the
 	// demo shows a real photo; the "broken" demo uses a URL that 404s → initial.
@@ -384,6 +396,56 @@
 							/>
 						</div>
 					</Disclosure>
+				</div>
+			</div>
+		</div>
+
+		<div class="primitives" data-app="moneywala">
+			<span class="avatars-label">
+				SelectField — pick one record among N, native `&lt;select&gt;` in TextField chrome:
+			</span>
+			<div class="primitives-row">
+				<div class="narrow">
+					<SelectField
+						label="Which card?"
+						prefix="💳"
+						name="card"
+						required
+						placeholder="Choose a card…"
+						options={cards}
+						bind:value={card}
+						hint={card ? 'Benefits will be checked against this card.' : 'Required — pick one to continue.'}
+					/>
+					<div style="margin-top:14px">
+						<SelectField
+							size="sm"
+							label="Holder"
+							name="holder"
+							options={['maya', 'arjun', 'sam']}
+							bind:value={holder}
+						/>
+					</div>
+					<div style="margin-top:14px">
+						<!-- Escape hatch: raw <option>/<optgroup> markup instead of `options`. -->
+						<SelectField label="Reset cycle" name="cycle" bind:value={cycle}>
+							<optgroup label="Recurring">
+								<option value="monthly">Every statement</option>
+								<option value="quarterly">Every quarter</option>
+								<option value="yearly">Every year</option>
+							</optgroup>
+							<optgroup label="One-off">
+								<option value="never">Never resets</option>
+							</optgroup>
+						</SelectField>
+					</div>
+					<div style="margin-top:14px">
+						<SelectField
+							label="Linked loyalty program"
+							disabled
+							placeholder="No programs yet"
+							hint="Disabled until a program exists."
+						/>
+					</div>
 				</div>
 			</div>
 		</div>
