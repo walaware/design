@@ -607,11 +607,10 @@ whatever happened to be first — the exact case `placeholder` exists for. So `r
 alone now renders `"Choose one…"`; pass `placeholder="…"` for better copy, or
 `placeholder=""` to opt out on purpose.
 
-**Focus ring:** the ring is coral (`--color-coral-400` / `--color-coral-200`), matching
-`TextField` and `DateField` rather than `--color-focus-ring` — that token resolves to the
-**app accent** under `[data-app]`, which would leave a select ringed in leaf sitting next
-to a text field ringed in coral in the same form. Moving the whole field family onto
-`--color-focus-ring` is a house-wide decision, not a per-component one.
+**Focus ring:** the ring is `--color-focus-ring` + `--color-primary-soft`, i.e. **the app
+accent**, shared with `TextField` and `DateField`. (v0.14.x shipped all three hardcoded to
+coral; the whole family moved onto the accent token in **v0.15.0** — see
+[Accent contract](#per-app-accent-contract).)
 
 ### PhotoWall
 
@@ -715,6 +714,10 @@ utilities. Colours use Tailwind v4's `--color-*` namespace.
 | ------------------------------------ | --------------------------------------------- |
 | `--color-sand-{50–400}`              | Warm neutral backgrounds (`sand-100` = canvas) |
 | `--color-coral-{200–700}`            | House lead + the constant `wala` thread        |
+| `--color-primary` / `-press` / `-soft` | The live app accent (remapped by `[data-app]`) |
+| `--color-primary-ink` / `-lip`       | Derived accent stops — label on a soft fill, and the mid stop (soft-button lip, ghost border) |
+| `--color-focus-ring`                 | Focus ring — the app accent under `[data-app]` |
+| `--color-wala` / `--color-wala-soft` | The constant coral thread — **never** remapped   |
 | `--color-sun / berry / leaf / sky / teal` | Accents + functional hues (status, avatars) |
 | `--color-cocoa-{300–900}`            | Ink (`cocoa-900` = strong text)                |
 | `--color-primary` / `-press` / `-soft` | **Remapped per app** via `data-app`          |
@@ -737,7 +740,33 @@ utilities. Colours use Tailwind v4's `--color-*` namespace.
 </html>
 ```
 
-Apps may also override their accent directly if they ever diverge from the suite default:
+**What follows the accent, and what doesn't.** A component is accent-role if it's the app
+speaking — primary actions and their quiet variants:
+
+| Follows the accent | Stays fixed |
+| ------------------ | ----------- |
+| `Button` `primary` / `soft` / `ghost` | `Button` `secondary` (sun) and `accent` (berry) — house roles |
+| `IconButton` `soft` / `solid` | `IconButton` `sun` / `plain` |
+| `Chip` `primary` | every other `Chip` tone — `coral`/`sun`/`berry`/`leaf` are **hue names**, so `tone="coral"` means coral in every app |
+| Form focus rings (`TextField`, `DateField`, `SelectField`) | `Wordmark`, `NotificationBell`, scrapbook decoration — the constant `wala` thread |
+
+**The rule that keeps this honest:** a component in an accent role must never read the
+`--color-coral-*` ramp. Coral is both the house lead **and** tripwala's accent, so a raw
+coral in an accent role looks perfect in tripwala and is wrong in the other six apps —
+which is exactly how the v0.14.x leak survived review. Read `--color-primary*` /
+`--color-focus-ring` for accent roles, and `--color-wala` / `--color-wala-soft` for
+anything that should stay coral everywhere.
+
+Each accent ships three stops (`--app-accent`, `-press`, `-soft`). Two more are **derived**
+from the live accent so a new app in the roster gets them free:
+
+- **`--color-primary-ink`** — a label on a soft accent fill (soft/ghost button text, soft
+  icon-button glyph, accent chip text). Mixed toward `cocoa-900`, which also lifts contrast
+  on soft fills from 3.59:1 (below AA) to 4.50–5.79:1 across the roster — every app now clears WCAG AA for normal text.
+- **`--color-primary-lip`** — the mid stop: the soft button's 3D lip and the ghost border.
+
+Apps may also override their accent directly if they ever diverge from the suite default —
+`ink` and `lip` re-derive from whatever you set, so there's nothing extra to supply:
 
 ```css
 [data-app='shopwala'] {

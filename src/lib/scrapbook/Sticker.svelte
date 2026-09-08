@@ -65,7 +65,7 @@
 		--sticker-bg: var(--color-sun-200);
 	}
 	.t-coral {
-		--sticker-bg: var(--color-coral-200);
+		--sticker-bg: var(--color-wala-soft);
 	}
 	.t-berry {
 		--sticker-bg: var(--color-berry-200);

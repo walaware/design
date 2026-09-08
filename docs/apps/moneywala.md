@@ -119,9 +119,9 @@ the props).
 
 `TextField`, `DateField`, `SelectField`, `Switch`, `SegmentedControl`, `Composer`,
 `CopyField` all share one field chrome. Keep a form's fields on the **same `size`** so
-their heights line up, and remember the **focus ring is coral across the whole family**,
-not the app accent — a leaf-ringed select next to a coral-ringed text field is the bug,
-not the feature (see the README's SelectField note).
+their heights line up. **As of v0.15.0 the focus ring is the app accent** (leaf here) across
+the whole family — v0.14.x hardcoded coral in all three fields, which is the leak moneywala
+reported. Ring one field and they all match; there's nothing per-form to configure.
 
 ## App-specific patterns
 

@@ -108,7 +108,7 @@
 		background:
 			radial-gradient(
 				85% 70% at 12% 0%,
-				color-mix(in srgb, var(--color-coral-200) 75%, transparent),
+				color-mix(in srgb, var(--color-wala-soft) 75%, transparent),
 				transparent 62%
 			),
 			radial-gradient(

@@ -47,9 +47,10 @@
 	.wala-iconbtn:active {
 		transform: scale(0.9);
 	}
+	/* A role, not a hue — follows the accent, like t-solid below. */
 	.t-soft {
-		--ib-bg: var(--color-coral-200);
-		--ib-fg: var(--color-coral-700);
+		--ib-bg: var(--color-primary-soft);
+		--ib-fg: var(--color-primary-ink);
 	}
 	.t-sun {
 		--ib-bg: var(--color-sun-200);

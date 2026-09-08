@@ -128,16 +128,18 @@
 		--btn-fg: var(--color-white);
 		--btn-lip: var(--color-berry-600);
 	}
+	/* soft + ghost are the QUIET HALF OF PRIMARY, so they follow the app accent — unlike
+	   secondary (sun) and accent (berry), which are fixed house roles. */
 	.v-soft {
-		--btn-bg: var(--color-coral-200);
-		--btn-fg: var(--color-coral-700);
-		--btn-lip: var(--color-coral-300);
+		--btn-bg: var(--color-primary-soft);
+		--btn-fg: var(--color-primary-ink);
+		--btn-lip: var(--color-primary-lip);
 	}
 	.v-ghost {
 		--btn-bg: transparent;
-		--btn-fg: var(--color-coral-700);
+		--btn-fg: var(--color-primary-ink);
 		--btn-lip: transparent;
-		border: 2px solid var(--color-coral-300);
+		border: 2px solid var(--color-primary-lip);
 		box-shadow: none;
 	}
 	.v-ghost:active:not(:disabled) {

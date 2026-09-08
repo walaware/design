@@ -119,6 +119,16 @@
 	--color-primary: var(--color-coral-500);
 	--color-primary-press: var(--color-coral-600);
 	--color-primary-soft: var(--color-coral-200);
+	/* The quiet half of the accent — soft/ghost buttons, soft icon buttons, accent chips.
+	   Each app accent ships only three stops (base / press / soft), so `ink` (label on a
+	   soft surface) and `lip` (the mid stop: soft-button lip, ghost border) are DERIVED from
+	   the live accent rather than hand-picked per app — that way a new app in the roster gets
+	   them for free, and they can never drift back to a fixed hue. Mixing toward cocoa-900
+	   also lifts label contrast on soft fills from ~3.6:1 (the old hardcoded coral-700 on
+	   coral-200) to ~4.5–5.8:1 across the roster. Re-declared under [data-app] below so a
+	   NESTED data-app wrapper re-resolves them against its own accent. */
+	--color-primary-ink: color-mix(in srgb, var(--color-primary) 45%, var(--color-cocoa-900));
+	--color-primary-lip: color-mix(in srgb, var(--color-primary) 40%, var(--color-primary-soft));
 	--color-secondary: var(--color-sun-400);
 	--color-secondary-press: var(--color-sun-600);
 	--color-accent: var(--color-berry-500);
@@ -144,7 +154,12 @@
 
 	--color-focus-ring: var(--color-coral-400);
 
-	/* The constant family thread — never remapped per app. */
+	/* The constant family thread — never remapped per app. Anything that should stay coral
+	   in EVERY app reads these, never the --color-coral-* ramp directly: the ramp is both the
+	   house lead and tripwala's accent, so a raw coral in an accent role is invisible in
+	   tripwala and wrong everywhere else (exactly the leak fixed in v0.15.0). Current thread
+	   surfaces: the wordmark, the notification bell, and the scrapbook decoration
+	   (PhotoWall tape, Sticker) — celebration, not accent. */
 	--color-wala: var(--color-coral-500);
 	--color-wala-soft: var(--color-coral-200);
 	--color-brand-ink: var(--color-cocoa-900);
@@ -317,6 +332,11 @@
 	--color-primary-press: var(--app-accent-press);
 	--color-primary-soft: var(--app-accent-soft);
 	--color-focus-ring: var(--app-accent);
+	/* Re-derived here, not inherited: a custom property that references var() is resolved on
+	   the element it's DECLARED on, so the :root copies would bake in coral and a nested
+	   <div data-app> would inherit that computed value. */
+	--color-primary-ink: color-mix(in srgb, var(--app-accent) 45%, var(--color-cocoa-900));
+	--color-primary-lip: color-mix(in srgb, var(--app-accent) 40%, var(--app-accent-soft));
 }
 
 /* ============================================================

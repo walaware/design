@@ -2,9 +2,10 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 
-	type Tone = 'neutral' | 'coral' | 'sun' | 'berry' | 'leaf' | 'danger';
+	type Tone = 'neutral' | 'primary' | 'coral' | 'sun' | 'berry' | 'leaf' | 'danger';
 
 	interface Props extends HTMLAttributes<HTMLSpanElement> {
+		/** `primary` follows the app accent; every other tone is a fixed hue. */
 		tone?: Tone;
 		/** Transparent fill, coloured border only. */
 		outline?: boolean;
@@ -41,6 +42,14 @@
 		--chip-bg: var(--color-surface-chip);
 		--chip-fg: var(--color-cocoa-700);
 		--chip-bd: var(--color-sand-300);
+	}
+	/* The only accent-following tone — use it for "this chip belongs to the app". Every
+	   other tone below is a FIXED hue: `tone="coral"` means coral in every app, the same
+	   way `sun`/`berry`/`leaf` do, so none of them remap. */
+	.t-primary {
+		--chip-bg: var(--color-primary-soft);
+		--chip-fg: var(--color-primary-ink);
+		--chip-bd: var(--color-primary-soft);
 	}
 	.t-coral {
 		--chip-bg: var(--color-coral-200);

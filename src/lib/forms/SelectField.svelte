@@ -161,8 +161,8 @@
 			box-shadow var(--dur-base);
 	}
 	.field:focus-within {
-		border-color: var(--color-coral-400);
-		box-shadow: 0 0 0 4px var(--color-coral-200);
+		border-color: var(--color-focus-ring);
+		box-shadow: 0 0 0 4px var(--color-primary-soft);
 	}
 	.field.is-disabled {
 		background: var(--color-surface-sunk);

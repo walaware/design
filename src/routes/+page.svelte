@@ -189,6 +189,7 @@
 	<Card>
 		<TextField label="Trip name" prefix="🗺️" placeholder="Weekend in the hills" hint="Sentence case, friendly." />
 		<div class="row gap" style="margin-top:12px">
+			<Chip tone="primary">Accent</Chip>
 			<Chip tone="coral">2 nights</Chip>
 			<Tooltip label="Last polled 2m ago" placement="bottom" tone="light">
 				<Chip tone="leaf">4 going</Chip>
