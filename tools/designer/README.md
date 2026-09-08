@@ -30,6 +30,11 @@ block headless Chrome), solved with a virtual display + a localhost VNC over SSH
 
 - **Node ≥ 24** — `agent-browser` requires it (designer itself is fine on ≥22). Use nvm:
   `nvm install 24 && nvm use 24`. Run designer under Node 24.
+- **designer** — `npm i -g @pro-vi/designer` (upstream; installs under the active Node).
+  It is a **global CLI, not a repo dependency**, so nothing in this repo pulls it in and a
+  Node reinstall silently loses it — check `which designer` before planning a consult
+  around it. Reinstalled 2026-09-08 at **0.3.26** after exactly that (`doctor` green, and
+  the `~/.chrome-designer-profile` login survived, so no repeat VNC step).
 - **agent-browser** — `npm i -g agent-browser` (installs under the active Node).
 - **Chrome** — `/usr/bin/google-chrome` (or set `CHROME_BIN`).
 - **Xvfb** + **x11vnc** — `sudo apt install xvfb x11vnc` (Xvfb usually preinstalled).
@@ -82,9 +87,10 @@ designer health --json
 
 ## Linux deltas + upstream patch
 
-designer is ~stock on Linux; two cosmetic/robustness gaps remain, fixed in
-[`upstream-linux-support.patch`](./upstream-linux-support.patch) (ready to PR to
-`pro-vi/designer`; `git apply` in a clone):
+**Both fixes are upstream as of 2026-08-18** — [pro-vi/designer#110](https://github.com/pro-vi/designer/pull/110)
+is **merged**, so plain `npm i -g @pro-vi/designer` (≥ 0.3.26) is all you need and the
+`walaware/designer` fork is retired. [`upstream-linux-support.patch`](./upstream-linux-support.patch)
+is kept only as a record of what changed:
 
 1. `scripts/designer-chrome.sh` defaulted `CHROME` to the macOS path — now resolves
    `CHROME_BIN` → per-OS default (Linux `google-chrome`/`chromium`). *(setup.ts already
@@ -97,5 +103,5 @@ designer is ~stock on Linux; two cosmetic/robustness gaps remain, fixed in
 The README's "macOS only" banner is stale — `package.json` already declares
 `os: [darwin, linux, win32]` and `cross-platform.ts` branches for all three.
 
-We consume upstream `@pro-vi/designer` directly; a fork is only warranted if the PR
-stalls. This runbook + `designer-up.sh` are the only Linux-specific pieces we maintain.
+We consume upstream `@pro-vi/designer` directly — the PR landed, so no fork is warranted.
+This runbook + `designer-up.sh` are the only Linux-specific pieces we maintain.
