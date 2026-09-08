@@ -36,6 +36,14 @@ pnpm add -D svelte tailwindcss @tailwindcss/vite
 > Pin to a tag (`#v0.1.0`) so installs are reproducible. To cut a new release, bump the version and
 > push a matching tag.
 
+**Bumping the pin in a pnpm workspace.** The tag ref and the `pnpm-workspace.yaml`
+`allowBuilds`/`onlyBuiltDependencies` sha are two separate pins — re-pin the sha to the new
+tag's tarball alongside the version bump, or the `prepare` build is silently skipped. One
+known red herring: the first `pnpm install` after the bump can still print
+`ERR_PNPM_IGNORED_BUILDS` naming the **old** sha. That's stale `node_modules/.modules.yaml`
+bookkeeping, not a bad key — a second `pnpm install` clears it. (Reported by the moneywala
+agent on the v0.13.0 → v0.14.0 bump.)
+
 ---
 
 ## Wire it up (3 steps)
@@ -557,7 +565,7 @@ children when you need groups or already have the markup.
 | `hint` | node | helper line below |
 | `options` | `SelectOption[]` | `string` (value = label) or `{ value, label, disabled? }` (default `[]`) |
 | `prefix` | `string \| null` | leading emoji / glyph inside the field (default `null`) |
-| `placeholder` | `string` | empty-value first option; unselectable when `required`, so native validation fires on an untouched field |
+| `placeholder` | `string` | empty-value first option; unselectable when `required`, so native validation fires on an untouched field. **Defaults to `"Choose one…"` when `required` is set** — pass `placeholder=""` to opt out |
 | `size` | `'sm' \| 'md'` | form size scale (default `md`) — **not** the native visible-row count |
 | `disabled`, `required`, `name` | — | native form attributes |
 | `value` | `string` | selected value (`$bindable`, default `''`) |
@@ -592,6 +600,12 @@ children when you need groups or already have the markup.
   </optgroup>
 </SelectField>
 ```
+
+**`required` bakes in its own prompt.** A required select with no placeholder preselects
+its first real option, so the browser never asks for a choice and a no-JS form submits
+whatever happened to be first — the exact case `placeholder` exists for. So `required`
+alone now renders `"Choose one…"`; pass `placeholder="…"` for better copy, or
+`placeholder=""` to opt out on purpose.
 
 **Focus ring:** the ring is coral (`--color-coral-400` / `--color-coral-200`), matching
 `TextField` and `DateField` rather than `--color-focus-ring` — that token resolves to the

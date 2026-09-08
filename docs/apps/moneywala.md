@@ -10,7 +10,9 @@
 > **`SelectField`**, and (b) the kit guidance that request settled. Treat the screen
 > breakdown as *the app's current shape*, not a blessed design — when moneywala does go
 > through Claude Design, rewrite the Screens section from the mocks and mark the sync
-> date above.
+> date above. **Nav + the empty-list pattern below were corrected by the moneywala agent
+> on 2026-09-08 against the shipped `+layout.svelte`** — the app is ahead of the request
+> that started this file.
 
 ## Context
 
@@ -35,12 +37,20 @@ Two consequences for layout:
 
 `AppShell` with the Leaf accent; settings via `onSettings`.
 
-| key | label | icon | badge? | purpose |
-| --- | ----- | ---- | ------ | ------- |
-| `dashboard` | Home | 🏠 | count of expiring-soon benefits | **hero** — what's unused, what resets soon |
-| `cards` | Cards | 💳 | — | the card list + add/edit card |
-| `loyalty` | Loyalty | 🎟️ | — | programmes and their balances |
-| `benefits` | Benefits | 🎁 | — | benefit rules, grouped by card |
+As shipped in the app's `+layout.svelte` (six live destinations + two stubs). Note that
+**programmes and balances are separate record types**, so they're separate destinations —
+an earlier draft of this file collapsed them into one `loyalty` key, and omitted `holders`.
+
+| key | label | icon | route | purpose |
+| --- | ----- | ---- | ----- | ------- |
+| `dashboard` | Benefits | 🎁 | `/` | **hero** — what's unused, what resets soon |
+| `cards` | Cards | 💳 | `/cards` | the card list + add/edit card |
+| `balances` | Balances | — | `/balances` | loyalty balances and their adjustments |
+| `rules` | Benefit rules | — | `/benefits` | benefit rules, grouped by card |
+| `programs` | Programs | — | `/programs` | loyalty programmes |
+| `holders` | Holders | — | `/holders` | who a card/programme belongs to |
+| `advisor` | Advisor | 🧮 | — | `soon: true` stub — which card for this purchase |
+| `spending` | Spending (Sure) | 📊 | — | `soon: true` stub |
 | _settings_ | Settings | ⚙ (shell glyph) | — | account; keep it thin |
 
 Per Sam's standing IA stance, **prefer in-context actions over a settings screen** — an
@@ -63,7 +73,7 @@ shape; the dashboard is the only bespoke surface._
   here…") inviting the user to add their first card, since nothing works until one
   exists.
 
-### Cards / Loyalty / Benefits (`cards`, `loyalty`, `benefits`)
+### Record screens (`cards`, `balances`, `rules`, `programs`, `holders`)
 
 - **Purpose:** list + manual-entry CRUD for each record type.
 - **Layout:** a `Card` per record in a flex column; the add/edit form is a form `Card`
@@ -72,13 +82,18 @@ shape; the dashboard is the only bespoke surface._
   expiry dates, **`SelectField` for every "which existing record?" field** — the card a
   benefit rule attaches to, the programme a balance belongs to, the holder, the reset
   cycle. `Switch` for on/off flags, `SegmentedControl` for 2–3 mutually exclusive modes.
-- **States:** empty list → `EmptyState`; a `SelectField` whose source list is empty
-  should render **disabled with a placeholder that says why** ("No programmes yet") —
-  don't show an empty dropdown.
+- **States:** empty list → `EmptyState`. For a `SelectField` whose **source list** is
+  empty, moneywala's answer is **guard-and-link, not a disabled dropdown**: the form
+  guards on the source list and, when it's empty, replaces the whole form with a prose
+  line pointing at the page that fixes it — "Add a holder first", "First add a card and a
+  matching benefit rule". A disabled dropdown says *no*; the link says *here's how*.
+  Prefer that. Disabled + an explanatory placeholder ("No programmes yet") is the
+  fallback for a field that can't be guarded that way (e.g. one optional select inside an
+  otherwise-usable form). Either way: **never an empty dropdown**.
 
 ## Kit guidance
 
-### `SelectField` (shipped v0.14.0 — this app's request)
+### `SelectField` (shipped v0.14.0; `required` prompt in v0.14.1 — this app's request)
 
 `import { SelectField } from '@walaware/design'`. A native `<select>` in TextField
 chrome: submits with `name=`, works with no JS, OS picker and its a11y for free. Use it
@@ -88,10 +103,11 @@ the props).
 - **Options:** `options={[{ value, label, disabled? }]}` — or bare strings when value and
   label are the same. Need `<optgroup>`, or already have the markup? Pass raw
   `<option>`/`<optgroup>` as children instead; they render after `options`.
-- **Required fields:** always pair `required` with a `placeholder` ("Choose a card…").
-  The placeholder is an empty-value option that becomes *unselectable* under `required`,
-  so the browser's own validation fires on an untouched field — which is what makes the
-  no-JS server-action path work.
+- **Required fields:** `required` now supplies its own prompt — since **v0.14.1** a
+  required select with no `placeholder` renders `"Choose one…"` rather than silently
+  preselecting its first real option (which defeated the native validation the prop
+  exists for; caught app-side on adoption). Still pass an explicit `placeholder` for
+  better copy ("Choose a card…"); `placeholder=""` opts out on purpose.
 - **`size`** is the kit's `'sm' | 'md'` form scale, **not** the native visible-row count
   (that native attribute is omitted). `md` matches `TextField`; use `sm` for dense
   secondary fields.
@@ -127,5 +143,6 @@ not another bare select.
 - **Long option lists.** `SelectField` is a native select — fine to a few dozen options.
   If a real user has 100+ benefit rules, we need the typeahead sibling; tell design when
   that becomes real rather than hand-rolling one app-side.
-- **Currency/amount input.** Not yet a shared primitive; moneywala is using `TextField`.
+- **Currency/amount input.** Not yet a shared primitive — moneywala uses `TextField`
+  with `inputmode="numeric"` and formats cents app-side, and reports that's fine for now.
   If healthwala or shopwala needs the same, that's two of three.

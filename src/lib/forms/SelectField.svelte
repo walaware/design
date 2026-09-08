@@ -25,8 +25,11 @@
 		options?: SelectOption[];
 		/** Leading emoji / glyph inside the field (mirrors TextField). */
 		prefix?: string | null;
-		/** Empty-value first option ("Choose one…"). Unselectable once `required`, so the
-		    browser's own "please select an item" validation fires on an untouched field. */
+		/** Empty-value first option. Unselectable once `required`, so the browser's own
+		    "please select an item" validation fires on an untouched field. **Defaults to
+		    "Choose one…" whenever `required` is set** — without it the first real option is
+		    silently preselected and that validation never fires, which is the exact case the
+		    prop exists for. Pass `placeholder=""` to opt out deliberately. */
 		placeholder?: string;
 		/** Form size scale. */
 		size?: 'sm' | 'md';
@@ -67,6 +70,12 @@
 	const labelOf = (o: SelectOption) => (typeof o === 'string' ? o : o.label);
 	const disabledOf = (o: SelectOption) => (typeof o === 'string' ? false : (o.disabled ?? false));
 
+	/** A `required` field with no placeholder preselects its first real option, so the
+	    browser never asks for a choice and a no-JS form submits whatever happened to be
+	    first — bake the prompt in rather than let every consumer rediscover it.
+	    `placeholder=""` is the deliberate opt-out (an empty string stays falsy below). */
+	const prompt = $derived(placeholder ?? (required ? 'Choose one…' : undefined));
+
 	/** Nothing picked yet — paint the field like a placeholder. */
 	const empty = $derived(value === '' || value == null);
 </script>
@@ -97,8 +106,8 @@
 			aria-describedby={hint ? hintId : undefined}
 			{...rest}
 		>
-			{#if placeholder}
-				<option value="" disabled={required}>{placeholder}</option>
+			{#if prompt}
+				<option value="" disabled={required}>{prompt}</option>
 			{/if}
 			{#each options as opt (valueOf(opt))}
 				<option value={valueOf(opt)} disabled={disabledOf(opt)}>{labelOf(opt)}</option>

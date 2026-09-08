@@ -439,6 +439,11 @@
 						</SelectField>
 					</div>
 					<div style="margin-top:14px">
+						<!-- `required` with NO placeholder: the prompt is baked in ("Choose one…"), so the
+						     first real option is never silently preselected and native validation fires. -->
+						<SelectField label="Statement day" name="statement_day" required options={['1st', '15th', '28th']} />
+					</div>
+					<div style="margin-top:14px">
 						<SelectField
 							label="Linked loyalty program"
 							disabled
